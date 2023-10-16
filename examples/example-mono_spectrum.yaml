@@ -1,0 +1,2 @@
+type: 'Mono'          # Spectrum type ('Band', 'Comptonized', 'PowerLaw', 'BrokenPowerLaw', 'Mono')
+energy: 500.0         # Energy in keV

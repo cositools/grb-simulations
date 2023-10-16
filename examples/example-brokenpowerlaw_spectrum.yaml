@@ -1,0 +1,6 @@
+type: 'BrokenPowerLaw'          # Spectrum type ('Band', 'Comptonized', 'PowerLaw', 'BrokenPowerLaw', 'Mono')
+energy_min: 10.0                # Minimum energy in keV
+energy_max: 5000.0              # Maximum energy in keV
+ebreak: 288.016                 # Break energy in keV
+index_lo: -1.0                  # Low energy spectral index
+index_hi: -2.0                  # High energy spectral index
