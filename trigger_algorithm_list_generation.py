@@ -317,22 +317,23 @@ def main():
   for file in os.listdir(source_path):
     filename = os.fsdecode(file)
     source_name = file.split('.')[0]
-    open_source_file(reader, source_path + filename, output_path + source_name + '/')
-    print('Reading source file: ' + filename)
-    source_times, source_energies = make_hit_dict(reader, bgo_num, ged_num, bgo_elim, bgo_pos, ged_pos, detector_keys)
+    if not os.path.isdir(output_path + source_name):
+      open_source_file(reader, source_path + filename, output_path + source_name + '/')
+      print('Reading source file: ' + filename)
+      source_times, source_energies = make_hit_dict(reader, bgo_num, ged_num, bgo_elim, bgo_pos, ged_pos, detector_keys)
 
-    if inputs['background_type'] == 'random':
-      background_paths, start, end = choose_background(inputs['background_number'], inputs['background_file_length'], inputs['background_time'], background_path, inputs['background_components'], inputs['background_file_type'])
-      background_times, background_energies = select_background(reader, background_paths, bgo_num, ged_num, bgo_elim, bgo_pos, ged_pos, start, end, detector_keys)
-    else:
-      open_file(reader, background_path)
-      print('Reading background file: ' + background_path.split('/')[-1])
-      background_times, background_energies = make_hit_dict(reader, bgo_num, ged_num, bgo_elim, bgo_pos, ged_pos, detector_keys)
+      if inputs['background_type'] == 'random':
+        background_paths, start, end = choose_background(inputs['background_number'], inputs['background_file_length'], inputs['background_time'], background_path, inputs['background_components'], inputs['background_file_type'])
+        background_times, background_energies = select_background(reader, background_paths, bgo_num, ged_num, bgo_elim, bgo_pos, ged_pos, start, end, detector_keys)
+      else:
+        open_file(reader, background_path)
+        print('Reading background file: ' + background_path.split('/')[-1])
+        background_times, background_energies = make_hit_dict(reader, bgo_num, ged_num, bgo_elim, bgo_pos, ged_pos, detector_keys)
 
-    times, energies = combine(source_times, source_energies, background_times, background_energies, detector_keys)
+      times, energies = combine(source_times, source_energies, background_times, background_energies, detector_keys)
 
-    for key in times.keys():
-      write_events(output_path + source_name + '/' + key + '.txt', times[key], energies[key])
+      for key in times.keys():
+        write_events(output_path + source_name + '/' + key + '.txt', times[key], energies[key])
   
 
 if __name__ == "__main__":
