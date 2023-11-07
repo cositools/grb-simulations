@@ -1,0 +1,9 @@
+# DP | Time point in [s] | Count rate (background subtracted, negative rate clipped to 0)
+IP LinLin
+DP 0.00000 965.967
+DP 0.22100 2829.146
+DP 0.42228 4372.555
+DP 0.86152 2607.704
+DP 1.1121 1309.271
+DP 1.33323 0.000
+EN
