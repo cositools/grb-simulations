@@ -2,3 +2,6 @@
 *
 # Except this file
 !.gitignore
+# Except directories to upload
+!data-challenge-2
+!sgrbs
