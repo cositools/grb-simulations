@@ -32,18 +32,18 @@ This draws lightcurves and spectra from the 'input_path/event_type/event_subtype
 To run from the command line: `python sample_source_file_generation.py -y input-file.yaml`.
 
 'trigger_algorithm_list_generation.py' creates event lists with the time and energy of each hit in the BGO and GeDs based on an input .yaml file. This draws source simulations from 'MEGAlib_outputs/' and background simulations from 'MEGAlib_backgrounds/' and creates the files in 'trigger_inputs/'.
-Parameters to be defined in .yaml file:
-	source_path -- path to directory housing source .sim files (e.g. 'MEGAlib_outputs/')
-	background_type -- whether to randomly select background regions for each source ('random') or use same background file for all sources ('file') 
-	background_path -- if background_type is 'random', path to directory housing background .sim files, and if background_type is 'file', the path to the concatenated background file (e.g. 'MEGAlib_backgrounds/')
-	background_number -- number of background files for each component (only necessary if background_type is 'random')
-	background_file_length -- length in s of each background file (only necessary if background_type is 'random')
-	background_time -- amount of background in s to add to each source, source will be added to the middle of the background time interval
-	background_components -- list of background components to include, file names must begin with component names (only necessary if background_type is 'random')
-	background_file_type -- whether the background files begin one after another in time ('sequential') or if they begin at the same time ('simultaneous') (only necessary if background_type is 'random')
-	output_path -- path to directory to store output (e.g. 'trigger_inputs/')
-	geometry_path -- path to geometry file, must match the geometry used to create simulations
-	mass_model_version -- version of mass model
+Parameters to be defined in .yaml file:    
+	source_path -- path to directory housing source .sim files (e.g. 'MEGAlib_outputs/')  
+	background_type -- whether to randomly select background regions for each source ('random') or use same background file for all sources ('file')  
+	background_path -- if background_type is 'random', path to directory housing background .sim files, and if background_type is 'file', the path to the concatenated background file (e.g. 'MEGAlib_backgrounds/')    
+	background_number -- number of background files for each component (only necessary if background_type is 'random')    
+	background_file_length -- length in s of each background file (only necessary if background_type is 'random')    
+	background_time -- amount of background in s to add to each source, source will be added to the middle of the background time interval    
+	background_components -- list of background components to include, file names must begin with component names (only necessary if background_type is 'random')    
+	background_file_type -- whether the background files begin one after another in time ('sequential') or if they begin at the same time ('simultaneous') (only necessary if background_type is 'random')    
+	output_path -- path to directory to store output (e.g. 'trigger_inputs/')    
+	geometry_path -- path to geometry file, must match the geometry used to create simulations    
+	mass_model_version -- version of mass model    
  To run from the command line: `python trigger_algorithm_list_generation.py -y input-file.yaml`.
 
 
