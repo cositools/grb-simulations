@@ -299,7 +299,7 @@ def combine(source_times, source_energies, background_times, background_energies
 # Write times and energies to file
 def write_events(file_path, times, energies):
 
-  print('Writing to file')
+  print('Writing to file: ' + file_path.split('/')[-1])
   with open(file_path, 'w') as f:
     f.write('time (s)           energy (keV)\n')
     for i in range(len(times)):
@@ -317,7 +317,7 @@ def main():
   for file in os.listdir(source_path):
     filename = os.fsdecode(file)
     source_name = file.split('.')[0]
-    if not os.path.isdir(output_path + source_name):
+    if not os.path.isdir(output_path + source_name) and os.path.isfile(source_path + file):
       open_source_file(reader, source_path + filename, output_path + source_name + '/')
       print('Reading source file: ' + filename)
       source_times, source_energies = make_hit_dict(reader, bgo_num, ged_num, bgo_elim, bgo_pos, ged_pos, detector_keys)
