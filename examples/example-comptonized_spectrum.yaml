@@ -1,5 +1,5 @@
 type: 'Comptonized'         # Spectrum type ('Band', 'Comptonized', 'PowerLaw', 'BrokenPowerLaw', 'Mono')
-energy_min: 10.0            # Minimum energy in keV
-energy_max: 5000.0          # Maximum energy in keV
+energy_min: 100.0           # Minimum energy in keV
+energy_max: 10000.0         # Maximum energy in keV
 index: -1.0                 # Spectral index
 epeak: 288.016              # Peak energy in keV
