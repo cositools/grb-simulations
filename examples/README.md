@@ -26,7 +26,7 @@ Parameters to be defined in .yaml file:
 
 The `example-spectraltype_spectrum.yaml` files are examples of each of the MEGAlib spectral models supported by `sample_source_file_generation.py`: monoenergetic, Band function, Comptonized, power law, and broken power law.
 
-`example_spectrum.dat` is a sample spectral .dat file which can be used in place of the .yaml files. This allows for custom spectral shapes to be used instead of the built in MEGAlib functions. Only the shape is important, not the amplitude, since the flux is defined in the .source file. The spectrum files (either .yaml or .dat) will need to be located in the `input_path/event_type/event_subtype` (or `input_path/event_type` if no event subtypes) directory indicated in the input .yaml file.
+`example_spectrum.dat` is a sample spectral .dat file which can be used in place of the .yaml files. This allows for custom spectral shapes to be used instead of the built in MEGAlib functions. Only the shape is important, not the amplitude, since the flux is defined in the .source file. The spectrum files (either .yaml or .dat) will need to be located in the `input_path/` directory indicated in the input .yaml file.
 
 `example_lightcurve.dat` is a sample lightcurve file. Only the shape is important, not the amplitude, since the flux is defined in the .source file. The lightcurve files need to be in `input_path/event_type/event_subtype` (or `input_path/event_type` if no event subtypes) directory indicated in the input .yaml file.    
 
@@ -42,4 +42,10 @@ Parameters to be defined in .yaml file:
 	background_time -- amount of background in s to add to each source, source will be added to the middle of the background time interval    
 	background_components -- list of background components to include, file names must begin with component names (only necessary if background_type is 'random')    
 	background_file_type -- whether the background files begin one after another in time ('sequential') or if they begin at the same time ('simultaneous') (only necessary if background_type is 'random')    
-	mass_model_version -- version of mass model    
+	mass_model_version -- version of mass model   
+
+`example_download.yaml` is a sample .yaml file used as input for `download_gbm_data.py`.    
+Parameters to be defined in the .yaml file:
+	output_path -- path to directory to store downloaded files (e.g. 'gbm_data/')
+	filters -- parameters used to filter bursts (must be columns in [table](https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dfermigbrst&Action=More+Options))
+	download -- columns of GBM burst data to download (must be columns in [table](https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dfermigbrst&Action=More+Options), must include trigger_name and bcat_detector_mask)

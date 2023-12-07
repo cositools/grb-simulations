@@ -9,7 +9,8 @@ This repository contains the code and inputs for COSI GRB simulations, as well a
 4. Combine source simulations with background simulations. Depending on the analysis, this may be done at either the .sim or .tra file level. There are MEGAlib tools (e.g. mtraconcatter) which do this (see the [MEGAlib documentation](https://megalibtoolkit.com/documentation.html)), and if creating event lists to be used to test the onboard trigger algorithm, this is done in `trigger_algorithm_list_generation.py`.
 
 ## Scripts     
-- `download_gbm_data.py`
+- `download_gbm_data.py` downloads Fermi-GBM spectra and lightcurves given an input .yaml file (an example can be found in `examples/`) and stores the data in a specified output directory.
+To run from the command line: `python download_gbm_data.py -y input-file.yaml`.
 - `gbm_to_megalib.py`
 - `coordinate_conversion.py`
 - `source_file_generation.py` will create source file samples based an on an input .yaml file (an example can be found in `examples/`). This will draw lightcurves and spectra from the samples in `MEGAlib_source_inputs/` and create .source files in a specified directory. The .source files are created with the defined mass model path, fluxes, and incidence angles. Currently, this only produces .source files in detector coordinates, but the ability to create .source files in Galactic coordinates with orientation files will be added later, as well as polarization.          
