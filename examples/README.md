@@ -3,7 +3,7 @@
 This directory contains examples of the .yaml and .dat files needed to run the python scripts.
 
 `example_download.yaml` is a sample .yaml file used as input for `download_gbm_data.py`.    
-Parameters to be defined in the .yaml file:
+Parameters to be defined in the .yaml file:    
 	output_path -- path to directory to store downloaded files (e.g. 'gbm_data/')
 	filters -- parameters used to filter bursts (must be columns in [table](https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dfermigbrst&Action=More+Options))
 	download -- columns of GBM burst data to download (must be columns in [table](https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dfermigbrst&Action=More+Options), must include trigger_name and bcat_detector_mask)    
@@ -41,7 +41,7 @@ Parameters to be defined in the .yaml file:
 	shield_counts -- whether to include line in .source files to store background shield counts in MEGAlib .sim files ('y' for yes, 'n' for no)   
 	coordinate_system -- Coordinate system of .source files ('local' for detector coordinates or 'galactic' for galactic coordinates), galactic is not yet supported   
 
-The `example-spectraltype_spectrum.yaml` files are examples of each of the MEGAlib spectral models supported by `sample_source_file_generation.py`: monoenergetic, Band function, Comptonized, power law, and broken power law.
+The `example-spectraltype_spectrum.yaml` files are examples of each of the MEGAlib spectral models supported by `sample_source_file_generation.py`: monoenergetic, Band function, Comptonized, power law, and broken power law. The parameters needed depend on the model.      
 
 `example_spectrum.dat` is a sample spectral .dat file which can be used in place of the .yaml files. This allows for custom spectral shapes to be used instead of the built in MEGAlib functions. Only the shape is important, not the amplitude, since the flux is defined in the .source file. The spectrum files (either .yaml or .dat) will need to be located in the `input_path/` directory indicated in the input .yaml file.
 
