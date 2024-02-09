@@ -1,5 +1,5 @@
-energy_max: 5000.0
-energy_min: 10.0
+energy_max: 10000
+energy_min: 50
 epeak: 1404.938
 index: -0.07567174
 type: Comptonized

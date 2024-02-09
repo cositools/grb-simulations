@@ -1,0 +1,4 @@
+input_path: '/path/to/tra/files/'                                 # Path to directory housing .tra files
+output_path: '/path/to/extracted/tra/files/'                      # Path to directory to store extracted .tra files
+mass_model_path: '/path/to/mass/model/'                           # Path to mass model
+config_file_path: '/path/to/config/file/'                         # Path to mimrec configuration file
