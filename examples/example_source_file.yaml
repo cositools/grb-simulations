@@ -1,5 +1,5 @@
-input_path: 'MEGAlib_source_inputs/grbs/sgrbs/'                                                               # Path to directory housing source inputs
-output_path: 'MEGAlib_source_files/grbs/sgrbs/'                                                               # Path to directory to store .source files
+input_path: '/path/to/source/inputs/'                                                                         # Path to directory housing source inputs
+output_path: '/path/to/source/files/'                                                                         # Path to directory to store .source files
 geometry_path: '/Users/eneights/software/COSItools/massmodels/massmodel-cosi-smex-v12/COSISMEX.geo.setup'     # Path to geometry file
 spectrum_type: 'yaml'                                                                                         # File type to use for spectrum (e.g. 'yaml' for .yaml file with spectral parameters or 'dat' for .dat file with discrete spectrum)
 mix_or_match: 'match'                                                                                         # Choose whether to mix or match spectra and lightcurves ('match' to use spectrum and lightcurve from same event or 'mix' to use spectra and lightcurves from different events)

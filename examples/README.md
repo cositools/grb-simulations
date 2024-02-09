@@ -1,9 +1,26 @@
 # Example .yaml and .dat files
 
-This directory contains examples of the .yaml and .dat files needed to run `sample_source_file_generation.py`. When `sample_source_file_generation.py` is run, it takes spectral (.yaml & .dat) and lightcurve (.dat) files from the directory specified in the input .yaml file (`example.yaml`) and writes the spectral info from the spectrum .yaml file (if spectrum_type: 'yaml') or the path to the .dat file into the MEGAlib .source file (spectrum_type: 'dat'), as well as the path to the lightcurve .dat file.
+This directory contains examples of the .yaml and .dat files needed to run the python scripts.
 
-`example.yaml` is a sample .yaml file used as input for `sample_source_file_generation.py`.    
-Parameters to be defined in .yaml file:  
+`example_download.yaml` is a sample .yaml file used as input for `download_gbm_data.py`.    
+Parameters to be defined in the .yaml file:
+	output_path -- path to directory to store downloaded files (e.g. 'gbm_data/')
+	filters -- parameters used to filter bursts (must be columns in [table](https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dfermigbrst&Action=More+Options))
+	download -- columns of GBM burst data to download (must be columns in [table](https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dfermigbrst&Action=More+Options), must include trigger_name and bcat_detector_mask)    
+
+`example_gbm_to_megalib.yaml` is a sample .yaml file used as input for `gbm_to_megalib.py`.      
+Parameters to be defined in the .yaml file:      
+	input_path -- path to directory housing downloaded GBM data (e.g. 'gbm_data/')      
+	output_path -- path to directory to store MEGAlib source inputs (e.g. 'MEGAlib_source_inputs/')       
+	plot_path -- path to directory to store lightcurve plots      
+	source_time_range -- time range of source lightcurve (s)     
+	background_time_range -- time range to use to fit background (s)     
+	nai_energy_range -- energy range of GBM's NaI detectors used for lightcurve     
+	bgo_energy_range -- energy range of GBM's BGO detectors used for lightcurve     
+	cosi_energy_range -- energy range for COSI MEGAlib simulations     
+
+`example_source_file.yaml` is a sample .yaml file used as input for `sample_source_file_generation.py`. When `sample_source_file_generation.py` is run, it takes spectral (.yaml & .dat) and lightcurve (.dat) files from the directory specified in the input .yaml file (`example.yaml`) and writes the spectral info from the spectrum .yaml file (if spectrum_type: 'yaml') or the path to the .dat file into the MEGAlib .source file (spectrum_type: 'dat'), as well as the path to the lightcurve .dat file.      
+Parameters to be defined in the .yaml file:  
 	input_path -- path to directory housing source inputs (e.g. 'MEGAlib_source_inputs/')   
 	output_path -- path to directory to store .source files (e.g. 'MEGAlib_source_files/')  
 	geometry_path -- path to mass model  
@@ -30,8 +47,27 @@ The `example-spectraltype_spectrum.yaml` files are examples of each of the MEGAl
 
 `example_lightcurve.dat` is a sample lightcurve file. Only the shape is important, not the amplitude, since the flux is defined in the .source file. The lightcurve files need to be in `input_path/event_type/event_subtype` (or `input_path/event_type` if no event subtypes) directory indicated in the input .yaml file.    
 
+`example_cosima.yaml` is a sample .yaml file used as input for `run_cosima.py`.     
+Parameters to be defined in the .yaml file:   
+	input_path -- path to directory housing MEGAlib .source files (e.g. 'MEGAlib_source_files/')      
+	output_path -- path to directory to store .sim files (e.g. 'MEGAlib_outputs/')     
+
+`example_revan.yaml` is a sample .yaml file used as input for `run_revan.py`.     
+Parameters to be defined in the .yaml file:   
+	input_path -- path to directory housing .sim files (e.g. 'MEGAlib_outputs/')      
+	output_path -- path to directory to store .tra files (e.g. 'MEGAlib_outputs/')    
+	mass_model_path -- path to instrument mass model (e.g. 'COSISMEX.O64.geo.setup')      
+	config_file_path -- path to revan configuration file (e.g. 'SMEXv12.Continuum.HEALPixO3.binnedimaging.revan.cfg')      
+
+`example_mimrec.yaml` is a sample .yaml file used as input for `run_mimrec.py`.     
+Parameters to be defined in the .yaml file:   
+	input_path -- path to directory housing .tra files (e.g. 'MEGAlib_outputs/')      
+	output_path -- path to directory to store extracted .tra files (e.g. 'MEGAlib_outputs/')    
+	mass_model_path -- path to instrument mass model (e.g. 'COSISMEX.O64.geo.setup')      
+	config_file_path -- path to mimrec configuration file (e.g. 'SMEXv12.Continuum.HEALPixO3.binnedimaging.mimrec.cfg')     
+
 `example_trigger_algorithm.yaml` is a sample .yaml file used as input for `trigger_algorithm_list_generation.py`.    
-Parameters to be defined in .yaml file:    
+Parameters to be defined in the .yaml file:    
 	source_path -- path to directory housing source .sim files (e.g. 'MEGAlib_outputs/')  
 	output_path -- path to directory to store output (e.g. 'trigger_inputs/')    
 	geometry_path -- path to geometry file, must match the geometry used to create simulations    
@@ -43,9 +79,3 @@ Parameters to be defined in .yaml file:
 	background_components -- list of background components to include, file names must begin with component names (only necessary if background_type is 'random')    
 	background_file_type -- whether the background files begin one after another in time ('sequential') or if they begin at the same time ('simultaneous') (only necessary if background_type is 'random')    
 	mass_model_version -- version of mass model   
-
-`example_download.yaml` is a sample .yaml file used as input for `download_gbm_data.py`.    
-Parameters to be defined in the .yaml file:
-	output_path -- path to directory to store downloaded files (e.g. 'gbm_data/')
-	filters -- parameters used to filter bursts (must be columns in [table](https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dfermigbrst&Action=More+Options))
-	download -- columns of GBM burst data to download (must be columns in [table](https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dfermigbrst&Action=More+Options), must include trigger_name and bcat_detector_mask)

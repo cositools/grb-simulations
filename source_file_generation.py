@@ -8,7 +8,7 @@ from scipy import integrate
 def parse_args():
 
 	parser = argparse.ArgumentParser()
-	parser.add_argument("-y", "--yaml", help = "Path to input .yaml file", default='examples/example.yaml')
+	parser.add_argument("-y", "--yaml", help = "Path to input .yaml file", default='examples/example_source_file.yaml')
 	args = parser.parse_args()
 
 	return args
