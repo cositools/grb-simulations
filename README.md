@@ -15,11 +15,11 @@ To run from the command line: `python download_gbm_data.py -y input-file.yaml`.
 To run from the command line: `python gbm_to_megalib.py -y input-file.yaml`.    
 - `source_file_generation.py` creates source file samples based an on an input .yaml file (an example can be found in `examples/`). This draws lightcurves and spectra from the samples in `MEGAlib_source_inputs/` and create .source files in a specified directory. The .source files are created with the defined mass model path, fluxes, and incidence angles. Currently, this only produces .source files in detector coordinates, but the ability to create .source files in Galactic coordinates with orientation files will be added later, as well as polarization.          
 To run from the command line: `python source_file_generation.py -y input-file.yaml`.      
-- `run_cosima.py` runs cosima on all of the .source files in a specified directory and produces simulation (.sim) files. You must be on the main branch of MEGAlib to run cosima.       
+- `run_cosima.py` runs cosima on all of the .source files in a specified directory and produces simulation (.sim) files. You must be on the main branch of MEGAlib to run cosima with version 12 of the mass model.       
 To run from the command line: `python run_cosima.py -y input-file.yaml`.  
-- `run_revan.py` runs revan on all of the .sim files in a specified directory and produces reconstructed simulation (.tra) files. You must be on the dee2022 branch of MEGAlib to run revan.    
+- `run_revan.py` runs revan on all of the .sim files in a specified directory and produces reconstructed simulation (.tra) files. You must be on the dee2022 branch of MEGAlib to run revan with version 12 of the mass model.    
 To run from the command line: `python run_revan.py -y input-file.yaml`.    
-- `run_mimrec.py` runs mimrec on all of the .tra files in a specified directory and produces reconstructed simulation (.tra) files with event selections. You must be on the dee2022 branch of MEGAlib to run mimrec.     
+- `run_mimrec.py` runs mimrec on all of the .tra files in a specified directory and produces reconstructed simulation (.tra) files with event selections. You must be on the dee2022 branch of MEGAlib to run mimrec with version 12 of the mass model.     
 To run from the command line: `python run_mimrec.py -y input-file.yaml`.    
 - `trigger_algorithm_list_generation.py` creates event lists with the time and energy of each hit in the BGO and GeDs based on an input .yaml file (an example can be found in `examples/`). This draws source and background simulations (.sim files) from specified input directories and creates trigger algroithm files in a specified output directory.         
 To run from the command line: `python trigger_algorithm_list_generation.py -y input-file.yaml`.      
