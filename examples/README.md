@@ -51,6 +51,8 @@ The `example-spectraltype_spectrum.yaml` files are examples of each of the MEGAl
 Parameters to be defined in the .yaml file:   
 - input_path: path to directory housing MEGAlib .source files (e.g. 'MEGAlib_source_files/')      
 - output_path: path to directory to store .sim files (e.g. 'MEGAlib_outputs/')     
+- parallel: whether to run mcosima in parallel (optional, e.g. 'True')      
+- instances: number of instances to start (optional, defaults to number of CPU cores if not provided and parallel is 'True')    
 
 `example_revan.yaml` is a sample .yaml file used as input for `run_revan.py`.     
 Parameters to be defined in the .yaml file:   
