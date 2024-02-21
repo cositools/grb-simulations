@@ -204,6 +204,7 @@ def define_angles_flux(inputs, spectrum):
 	else:
 		raise RuntimeError("Only detector coordinates are supported for now. 'coordinate_system' in input .yaml file must be 'local'.")
 
+	e_flux = None
 	if 'ph_flux' in inputs:
 		if type(inputs['ph_flux']) == int or type(inputs['ph_flux']) == float:
 			flux = float(inputs['ph_flux'])
@@ -231,7 +232,7 @@ def define_angles_flux(inputs, spectrum):
 	else:
 		raise RuntimeError("Must specify flux(es) in input .yaml file.")
 
-	return zenith, azimuth, flux
+	return zenith, azimuth, flux, e_flux
 
 # Determines text to define spectrum in source file
 def define_spectrum(spectrum, name):
@@ -272,7 +273,7 @@ def lightcurve_spectrum_text(name, lightcurve, event_spectrum, path):
 	return spectrum_text, lightcurve_text, spectrum
 
 # Creates source file
-def make_source_file(event, filename, geometry, shield_counts, z, a, flux, spectrum_text, lightcurve_text, coordsys):
+def make_source_file(event, filename, geometry, shield_counts, z, a, flux, spectrum_text, lightcurve_text, coordsys, e_flux):
 
 	if coordsys == 'local':
 		with open(filename, 'w') as f:
@@ -295,7 +296,10 @@ def make_source_file(event, filename, geometry, shield_counts, z, a, flux, spect
 			f.write(event + '.Beam            FarFieldPointSource ' + str(z) + ' ' + str(a) + '\n')
 			f.write('\n# Spectrum \n')
 			f.write(spectrum_text + '\n')
-			f.write('\n# Average photon flux in photon/cm2/s\n')
+			if not e_flux == None:
+				f.write('\n# Average photon flux in photon/cm2/s corresponding to ' + '{:.2e}'.format(e_flux) + ' erg/cm2/s\n')
+			else:
+				f.write('\n# Average photon flux in photon/cm2/s\n')
 			f.write(event + '.Flux            ' + str(flux) + '\n')
 			f.write('\n# Lightcurve\n')
 			f.write(lightcurve_text)
@@ -312,8 +316,8 @@ def main():
 	for event in events:
 		source_filename = output_path + event + '.source'
 		spectrum_text, lightcurve_text, spectrum = lightcurve_spectrum_text(event, lightcurves[event], spectra[event], input_path)
-		zenith_angle, azimuthal_angle, flux = define_angles_flux(inputs, spectrum)
-		make_source_file(event, source_filename, inputs['geometry_path'], inputs['shield_counts'], zenith_angle, azimuthal_angle, flux, spectrum_text, lightcurve_text, inputs['coordinate_system'])
+		zenith_angle, azimuthal_angle, flux, e_flux = define_angles_flux(inputs, spectrum)
+		make_source_file(event, source_filename, inputs['geometry_path'], inputs['shield_counts'], zenith_angle, azimuthal_angle, flux, spectrum_text, lightcurve_text, inputs['coordinate_system'], e_flux)
 
 if __name__ == "__main__":
     main()
