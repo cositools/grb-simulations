@@ -48,12 +48,38 @@ def run_cosima(input_path, output_path):
 	if os.path.exists(cwd + '/absorptions'):
 		shutil.rmtree(cwd + '/absorptions')
 
+# Run cosima on all files in input path
+def run_mcosima(input_path, output_path, instances=None):
+
+	cwd = os.getcwd()
+
+	for file in os.listdir(input_path):
+		if file.split('.')[-1] == 'source' and not (os.path.exists(output_path + file.split('.')[0] + '.inc1.id1.sim.gz')):
+			print('Simulating ' + file)
+			os.chdir(input_path)
+			if instances == None:
+				os.system('mcosima -z ' + file + ' > ' + output_path + 'output_files/output_' + file.split('.')[0] + '.txt')
+			else:
+				os.system('mcosima -t ' + instances + ' -z ' + file + ' > ' + output_path + 'output_files/output_' + file.split('.')[0] + '.txt')
+			os.chdir(cwd)
+			os.system('mv ' + input_path + '*.sim.gz ' + output_path)
+
+	if os.path.exists(cwd + '/absorptions'):
+		shutil.rmtree(cwd + '/absorptions')
+
 
 def main():
 	input_file = parse_args().yaml
 	inputs = read_yaml(input_file)
 	input_path, output_path = define_paths(inputs)
-	run_cosima(input_path, output_path)
+	
+	if 'parallel' in inputs.keys() and inputs['parallel']:
+		if 'instances' in inputs.keys():
+			run_mcosima(input_path, output_path, instances=str(inputs['instances']))
+		else:
+			run_mcosima(input_path, output_path)
+	else:	
+		run_cosima(input_path, output_path)
 
 if __name__ == "__main__":
     main()
