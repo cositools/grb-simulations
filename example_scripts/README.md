@@ -13,3 +13,5 @@ To run from the command line: `python run_revan.py -y input-file.yaml`.
 To run from the command line: `python run_mimrec.py -y input-file.yaml`.    
 - `trigger_algorithm_list_generation.py` creates event lists with the time and energy of each hit in the BGO and GeDs based on an input .yaml file (an example can be found in `example_yaml_files/`). This draws source and background simulations (.sim files) from specified input directories and creates trigger algroithm files in a specified output directory.         
 To run from the command line: `python trigger_algorithm_list_generation.py -y input-file.yaml`.       
+
+`example_yaml_files/` contains sample .yaml files needed to run these scripts. See the README file in `example_yaml_files/` for more details.   
