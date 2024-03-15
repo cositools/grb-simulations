@@ -17,13 +17,15 @@ Parameters to be defined in the .yaml file:
 - background_time_range: time range to use to fit background (s)     
 - nai_energy_range: energy range of GBM's NaI detectors used for lightcurve     
 - bgo_energy_range: energy range of GBM's BGO detectors used for lightcurve     
-- cosi_energy_range: energy range for COSI MEGAlib simulations     
+- cosi_energy_range: energy range for COSI MEGAlib simulations 
+- min_duration: minimum duration of events to reject once binned using Bayesian blocks (s), should match maximum expected event duration      
 
 `example_source_file.yaml` is a sample .yaml file used as input for `sample_source_file_generation.py`. When `sample_source_file_generation.py` is run, it takes spectral (.yaml & .dat) and lightcurve (.dat) files from the directory specified in the input .yaml file (`example.yaml`) and writes the spectral info from the spectrum .yaml file (if spectrum_type: 'yaml') or the path to the .dat file into the MEGAlib .source file (spectrum_type: 'dat'), as well as the path to the lightcurve .dat file.      
 Parameters to be defined in the .yaml file:  
 - input_path: path to directory housing source inputs (e.g. 'MEGAlib_source_inputs/')   
 - output_path: path to directory to store .source files (e.g. 'MEGAlib_source_files/')  
-- geometry_path: path to mass model  
+- source_input_path: path to directory where .source files should look for lightcurve and spectral .dat files (optional, only needed if different than input path)      
+- mass_model_path: path to mass model  
 - spectrum_type: file type to use for spectrum ('yaml' to use built in MEGAlib spectral models with parameters defined in .yaml files or 'dat' to use .dat files with spectral shape)  
 - mix_or_match: whether to mix or match lightcurves and spectra ('match' will use lightcurves and spectra from same event, 'mix' will randomly match lightcurves with spectra from input directory)  
 - zenith: incidence (zenith) angle or list of incidence (zenith) angles (between 0 and 180 where 90 degrees is on-axis)    
@@ -41,11 +43,11 @@ Parameters to be defined in the .yaml file:
 - shield_counts: whether to include line in .source files to store background shield counts in MEGAlib .sim files ('y' for yes, 'n' for no)   
 - coordinate_system: Coordinate system of .source files ('local' for detector coordinates or 'galactic' for galactic coordinates), galactic is not yet supported   
 
-The `example-spectraltype_spectrum.yaml` files are examples of each of the MEGAlib spectral models supported by `sample_source_file_generation.py`: monoenergetic, Band function, Comptonized, power law, and broken power law. The parameters needed depend on the model.      
+The `example-spectraltype_spectrum.yaml` files are examples of each of the MEGAlib spectral models supported by `sample_source_file_generation.py`: monoenergetic, Band function, Comptonized, power law, and broken power law. The parameters needed depend on the model. These files must end in '_spectrum.yaml' and be located in the `input_path/` directory indicated in the input .yaml file when running `source_file_generation.py`.      
 
-`example_spectrum.dat` is a sample spectral .dat file which can be used in place of the .yaml files. This allows for custom spectral shapes to be used instead of the built in MEGAlib functions. Only the shape is important, not the amplitude, since the flux is defined in the .source file. The spectrum files (either .yaml or .dat) will need to be located in the `input_path/` directory indicated in the input .yaml file.
+`example_spectrum.dat` is a sample spectral .dat file which can be used in place of the .yaml files. This allows for custom spectral shapes to be used instead of the built in MEGAlib functions. Only the shape is important, not the amplitude, since the flux is defined in the .source file. These files must end in '_spectrum.dat' and be located in the `input_path/` directory indicated in the input .yaml file when running `source_file_generation.py`.      
 
-`example_lightcurve.dat` is a sample lightcurve file. Only the shape is important, not the amplitude, since the flux is defined in the .source file. The lightcurve files need to be in `input_path/event_type/event_subtype` (or `input_path/event_type` if no event subtypes) directory indicated in the input .yaml file.    
+`example_lightcurve.dat` is a sample lightcurve file. Only the shape is important, not the amplitude, since the flux is defined in the .source file. These files must end in '_lightcurve.dat' and be located in the `input_path/` directory indicated in the input .yaml file when running `source_file_generation.py`.    
 
 `example_cosima.yaml` is a sample .yaml file used as input for `run_cosima.py`.     
 Parameters to be defined in the .yaml file:   
@@ -70,7 +72,7 @@ Parameters to be defined in the .yaml file:
 Parameters to be defined in the .yaml file:    
 - source_path: path to directory housing source .sim files (e.g. 'MEGAlib_outputs/')  
 - output_path: path to directory to store output (e.g. 'trigger_inputs/')    
-- geometry_path: path to geometry file, must match the geometry used to create simulations    
+- mass_model_path: path to geometry file, must match the geometry used to create simulations    
 - background_type: whether to randomly select background regions for each source ('random') or use same background file for all sources ('file')  
 - background_path: if background_type is 'random', path to directory housing background .sim files, and if background_type is 'file', the path to the concatenated background file (e.g. 'MEGAlib_backgrounds/')    
 - background_number: number of background files for each component (only necessary if background_type is 'random')    

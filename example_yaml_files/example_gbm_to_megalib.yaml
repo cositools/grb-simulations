@@ -6,3 +6,4 @@ background_time_range: [-15.0, 17.0]                                            
 nai_energy_range: [50, 10000]                                                       # Energy range of GBM's NaI detectors used for lightcurve
 bgo_energy_range: [50, 10000]                                                       # Energy range of GBM's BGO detectors used for lightcurve
 cosi_energy_range: [50, 10000]                                                      # Energy range for MEGAlib simulations
+min_duration: 2.0                                                                   # Minimum duration of events to reject (s)
