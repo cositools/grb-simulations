@@ -40,7 +40,7 @@ Parameters to be defined in the .yaml file:
 - e_flux: flux or list of fluxes in erg/cm<sup>2</sup>/s (only used if 'ph_flux', 'ph_flux_min', & 'ph_flux_max' are not defined)      
 - e_flux_min: minimum flux in erg/cm<sup>2</sup>/s (only used if 'e_flux', 'ph_flux', 'ph_flux_min', & 'ph_flux_max' are not defined)    
 - e_flux_max: maximum flux in erg/cm<sup>2</sup>/s (only used if 'e_flux', 'ph_flux', 'ph_flux_min', & 'ph_flux_max' are not defined)    
-- shield_counts: whether to include line in .source files to store background shield counts in MEGAlib .sim files ('y' for yes, 'n' for no)   
+- shield_counts: whether to include line in .source files to store background shield counts in MEGAlib .sim files (optional, 'y' or True to include)   
 - coordinate_system: Coordinate system of .source files ('local' for detector coordinates or 'galactic' for galactic coordinates), galactic is not yet supported   
 
 The `example-spectraltype_spectrum.yaml` files are examples of each of the MEGAlib spectral models supported by `sample_source_file_generation.py`: monoenergetic, Band function, Comptonized, power law, and broken power law. The parameters needed depend on the model. These files must end in '_spectrum.yaml' and be located in the `input_path/` directory indicated in the input .yaml file when running `source_file_generation.py`.      
