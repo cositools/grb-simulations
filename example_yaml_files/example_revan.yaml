@@ -1,4 +1,4 @@
 input_path: '/path/to/sim/files/'                                 # Path to directory housing .sim files
 output_path: '/path/to/tra/files/'                                # Path to directory to store .tra files
-mass_model_path: '/path/to/mass/model/'                           # Path to mass model
-config_file_path: '/path/to/config/file/'                         # Path to revan configuration file
+mass_model_path: '/path/to/mass/model'                            # Path to mass model
+config_file_path: '/path/to/config/file'                          # Path to revan configuration file

@@ -17,13 +17,15 @@ Parameters to be defined in the .yaml file:
 - background_time_range: time range to use to fit background (s)     
 - nai_energy_range: energy range of GBM's NaI detectors used for lightcurve     
 - bgo_energy_range: energy range of GBM's BGO detectors used for lightcurve     
-- cosi_energy_range: energy range for COSI MEGAlib simulations     
+- cosi_energy_range: energy range for COSI MEGAlib simulations 
+- min_duration: minimum duration of events to reject once binned using Bayesian blocks (s), should match maximum expected event duration      
 
 `example_source_file.yaml` is a sample .yaml file used as input for `sample_source_file_generation.py`. When `sample_source_file_generation.py` is run, it takes spectral (.yaml & .dat) and lightcurve (.dat) files from the directory specified in the input .yaml file (`example.yaml`) and writes the spectral info from the spectrum .yaml file (if spectrum_type: 'yaml') or the path to the .dat file into the MEGAlib .source file (spectrum_type: 'dat'), as well as the path to the lightcurve .dat file.      
 Parameters to be defined in the .yaml file:  
 - input_path: path to directory housing source inputs (e.g. 'MEGAlib_source_inputs/')   
 - output_path: path to directory to store .source files (e.g. 'MEGAlib_source_files/')  
-- geometry_path: path to mass model  
+- source_input_path: path to directory where .source files should look for lightcurve and spectral .dat files (optional, only needed if different than input path)      
+- mass_model_path: path to mass model  
 - spectrum_type: file type to use for spectrum ('yaml' to use built in MEGAlib spectral models with parameters defined in .yaml files or 'dat' to use .dat files with spectral shape)  
 - mix_or_match: whether to mix or match lightcurves and spectra ('match' will use lightcurves and spectra from same event, 'mix' will randomly match lightcurves with spectra from input directory)  
 - zenith: incidence (zenith) angle or list of incidence (zenith) angles (between 0 and 180 where 90 degrees is on-axis)    
@@ -70,7 +72,7 @@ Parameters to be defined in the .yaml file:
 Parameters to be defined in the .yaml file:    
 - source_path: path to directory housing source .sim files (e.g. 'MEGAlib_outputs/')  
 - output_path: path to directory to store output (e.g. 'trigger_inputs/')    
-- geometry_path: path to geometry file, must match the geometry used to create simulations    
+- mass_model_path: path to geometry file, must match the geometry used to create simulations    
 - background_type: whether to randomly select background regions for each source ('random') or use same background file for all sources ('file')  
 - background_path: if background_type is 'random', path to directory housing background .sim files, and if background_type is 'file', the path to the concatenated background file (e.g. 'MEGAlib_backgrounds/')    
 - background_number: number of background files for each component (only necessary if background_type is 'random')    
