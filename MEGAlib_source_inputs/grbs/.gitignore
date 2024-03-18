@@ -5,3 +5,5 @@
 # Except directories to upload
 !data-challenge-2
 !sgrbs
+!lgrbs
+!sgrbs_0
