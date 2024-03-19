@@ -22,7 +22,7 @@ class model():
 		Parameters
 		----------
 		e : float
-			Energy
+			Energy (keV)
 		alpha : float
 			Low energy spectral index
 		beta : float
@@ -50,7 +50,7 @@ class model():
 		Parameters
 		----------
 		e : float
-			Energy
+			Energy (keV)
 		index : float
 			Spectral index
 		epeak : float
@@ -73,7 +73,7 @@ class model():
 		Parameters
 		----------
 		e : float
-			Energy
+			Energy (keV)
 		index : float
 			Spectral index
 
@@ -94,15 +94,15 @@ class model():
 		Parameters
 		----------
 		e : float
-			Energy
+			Energy (keV)
 		ebreak : float
-			Break energy
+			Break energy (keV)
 		index_lo : float
 			Low energy spectral index
 		index_hi : float
 			High energy spectral index
 		emax : float
-			Maximum energy
+			Maximum energy (keV)
 
 		Returns
 		----------
@@ -171,6 +171,7 @@ class model():
 		"""
 
 		erg_to_kev = 6.24150647e8
+		e_times_function = lambda e: e * self.function(e)
 
 		if not parameters == None:
 			self.set_model(parameters)
@@ -179,8 +180,43 @@ class model():
 			ph_flux = e_flux * erg_to_kev / self.parameters[0]
 		else:
 			if not e_range == None:
-				ph_flux = e_flux * erg_to_kev / integrate.quad(self.function, e_range[0], e_range[1])[0]
+				ph_flux = e_flux * erg_to_kev * integrate.quad(self.function, e_range[0], e_range[1])[0] / integrate.quad(e_times_function, e_range[0], e_range[1])[0]
 			else:
 				raise RuntimeError("Must provide energy range for integration.")
 
 		return ph_flux
+
+	def calc_energy_flux(self, ph_flux, e_range=None, parameters=None):
+		"""
+		Calculate energy flux from photon flux.
+
+		Parameters
+		----------
+		ph_flux : float
+			Photon flux in photons/s/cm^2
+		e_range : list of int or list of float, optional
+			Low and high energy limits in keV
+		parameters : list of int or list of float, optional
+			Values of model parameters. Length dependent on model
+
+		Returns
+		----------
+		e_flux : float
+			Energy flux in erg/s/cm^2
+		"""
+
+		erg_to_kev = 6.24150647e8
+		e_times_function = lambda e: e * self.function(e)
+
+		if not parameters == None:
+			self.set_model(parameters)
+
+		if self.model == 'Mono':
+			e_flux = ph_flux * self.parameters[0] / erg_to_kev
+		else:
+			if not e_range == None:
+				e_flux = ph_flux * integrate.quad(e_times_function, e_range[0], e_range[1])[0] / integrate.quad(self.function, e_range[0], e_range[1])[0] / erg_to_kev
+			else:
+				raise RuntimeError("Must provide energy range for integration.")
+
+		return e_flux
