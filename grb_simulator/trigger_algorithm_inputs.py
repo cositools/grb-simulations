@@ -1,6 +1,7 @@
 import ROOT as root
 import os
 import random
+import shutil
 from .config import suppress_output, define_paths
 from .load_megalib import load_megalib
 
@@ -12,21 +13,16 @@ class trigger_algorithm_inputs():
 
 		Parameters
 		----------
-		source_path : str
-			Path to source .sim files
-		background_path : str
-			Path to background .sim files
-		output_path : str
-			Path to save trigger algorithm input files
 		inputs : dict
 			Contents of input yaml file 
 		"""
 
 		[self.source_path, 
 		 self.background_path, 
-		 self.output_path, 
-		 self.mass_model_path] = define_paths([inputs['source_path'], inputs['background_path'], inputs['output_path'], inputs['mass_model_path']], 
-		 									[False, False, True, False])
+		 self.output_path,
+		 self.source_file_path, 
+		 self.mass_model_path] = define_paths([inputs['source_path'], inputs['background_path'], inputs['output_path'], inputs['source_file_path'], inputs['mass_model_path']], 
+		 									[False, False, True, False, False])
 		if inputs['background_type'] == 'file':
   			self.background_path = self.background_path[:-1]
 		self.mass_model_path = self.mass_model_path[:-1]
@@ -335,7 +331,7 @@ class trigger_algorithm_inputs():
 
 		return times_sorted, energies_sorted
 
-	def write_events(self, file_path, times, energies):
+	def write_hits(self, file_path, times, energies):
 		"""
 		Write times and energies to trigger algorithm input file.
 
@@ -355,10 +351,50 @@ class trigger_algorithm_inputs():
 			for i in range(len(times)):
 				f.write("{:.9f}".format(times[i]) + '        ' + str(energies[i]) + '\n')
 
+	def copy_readme(self):
+		"""
+		Copy README from source file directory to trigger input directory.
+		"""
+
+		if os.pathisfile(self.source_file_path + 'README.md'):
+			shutil.copy(self.source_file_path + 'README.md', self.output_path + 'README.md')
+		else:
+			print('No README in .source file directory.')
+
+	def write_readme(self, source_name):
+		"""
+		Write README for event directory.
+		"""
+
+		filename = self.source_file_path + source_name + '.source'
+    	with open(filename, 'r') as f:
+        	lines = f.readlines()
+    	for line in lines:
+    		line_list = line.split()
+    		if '.Beam' in line:
+    			z = mylist[2]
+    			a = mylist[3]
+    		elif '.Spectrum' in line:
+    			spectrum = mylist[1:]
+    		elif 'Average photon flux' in line:
+    			e_flux = mylist[8:]
+    		elif '.Flux' in line:
+    			ph_flux = mylist[1] + ' ph/cm2/s'
+
+		with open(self.output_path + source_name + '/' + 'README.md', 'w') as f:
+			f.write('zenith angle: ' + z + '\n')
+			f.write('azimuth angle: ' + a + '\n')
+			f.write('spectrum: ' + spectrum[0] + '\n')
+			f.write('spectral parameters or file: ' + spectrum[1:] + '\n')
+			f.write('energy flux: ' + e_flux + '\n')
+			f.write('photon flux: ' + ph_flux + '\n')
+
 	def create_event_files(self):
 		"""
 		Create trigger algorithm input files for all events in input directory.
 		"""
+
+		self.copy_readme()
 
 		for file in os.listdir(self.source_path):
 			filename = os.fsdecode(file)
@@ -380,4 +416,6 @@ class trigger_algorithm_inputs():
 				times, energies = self.combine(source_times, source_energies, background_times, background_energies)
 
 				for key in times.keys():
-					self.write_events(self.output_path + source_name + '/' + key + '.txt', times[key], energies[key])
+					self.write_hits(self.output_path + source_name + '/' + key + '.txt', times[key], energies[key])
+
+				self.write_readme(source_name)

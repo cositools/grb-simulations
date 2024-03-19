@@ -72,6 +72,7 @@ Parameters to be defined in the .yaml file:
 Parameters to be defined in the .yaml file:    
 - source_path: path to directory housing source .sim files (e.g. 'MEGAlib_outputs/')  
 - output_path: path to directory to store output (e.g. 'trigger_inputs/')    
+- source_file_path: path to directory housing source files used to simulate .sim files (e.g. 'MEGAlib_source_files/')
 - mass_model_path: path to geometry file, must match the geometry used to create simulations    
 - background_type: whether to randomly select background regions for each source ('random') or use same background file for all sources ('file')  
 - background_path: if background_type is 'random', path to directory housing background .sim files, and if background_type is 'file', the path to the concatenated background file (e.g. 'MEGAlib_backgrounds/')    
