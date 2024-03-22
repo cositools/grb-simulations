@@ -320,6 +320,8 @@ class trigger_algorithm_inputs():
 			for i in range(len(source_times[key])):
 				source_times[key][i] += (min(min_times) + max(max_times)) / 2
 
+		source_start_time = min(source_times)
+
 		for key in times.keys():
 			for i in range(len(source_times[key])):
 				times[key].append(source_times[key][i])
@@ -329,7 +331,7 @@ class trigger_algorithm_inputs():
 				energies[key].append(background_energies[key][i])
 			times_sorted[key], energies_sorted[key] = (list(x) for x in zip(*sorted(zip(times[key], energies[key]))))
 
-		return times_sorted, energies_sorted
+		return times_sorted, energies_sorted, source_start_time
 
 	def write_hits(self, file_path, times, energies):
 		"""
@@ -356,38 +358,39 @@ class trigger_algorithm_inputs():
 		Copy README from source file directory to trigger input directory.
 		"""
 
-		if os.pathisfile(self.source_file_path + 'README.md'):
+		if os.path.isfile(self.source_file_path + 'README.md'):
 			shutil.copy(self.source_file_path + 'README.md', self.output_path + 'README.md')
 		else:
 			print('No README in .source file directory.')
 
-	def write_readme(self, source_name):
+	def write_readme(self, source_name, start_time):
 		"""
 		Write README for event directory.
 		"""
 
 		filename = self.source_file_path + source_name + '.source'
-    	with open(filename, 'r') as f:
-        	lines = f.readlines()
-    	for line in lines:
-    		line_list = line.split()
-    		if '.Beam' in line:
-    			z = mylist[2]
-    			a = mylist[3]
-    		elif '.Spectrum' in line:
-    			spectrum = mylist[1:]
-    		elif 'Average photon flux' in line:
-    			e_flux = mylist[8:]
-    		elif '.Flux' in line:
-    			ph_flux = mylist[1] + ' ph/cm2/s'
+		with open(filename, 'r') as f:
+			lines = f.readlines()
+		for line in lines:
+			line_list = line.split()
+			if '.Beam' in line:
+				z = line_list[2]
+				a = line_list[3]
+			elif '.Spectrum' in line:
+				spectrum = line_list[1:]
+			elif 'Average photon flux' in line:
+				e_flux = line_list[8:]
+			elif '.Flux' in line:
+				ph_flux = line_list[1] + ' ph/cm2/s'
 
 		with open(self.output_path + source_name + '/' + 'README.md', 'w') as f:
 			f.write('zenith angle: ' + z + '\n')
 			f.write('azimuth angle: ' + a + '\n')
 			f.write('spectrum: ' + spectrum[0] + '\n')
-			f.write('spectral parameters or file: ' + spectrum[1:] + '\n')
-			f.write('energy flux: ' + e_flux + '\n')
+			f.write('spectral parameters or file: ' + str(spectrum[1:]) + '\n')
+			f.write('energy flux: ' + str(e_flux[0]) + ' ' + str(e_flux[1]) + '\n')
 			f.write('photon flux: ' + ph_flux + '\n')
+			f.write('event start time: ' + str(start_time) + '\n')
 
 	def create_event_files(self):
 		"""
@@ -413,9 +416,9 @@ class trigger_algorithm_inputs():
 					print('Reading background file: ' + self.background_path.split('/')[-1])
 					background_times, background_energies = self.make_hit_dict(self.megalib.reader)
 
-				times, energies = self.combine(source_times, source_energies, background_times, background_energies)
+				times, energies, start_time = self.combine(source_times, source_energies, background_times, background_energies)
 
 				for key in times.keys():
 					self.write_hits(self.output_path + source_name + '/' + key + '.txt', times[key], energies[key])
 
-				self.write_readme(source_name)
+				self.write_readme(source_name, start_time)

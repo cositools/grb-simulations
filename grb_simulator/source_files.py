@@ -308,7 +308,7 @@ class source_files():
 			f.write('PhysicsListEM               LivermorePol\n')
 			f.write('\n# Output formats\n')
 			f.write('StoreSimulationInfo         init-only\n')
-			if self.shield_counts == False:
+			if self.shield_counts == True:
 				f.write('\n# Store shield counts\n')
 				f.write('PreTriggerMode              EveryEventWithHits\n')
 			f.write('\n# Run and source parameters\n')
