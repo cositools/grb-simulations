@@ -9,5 +9,5 @@ azimuth_min: 0                                                                  
 azimuth_max: 360                                                                                              # Maximum azimuthal angle in degrees
 ph_flux_min: 2.5                                                                                              # Minimum flux in ph/cm^2/s
 ph_flux_max: 5.0                                                                                              # Maximum flux in ph/cm^2/s
-shield_counts: 'y'                                                                                            # Whether to store background shield counts in .sim file ('y' for yes, 'n' for no)
+shield_counts: True                                                                                           # Whether to store background shield counts in .sim file ('y' for yes, 'n' for no)
 coordinate_system: 'local'                                                                                    # Coordinate system of .source files ('local' for detector coordinates or 'galactic' for galactic coordinates)

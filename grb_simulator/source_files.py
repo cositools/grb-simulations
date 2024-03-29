@@ -228,7 +228,7 @@ class source_files():
 		elif spectrum == 'Mono':
 			spectrum_text = name + '.Spectrum        Mono ' + str(parameters[0])
 		elif spectrum == 'Band':
-			spectrum_text = name + '.Spectrum        Band ' + str(energy_range[0]) + ' ' + str(energy_range[1]) + ' ' + str(parameters[0]) + ' ' + str(parameters[1]) + ' ' + str(parameters[1])
+			spectrum_text = name + '.Spectrum        Band ' + str(energy_range[0]) + ' ' + str(energy_range[1]) + ' ' + str(parameters[0]) + ' ' + str(parameters[1]) + ' ' + str(parameters[2])
 		elif spectrum == 'Comptonized':
 			spectrum_text = name + '.Spectrum        Comptonized ' + str(energy_range[0]) + ' ' + str(energy_range[1]) + ' ' + str(parameters[0]) + ' ' + str(parameters[1])
 		elif spectrum == 'PowerLaw':
@@ -308,7 +308,7 @@ class source_files():
 			f.write('PhysicsListEM               LivermorePol\n')
 			f.write('\n# Output formats\n')
 			f.write('StoreSimulationInfo         init-only\n')
-			if self.shield_counts == False:
+			if self.shield_counts == True:
 				f.write('\n# Store shield counts\n')
 				f.write('PreTriggerMode              EveryEventWithHits\n')
 			f.write('\n# Run and source parameters\n')

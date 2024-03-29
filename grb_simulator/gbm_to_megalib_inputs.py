@@ -494,7 +494,7 @@ class gbm_to_megalib_inputs():
 			band_dict['energy_max'] = self.energy_range[1]
 			band_dict['alpha'] = source_info['flnc_band_alpha']
 			band_dict['beta'] = source_info['flnc_band_beta']
-			band_dict['ebreak'] = source_info['flnc_band_epeak']
+			band_dict['ebreak'] = source_info['flnc_band_epeak'] / (source_info['flnc_band_alpha'] + 2) 
 			write_yaml(self.output_path + source_info['trigger_name'] + '_spectrum.yaml', band_dict)
 		elif source_info['flnc_best_fitting_model'] == 'flnc_comp':
 			comptonized_dict = {}
