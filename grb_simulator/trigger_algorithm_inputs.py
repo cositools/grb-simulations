@@ -22,7 +22,7 @@ class trigger_algorithm_inputs():
 		 self.output_path,
 		 self.source_file_path, 
 		 self.mass_model_path] = define_paths([inputs['source_path'], inputs['background_path'], inputs['output_path'], inputs['source_file_path'], inputs['mass_model_path']], 
-		 									[False, False, True, False, False])
+		 									  [False, False, True, False, False])
 		if inputs['background_type'] == 'file':
   			self.background_path = self.background_path[:-1]
 		self.mass_model_path = self.mass_model_path[:-1]
