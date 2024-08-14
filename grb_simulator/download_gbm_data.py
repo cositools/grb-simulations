@@ -38,6 +38,7 @@ class download_gbm_data():
 		else:
 			for item in self.filters:
 				filter_list.append((item, self.filters[item][0], self.filters[item][1]))
+			
 			self.sliced_event_catalog = BurstCatalog().slices(filter_list)
 
 	def download_events(self):

@@ -1,0 +1,6 @@
+type: Band
+energy_min: 100
+energy_max: 10000
+alpha: -0.735003
+beta: -2.491069
+ebreak: 89.63539043966111
