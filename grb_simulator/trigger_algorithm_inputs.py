@@ -21,29 +21,29 @@ class trigger_algorithm_inputs():
 		 self.background_path, 
 		 self.output_path,
 		 self.source_file_path, 
-		 self.mass_model_path] = define_paths([inputs['source_path'], inputs['background_path'], inputs['output_path'], inputs['source_file_path'], inputs['mass_model_path']], 
+		 self.mass_model_path] = define_paths([inputs['paths']['input'], inputs['paths']['background'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model']], 
 		 									  [False, False, True, False, False])
-		if inputs['background_type'] == 'file':
-  			self.background_path = self.background_path[:-1]
+		if inputs['background']['type'] == 'file':
+			self.background_path = self.background_path[:-1]
 		self.mass_model_path = self.mass_model_path[:-1]
 
 		if inputs['mass_model_version'] == 8 or inputs['mass_model_version'] == 12:
 			self.mass_model_version = inputs['mass_model_version']
 		else:
-			raise RuntimeError('Mass model version ' + str(mass_model_version) + ' is not supported. Must be 8 or 12')
+			raise RuntimeError('Mass model version ' + str(self.mass_model_version) + ' is not supported. Must be 8 or 12')
 
-		if 'background_time' in inputs.keys():
-			self.background_time = inputs['background_time']
-		if 'background_number' in inputs.keys():
-			self.background_num = inputs['background_number']
-		if 'background_file_length' in inputs.keys():
-			self.background_length = inputs['background_file_length']
-		if 'background_components' in inputs.keys():
-			self.background_components = inputs['background_components']
-		if 'background_file_type' in inputs.keys():
-			self.background_file_type = inputs['background_file_type']
-		if 'background_type' in inputs.keys():
-			self.background_type = inputs['background_type']
+		if 'time' in inputs['background']:
+			self.background_time = inputs['background']['time']
+		if 'number' in inputs['background']:
+			self.background_num = inputs['background']['number']
+		if 'file_length' in inputs['background']:
+			self.background_length = inputs['background']['file_length']
+		if 'components' in inputs['background']:
+			self.background_components = inputs['background']['components']
+		if 'file_type' in inputs['background']:
+			self.background_file_type = inputs['background']['file_type']
+		if 'type' in inputs['background']:
+			self.background_type = inputs['background']['type']
 
 		if self.background_length >= 86400:
 			raise RuntimeError('For now, background simulations must be shorter than a day to avoid potential error with make_hit_dict()')
@@ -268,8 +268,8 @@ class trigger_algorithm_inputs():
 			for key in component_times.keys():
 				for j in range(len(component_times[key])):
 					if component_times[key][j] > start_time:
-		  				times[key].append(component_times[key][j])
-		  				energies[key].append(component_energies[key][j])
+						times[key].append(component_times[key][j])
+						energies[key].append(component_energies[key][j])
 
 		return times, energies
 

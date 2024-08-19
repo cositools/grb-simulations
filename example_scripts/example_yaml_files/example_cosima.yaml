@@ -1,2 +1,3 @@
-input_path: '/path/to/source/files/'                    # Path to directory housing .source files
-output_path: '/path/to/sim/files/'                      # Path to directory to store .sim files
+paths:
+  input: '/path/to/source/files/'                    # Path to directory housing .source files
+  output: '/path/to/sim/files/'                      # Path to directory to store .sim files

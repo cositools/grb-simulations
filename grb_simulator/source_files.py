@@ -19,76 +19,77 @@ class source_files():
 			Path to save MEGAlib source files
 		"""
 
-		[self.input_path, self.output_path] = define_paths([inputs['input_path'], inputs['output_path']], [False, True])
+		[self.input_path, self.output_path] = define_paths([inputs['paths']['input'], inputs['paths']['output']], [False, True])
 
-		if 'shield_counts' in inputs.keys() and inputs['shield_counts'] == 'y' or inputs['shield_counts'] == True:
+		if 'shield_counts' in inputs['general'] and inputs['general']['shield_counts'] == 'y' or inputs['general']['shield_counts'] == True:
 			self.shield_counts = True
 		else:
 			self.shield_counts = False
 
-		if 'zenith' in inputs.keys():
-			self.zenith = inputs['zenith']
+		if 'zenith' in inputs['position']:
+			self.zenith = inputs['position']['zenith']
 		else:
 			self.zenith = None
-		if 'zenith_min' in inputs.keys() and 'zenith_max' in inputs.keys():
-			self.zenith_range = [inputs['zenith_min'], inputs['zenith_max']]
+		if 'zenith_range' in inputs['position']:
+			self.zenith_range = inputs['position']['zenith_range']
 		else:
 			self.zenith_range = None
 		if self.zenith == None and self.zenith_range == None:
 			raise RuntimeError("A zenith angle or range of angles must be defined in input .yaml file.")
 
-		if 'azimuth' in inputs.keys():
-			self.azimuth = inputs['azimuth']
+		if 'azimuth' in inputs['position']:
+			self.azimuth = inputs['position']['azimuth']
 		else:
 			self.azimuth = None
-		if 'azimuth_min' in inputs.keys() and 'azimuth_max' in inputs.keys():
-			self.azimuth_range = [inputs['azimuth_min'], inputs['azimuth_max']]
+		if 'azimuth_range' in inputs['position']:
+			self.azimuth_range = inputs['position']['azimuth_range']
 		else:
 			self.azimuth_range = None
 		if self.azimuth == None and self.azimuth_range == None:
 			raise RuntimeError("An azimuth angle or range of angles must be defined in input .yaml file.")
 
-		if 'ph_flux' in inputs.keys():
-			self.ph_flux = inputs['ph_flux']
+		if 'photon_flux' in inputs['spectra_and_lightcurves']:
+			self.ph_flux = inputs['spectra_and_lightcurves']['photon_flux']
 		else:
 			self.ph_flux = None
-		if 'ph_flux_min' in inputs.keys() and 'ph_flux_max' in inputs.keys():
-			self.ph_flux_range = [inputs['ph_flux_min'], inputs['ph_flux_max']]
+		if 'photon_flux_range' in inputs['spectra_and_lightcurves']:
+			self.ph_flux_range = inputs['spectra_and_lightcurves']['photon_flux_range']
 		else:
 			self.ph_flux_range = None
 
-		if 'e_flux' in inputs.keys():
-			self.e_flux = inputs['e_flux']
+		if 'energy_flux' in inputs['spectra_and_lightcurves']:
+			self.e_flux = inputs['spectra_and_lightcurves']['energy_flux']
 		else:
 			self.e_flux = None
-		if 'e_flux_min' in inputs.keys() and 'e_flux_max' in inputs.keys():
-			self.e_flux_range = [inputs['e_flux_min'], inputs['e_flux_max']]
+		if 'energy_flux_range' in inputs['spectra_and_lightcurves']:
+			self.e_flux_range = inputs['spectra_and_lightcurves']['energy_flux_range']
 		else:
 			self.e_flux_range = None
 
 		if self.ph_flux == None and self.ph_flux_range == None and self.e_flux == None and self.e_flux_range == None:
 			raise RuntimeError("A flux or range of fluxes must be defined in input .yaml file.")
 
-		if 'source_input_path' in inputs.keys():
-			self.input_source = inputs['source_input_path']
+		if 'source_input' in inputs['paths']:
+			self.input_source = inputs['paths']['source_input']
 		else:
 			self.input_source = None
 		
-		if 'mass_model_path' in inputs.keys():
-			self.mass_model = inputs['mass_model_path']
+		if 'mass_model' in inputs['paths']:
+			self.mass_model = inputs['paths']['mass_model']
 		else:
 			raise RuntimeError("Mass model path must be defined in input .yaml file.")
-		if inputs['coordinate_system'] == 'local':
-			self.coordsys = inputs['coordinate_system']
+		
+		if inputs['general']['coordinate_system'] == 'local':
+			self.coordsys = inputs['general']['coordinate_system']
 		else:
 			raise RuntimeError("Only detector coordinates are supported for now. 'coordinate_system' in input .yaml file must be 'local'.")
 
-		if 'mix_or_match' in inputs.keys():
-			self.mix_or_match = inputs['mix_or_match']
+		if 'mix_or_match' in inputs['spectra_and_lightcurves']:
+			self.mix_or_match = inputs['spectra_and_lightcurves']['mix_or_match']
 		else:
 			self.mix_or_match = 'match'
-		if 'spectrum_type' in inputs.keys():
-			self.spectrum_type = inputs['spectrum_type']
+		if 'spectrum_type' in inputs['spectra_and_lightcurves']:
+			self.spectrum_type = inputs['spectra_and_lightcurves']['spectrum_type']
 		else:
 			self.spectrum_type = None
 
@@ -132,7 +133,7 @@ class source_files():
 				elif type(self.ph_flux) == list:
 					f.write('The fluxes of each source were chosen from the following list (in ph/cm<sup>2</sup>/s): ' + str(self.ph_flux) + '. ')
 				else:
-					raise RuntimeError("'ph_flux' in input .yaml file must be int, float, or list.")
+					raise RuntimeError("'photon_flux' in input .yaml file must be int, float, or list.")
 			elif not self.ph_flux_range == None:
 				f.write('The fluxes of each source were chosen randomly between ' + str(self.ph_flux_range[0]) + ' and ' + str(self.ph_flux_range[1]) + ' ph/cm<sup>2</sup>/s. ')
 			elif not self.e_flux == None:
@@ -141,7 +142,7 @@ class source_files():
 				elif type(self.e_flux) == list:
 					f.write('The fluxes of each source were chosen from the following list (in erg/cm<sup>2</sup>/s): ' + str(self.e_flux) + '. ')
 				else:
-					raise RuntimeError("'e_flux' in input .yaml file must be int, float, or list.")
+					raise RuntimeError("'energy_flux' in input .yaml file must be int, float, or list.")
 			elif not self.e_flux_range == None:
 				f.write('The fluxes of each source were chosen randomly between ' + str(self.e_flux_range[0]) + ' and ' + str(self.e_flux_range[1]) + ' erg/cm<sup>2</sup>/s. ')
 			else:

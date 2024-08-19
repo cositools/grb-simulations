@@ -7,7 +7,7 @@ from gbm.data import TTE
 from gbm.binning.unbinned import bin_by_time
 from gbm.background import BackgroundFitter, BackgroundRates
 from gbm.background.binned import Polynomial
-from gbm.plot import Lightcurve, Spectrum
+from gbm.plot import Lightcurve
 from .config import read_yaml, write_yaml, define_paths
 
 class gbm_to_megalib_inputs():
@@ -30,15 +30,15 @@ class gbm_to_megalib_inputs():
 
 		[self.input_path, 
 		 self.output_path, 
-		 self.plot_path] = define_paths([inputs['input_path'], inputs['output_path'], inputs['plot_path']], 
+		 self.plot_path] = define_paths([inputs['paths']['input'], inputs['paths']['output'], inputs['paths']['plots']], 
 		 								[False, True, True])
 
-		self.energy_range = inputs['cosi_energy_range']
-		self.background_t_range = inputs['background_time_range']
-		self.source_t_range = inputs['source_time_range']
-		self.nai_e_range = inputs['nai_energy_range']
-		self.bgo_e_range = inputs['bgo_energy_range']
-		self.min_bin_size = inputs['min_duration']
+		self.energy_range = inputs['energy']['cosi_range']
+		self.background_t_range = inputs['time']['background_range']
+		self.source_t_range = inputs['time']['source_range']
+		self.nai_e_range = inputs['energy']['nai_range']
+		self.bgo_e_range = inputs['energy']['bgo_range']
+		self.min_bin_size = inputs['time']['min_duration']
 
 		self.n_sources = self.count_sources()
 

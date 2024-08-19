@@ -45,12 +45,12 @@ class run_megalib():
 		if not config_mimrec == None:
 			self.config_mimrec = config_mimrec
 
-		if 'input_path' in inputs.keys() and 'output_path' in inputs.keys():
-			if 'mass_model_path' in inputs.keys() and 'config_file_path' in inputs.keys():
+		if 'input' in inputs['paths'] and 'output' in inputs['paths']:
+			if 'mass_model' in inputs['paths'] and 'config' in inputs['paths']:
 				[input_path, 
 		 	 	 output_path, 
 		 	 	 mass_model_path, 
-		 	 	 config_file_path] = define_paths([inputs['input_path'], inputs['output_path'], inputs['mass_model_path'], inputs['config_file_path']], 
+		 	 	 config_file_path] = define_paths([inputs['paths']['input'], inputs['paths']['output'], inputs['paths']['mass_model'], inputs['paths']['config']], 
 		 									  	  [False, True, False, False])
 				mass_model_path = mass_model_path[:-1]
 				config_file_path = config_file_path[:-1]
@@ -61,7 +61,7 @@ class run_megalib():
 				if not hasattr(self, 'config_mimrec'):
 					self.config_mimrec = config_file_path
 			else:
-				[input_path, output_path] = define_paths([inputs['input_path'], inputs['output_path']], [False, True])
+				[input_path, output_path] = define_paths([inputs['paths']['input'], inputs['paths']['output']], [False, True])
 			
 			if not hasattr(self, 'input_cosima'):
 				self.input_cosima = input_path
@@ -129,7 +129,7 @@ class run_megalib():
 
 		if not os.path.isdir(output_path + 'output/'):
 					os.makedirs(output_path + 'output/')
-		os.system('mimrec -f ' + file + ' -g ' + mass_model + ' -c ' + config_mimrec + ' -n -x > ' + output_mimrec + 'output/output_' + file.split('.')[0] + '.txt')
+		os.system('mimrec -f ' + file + ' -g ' + mass_model + ' -c ' + config_file + ' -n -x > ' + output_path + 'output/output_' + file.split('.')[0] + '.txt')
 
 	def run_on_all(self, run_func, input_path, output_path, input_ext, output_ext, print_text):
 		"""

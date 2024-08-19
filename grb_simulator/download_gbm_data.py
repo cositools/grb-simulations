@@ -14,7 +14,7 @@ class download_gbm_data():
 			Contents of input yaml file 
 		"""
 
-		self.output_path = define_paths([inputs['output_path']], [True])[0]
+		self.output_path = define_paths([inputs['paths']['output']], [True])[0]
 
 		if 'filters' in inputs.keys():
 			self.filters = inputs['filters']
