@@ -538,11 +538,24 @@ class gbm_to_megalib_inputs():
 					print('Deleting spectrum')
 					os.remove(self.output_path + source_info['trigger_name'] + '_spectrum.yaml')
 
+	def write_readme(self):
+		"""
+		Write README.
+		"""
+
+		with open(self.output_path + 'README.md', 'w') as f:
+			f.write('# Short GRB Spectra and Lightcurves\n\n')
+			f.write('This directory contains spectra and lightcurves of the Fermi-GBM data found in `' + self.input_path + 
+					'`. The lightcurves and spectra were binned using Bayesian blocks. The energy range for the spectral .yaml files is ' + 
+					str(self.energy_range[0]) + '-' + str(self.energy_range[1]) ' keV. Only GRBs with Band and Comptonized best spectral fits are included.')
+
 	def make_spectra_lightcurves(self):
 		"""
 		Make spectra and lightcurves for all events in directory.
 		"""
 
+		self.write_readme()
+		
 		n = 0
 		for name in os.listdir(self.input_path):
 			if os.path.isdir(self.input_path + name):
