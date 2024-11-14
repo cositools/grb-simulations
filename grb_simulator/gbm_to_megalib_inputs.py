@@ -536,7 +536,7 @@ class gbm_to_megalib_inputs():
 
 	def write_readme(self):
 		"""
-		Write README.
+		Write README for MEGAlib input file directory.
 		"""
 
 		with open(self.output_path + 'README.md', 'w') as f:
@@ -549,6 +549,8 @@ class gbm_to_megalib_inputs():
 		"""
 		Make spectra and lightcurves for all events in directory.
 		"""
+
+		self.write_readme()
 		
 		n = 0
 		for name in os.listdir(self.input_path):

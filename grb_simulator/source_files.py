@@ -333,6 +333,7 @@ class source_files():
 		"""
 
 		self.make_event_dict()
+		self..write_readme()
 
 		for this_event in self.events:
 			source_filename = self.output_path + this_event + '.source'

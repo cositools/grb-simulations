@@ -1,4 +1,5 @@
 import os
+from datetime import date
 from gbm.finder import BurstCatalog, TriggerFtp
 from .config import fill_dict, read_yaml, write_yaml, define_paths
 
@@ -43,6 +44,23 @@ class download_gbm_data():
 			
 			self.sliced_event_catalog = BurstCatalog().slices(filter_list)
 
+	def write_readme(self):
+		"""
+		Write README for directory containing downloaded data.
+		"""
+
+		with open(self.output_path + 'README.md', 'w') as f:
+			f.write('# Fermi-GBM Data\n\n')
+			if self.filters == None:
+				f.write('This directory contains all Fermi-GBM GRBs downloaded on ' + str(date.today()) '. ')
+			else:
+				f.write('This directory contains Fermi-GBM GRBs downloaded on ' + str(date.today()) ' with the following filters:           \n')
+				for item in self.filters:
+					f.write(str(item) + ': ' + str(self.filters[item]) '          \n')
+			f.write('The columns downloaded from the burst catalog are:          \n')
+			for column in self.download:
+				f.write(str(column) + '          \n')
+
 	def download_events(self):
 		"""
 		Download TTE data from GBM.
@@ -54,6 +72,8 @@ class download_gbm_data():
 		output_path : str
 			Path to directory to store downloaded files
 		"""
+
+		self.write_readme()
 
 		event_list = self.sliced_event_catalog.get_table(columns=self.download)
 		trig_finder = TriggerFtp(event_list[len(event_list)-1][self.download.index('trigger_name')].replace('bn', ''))

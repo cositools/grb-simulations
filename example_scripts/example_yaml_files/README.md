@@ -56,25 +56,29 @@ The `example-spectraltype_spectrum.yaml` files are examples of each of the MEGAl
 `example_cosima.yaml` is a sample .yaml file used as input for `run_cosima.py`.     
 Parameters to be defined in the .yaml file:   
 - paths:         
-    - input: path to directory housing MEGAlib .source files (e.g. 'MEGAlib_source_files/')      
-    - output: path to directory to store .sim files (e.g. 'MEGAlib_outputs/')     
-- parallel: whether to run simulations in parallel (optional, True to run in parallel)
-- instances: number of mcosima instances to run (optional, only needed if 'parallel' is True)
+    - source_files: path to directory housing MEGAlib .source files (e.g. 'MEGAlib_source_files/')      
+    - sim_files: path to directory to store .sim files (e.g. 'MEGAlib_outputs/')     
+- cosima:          
+    - zip: whether to gzip .sim files (optional, False to not zip files)
+    - parallel: whether to run simulations in parallel (optional, True to run in parallel)
+    - instances: number of mcosima instances to run (optional, only needed if 'parallel' is True)
 
 `example_revan.yaml` is a sample .yaml file used as input for `run_revan.py`.     
 Parameters to be defined in the .yaml file:   
 - paths:         
-    - input: path to directory housing .sim files (e.g. 'MEGAlib_outputs/')      
-    - output: path to directory to store .tra files (e.g. 'MEGAlib_outputs/')    
+    - sim_files: path to directory housing .sim files (e.g. 'MEGAlib_outputs/')      
+    - tra_files: path to directory to store .tra files (e.g. 'MEGAlib_outputs/')    
     - mass_model: path to instrument mass model (e.g. 'COSISMEX.O64.geo.setup')      
+- revan:          
     - config: path to revan configuration file (e.g. 'SMEXv12.Continuum.HEALPixO3.binnedimaging.revan.cfg')      
 
 `example_mimrec.yaml` is a sample .yaml file used as input for `run_mimrec.py`.     
 Parameters to be defined in the .yaml file:   
 - paths:         
-    - input: path to directory housing .tra files (e.g. 'MEGAlib_outputs/')      
-    - output: path to directory to store extracted .tra files (e.g. 'MEGAlib_outputs/')    
+    - tra_files: path to directory housing .tra files (e.g. 'MEGAlib_outputs/')      
+    - extracted_tra_files: path to directory to store extracted .tra files (e.g. 'MEGAlib_outputs/')    
     - mass_model: path to instrument mass model (e.g. 'COSISMEX.O64.geo.setup')      
+- mimrec:          
     - config: path to mimrec configuration file (e.g. 'SMEXv12.Continuum.HEALPixO3.binnedimaging.mimrec.cfg')     
 
 `example_trigger_algorithm.yaml` is a sample .yaml file used as input for `trigger_algorithm_list_generation.py`.    
