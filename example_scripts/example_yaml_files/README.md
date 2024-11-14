@@ -7,7 +7,7 @@ Parameters to be defined in the .yaml file:
 - paths:      
     - output: path to directory to store downloaded files (e.g. 'gbm_data/')       
 - filters: parameters used to filter bursts (must be columns in [GBM burst table](https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dfermigbrst&Action=More+Options))      
-- download: columns of GBM burst data to download (must be columns in [GBM burst table](https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dfermigbrst&Action=More+Options), must include trigger_name and bcat_detector_mask)     
+- download: columns of GBM burst data to download (must be columns in [GBM burst table](https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dfermigbrst&Action=More+Options), must include trigger_name, bcat_detector_mask, and t90)     
 
 `example_gbm_to_megalib.yaml` is a sample .yaml file used as input for `gbm_to_megalib.py`.      
 Parameters to be defined in the .yaml file:      
@@ -17,8 +17,7 @@ Parameters to be defined in the .yaml file:
     - plots: path to directory to store lightcurve plots      
 - time:     
     - source_range: time range of source lightcurve (s) with T90 beginning at t=0 s     
-    - background_range: time range to use to fit background (s) with T90 beginning at t=0 s        
-    - min_duration: minimum duration of events to reject once binned using Bayesian blocks (s), should match maximum expected event duration      
+    - background_range: time range to use to fit background (s) with T90 beginning at t=0 s         
 - energy:     
     - nai_range: energy range of GBM's NaI detectors used for lightcurve     
     - bgo_range: energy range of GBM's BGO detectors used for lightcurve     

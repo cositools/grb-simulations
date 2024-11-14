@@ -5,7 +5,6 @@ paths:
 time:
   source_range: [-2.0, 4.0]                                                         # Time range of source lightcurve (s)
   background_range: [-15.0, 17.0]                                                   # Time range to use to fit background (s)
-  min_duration: 2.0                                                                 # Minimum duration of events to reject (s)
 energy:
   nai_range: [100, 10000]                                                           # Energy range of GBM's NaI detectors used for lightcurve
   bgo_range: [100, 10000]                                                           # Energy range of GBM's BGO detectors used for lightcurve

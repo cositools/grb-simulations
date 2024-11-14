@@ -34,7 +34,6 @@ class gbm_to_megalib_inputs():
 		self.source_t_range = inputs['time']['source_range']
 		self.nai_e_range = inputs['energy']['nai_range']
 		self.bgo_e_range = inputs['energy']['bgo_range']
-		self.min_bin_size = inputs['time']['min_duration']
 
 		self.n_sources = self.count_sources()
 
@@ -117,7 +116,7 @@ class gbm_to_megalib_inputs():
 
 		return bkgd_list, merge
 
-	def bin_data(self, merge, bin_rate, bin_rate2):
+	def bin_data(self, merge, bin_rate, bin_rate2, t90):
 		"""
 		Merge and bin data.
 
@@ -129,6 +128,8 @@ class gbm_to_megalib_inputs():
 			Time bin size for plotting and background fitting
 		bin_rate2 : float
 			Time bin size for MEGAlib lightcurve
+		t90 : float
+			Duration (T90) of event
 
 		Returns
 		----------
@@ -172,7 +173,7 @@ class gbm_to_megalib_inputs():
 			bin_sizes = np.append(bin_sizes, bins2[j+1] - bins2[j])
 
 		err = False
-		if min(bin_sizes) > self.min_bin_size or len(bin_sizes) == 1:
+		if min(bin_sizes) > t90 or len(bin_sizes) == 1:
 			print('Not finding event with Bayesian blocks. Not saving')
 			err = True
 
@@ -449,7 +450,7 @@ class gbm_to_megalib_inputs():
 		bkgd_list_nai, merge = self.read_detectors(n_detect, merge, self.nai_e_range)
 		bkgd_list_bgo, merge = self.read_detectors(b_detect, merge, self.bgo_e_range)
 
-		rates, bins2, lc_data, nbins, err = self.bin_data(merge, bin_rate, bin_rate2)
+		rates, bins2, lc_data, nbins, err = self.bin_data(merge, bin_rate, bin_rate2, float(source_info['t90']))
 		if not err:
 			tot_bkgd, err = self.fit_background(n_detect, b_detect, bkgd_list_nai, bkgd_list_bgo, bin_rate, float(source_info['t90_start']), float(source_info['t90']))
 
