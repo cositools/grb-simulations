@@ -52,12 +52,16 @@ class run_megalib():
 
 	def cosima(self, file, output_path, zipped):
 		"""
-		Run cosima on a source file.
+		Run cosima on a .source file.
 
 		Parameters
 		----------
 		file : str
-			Source file name 
+			Name of .source file
+		output_path : str
+			Path to directory to store output .sim or .sim.gz files
+		zipped : bool
+			Whether to produce gzipped .sim files
 		"""
 
 		if not os.path.isdir(output_path + 'output/'):
@@ -70,12 +74,18 @@ class run_megalib():
 
 	def mcosima(self, file, output_path, zipped, instances=None):
 		"""
-		Run mcosima on a source file.
+		Run mcosima on a .source file.
 
 		Parameters
 		----------
 		file : str
-			Source file name 
+			Name of .source file
+		output_path : str
+			Path to directory to store output .sim or .sim.gz files
+		zipped : bool
+			Whether to produce gzipped .sim files
+		instances : int, optional
+			Number of mcosima instances to run, default is number of CPU cores
 		"""
 
 		if not os.path.isdir(output_path + 'output/'):
@@ -94,12 +104,18 @@ class run_megalib():
 
 	def revan(self, file, output_path, mass_model, config_file):
 		"""
-		Run revan on a sim file.
+		Run revan on a .sim file.
 
 		Parameters
 		----------
 		file : str
-			Sim or sim.gz file name 
+			Name of .sim or .sim.gz file
+		output_path : str
+			Path to directory to store output .tra.gz files
+		mass_model : str
+			Path to mass model
+		config_file : int, optional
+			Path to revan configuration file
 		"""
 
 		if not os.path.isdir(output_path + 'output/'):
@@ -108,12 +124,18 @@ class run_megalib():
 
 	def mimrec(self, file, output_path, mass_model, config_file):
 		"""
-		Run mimrec on a tra file.
+		Run mimrec on a .tra file.
 
 		Parameters
 		----------
 		file : str
-			Tra or tra.gz file name 
+			Name of .tra or .tra.gz file
+		output_path : str
+			Path to directory to store output extracted .tra files
+		mass_model : str
+			Path to mass model
+		config_file : int, optional
+			Path to mimrec configuration file
 		"""
 
 		if not os.path.isdir(output_path + 'output/'):
@@ -162,14 +184,14 @@ class run_megalib():
 
 	def run_cosima(self, input_path=None, output_path=None, zipped=None, instances=None):
 		"""
-		Run cosima or mcosima on all source files in a directory.
+		Run cosima or mcosima on all .source files in a directory.
 
 		Parameters
 		----------
 		input_path : str, optional
-			Path to directory housing source files, if different from path defined when creating run_megalib object
+			Path to directory housing .source files, if different from path defined when creating run_megalib object
 		output_path : str, optional
-			Path to directory to store output sim or sim.gz files, if different from path defined when creating run_megalib object
+			Path to directory to store output .sim or .sim.gz files, if different from path defined when creating run_megalib object
 		zipped : bool, optional
 			Whether to zip output .sim files
 		instances : int, optional
@@ -212,18 +234,16 @@ class run_megalib():
 
 	def run_revan(self, input_path=None, output_path=None, config_file=None):
 		"""
-		Run revan on all sim and sim.gz files in a directory.
+		Run revan on all .sim and .sim.gz files in a directory.
 
 		Parameters
 		----------
 		input_path : str, optional
-			Path to directory housing sim and/or sim.gz files, if different from path defined when creating run_megalib object
+			Path to directory housing .sim and/or .sim.gz files, if different from path defined when creating run_megalib object
 		output_path : str, optional
-			Path to directory to store output tra or tra.gz files, if different from path defined when creating run_megalib object
+			Path to directory to store output .tra.gz files, if different from path defined when creating run_megalib object
 		config_file : str, optional
 			Path to revan configuration file, if different from path defined when creating run_megalib object
-		zipped : bool, optional
-			Whether to zip output tra files
 		"""
 
 		if input_path == None:
@@ -254,14 +274,14 @@ class run_megalib():
 
 	def run_mimrec(self, input_path=None, output_path=None, config_file=None):
 		"""
-		Run mimrec on all tra and tra.gz files in a directory.
+		Run mimrec on all .tra and .tra.gz files in a directory.
 
 		Parameters
 		----------
 		input_path : str, optional
-			Path to directory housing tra and/or tra.gz files, if different from path defined when creating run_megalib object
+			Path to directory housing .tra and/or .tra.gz files, if different from path defined when creating run_megalib object
 		output_path : str, optional
-			Path to directory to store output extracted tra files, if different from path defined when creating run_megalib object
+			Path to directory to store output extracted .tra files, if different from path defined when creating run_megalib object
 		config_file : str, optional
 			Path to mimrec configuration file, if different from path defined when creating run_megalib object
 		"""

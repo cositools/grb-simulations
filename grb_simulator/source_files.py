@@ -93,7 +93,7 @@ class source_files():
 
 	def write_readme(self):
 		"""
-		Write README for source file directory.
+		Write README for .source file directory.
 		"""
 
 		with open(self.output_path + 'README.md', 'w') as f:
@@ -201,7 +201,7 @@ class source_files():
 
 	def define_spectrum(self, name, spectrum, parameters=None, filename=None, energy_range=None):
 		"""
-		Determine text to define spectrum in source file.
+		Determine text to define spectrum in .source file.
 
 		Parameters
 		----------
@@ -219,7 +219,7 @@ class source_files():
 		Returns
 		----------
 		spectrum_text : str
-			Text to define spectrum in source file
+			Text to define spectrum in .source file
 		"""
 
 		if spectrum == 'File':
@@ -241,7 +241,7 @@ class source_files():
 
 	def lightcurve_spectrum_text(self, name, lightcurve, event_spectrum, source):
 		"""
-		Read spectra and determine text to define lightcurve & spectrum in source file.
+		Read spectra and determine text to define lightcurve & spectrum in .source file.
 
 		Parameters
 		----------
@@ -277,14 +277,14 @@ class source_files():
 
 	def make_source_file(self, event, filename, z, a, flux, spectrum_text, lightcurve_text, e_flux):
 		"""
-		Write source file.
+		Write .source file.
 
 		Parameters
 		----------
 		event : str
 			Event name
 		filename : str
-			Soure file
+			Name of .source file
 		z : int or float
 			Zenith angle
 		a : int or float
@@ -329,7 +329,7 @@ class source_files():
 
 	def make_source_files(self):
 		"""
-		Write source files for all events in input directory.
+		Write .source files for all events in input directory.
 		"""
 
 		self.make_event_dict()

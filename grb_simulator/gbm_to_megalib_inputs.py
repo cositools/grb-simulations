@@ -522,10 +522,10 @@ class gbm_to_megalib_inputs():
 				print('Spectrum and lightcurve already exist')
 		else:
 			if os.path.isfile(self.output_path + source_info['trigger_name'] + '_spectrum.yaml'):
-				print('Spectrum file exists already. Deleting')
+				print('Spectrum file exists already. Deleting old file')
 				os.remove(self.output_path + source_info['trigger_name'] + '_spectrum.yaml')
 			elif os.path.isfile(self.output_path + source_info['trigger_name'] + '_lightcurve.dat'):
-				print('Lightcurve file exists already. Deleting')
+				print('Lightcurve file exists already. Deleting old file')
 				os.remove(self.output_path + source_info['trigger_name'] + '_lightcurve.dat')
 			s_error = self.make_spectrum(source_info)
 			if not s_error:

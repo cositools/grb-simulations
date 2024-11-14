@@ -64,13 +64,6 @@ class download_gbm_data():
 	def download_events(self):
 		"""
 		Download TTE data from GBM.
-
-		Parameters
-		----------
-		download : list
-			Names of columns to download from burst catalog
-		output_path : str
-			Path to directory to store downloaded files
 		"""
 
 		self.write_readme()

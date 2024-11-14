@@ -296,6 +296,8 @@ class trigger_algorithm_inputs():
 			Times of hits in each detector
 		energies_sorted : dict
 			Energies of hits in each detector
+		source_start_time : float
+			Time at which event begins
 		"""
 
 		min_times = []
@@ -368,6 +370,11 @@ class trigger_algorithm_inputs():
 	def write_readme(self, source_name, start_time):
 		"""
 		Write README for event directory.
+
+		source_name : str
+			Name of source
+		start_time : float
+			Time at which event begins
 		"""
 
 		filename = self.source_file_path + source_name + '.source'
