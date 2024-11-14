@@ -12,21 +12,17 @@ from .config import read_yaml, write_yaml, define_paths
 
 class gbm_to_megalib_inputs():
 
-	def __init__(self, inputs):
+	def __init__(self, input_file):
 		"""
 		Convert data downloaded from GBM to MEGAlib input files.
 
 		Parameters
 		----------
-		inputs : dict
-			Contents of input yaml file 
-		input_path : str
-			Path to GBM data 
-		output_path : str
-			Path to save MEGAlib input files
-		plot_path : str
-			Path to save plots
+		input_file : str
+			Path to input .yaml file
 		"""
+
+		inputs = read_yaml(input_file)
 
 		[self.input_path, 
 		 self.output_path, 
@@ -547,14 +543,12 @@ class gbm_to_megalib_inputs():
 			f.write('# Spectra and Lightcurves\n\n')
 			f.write('This directory contains spectra and lightcurves of the Fermi-GBM data found in `' + self.input_path + 
 					'`. The lightcurves and spectra were binned using Bayesian blocks. The energy range for the spectral .yaml files is ' + 
-					str(self.energy_range[0]) + '-' + str(self.energy_range[1]) ' keV. Only GRBs with Band and Comptonized best spectral fits are included.')
+					str(self.energy_range[0]) + '-' + str(self.energy_range[1]) + ' keV. Only GRBs with Band and Comptonized best spectral fits are included.')
 
 	def make_spectra_lightcurves(self):
 		"""
 		Make spectra and lightcurves for all events in directory.
 		"""
-
-		self.write_readme()
 		
 		n = 0
 		for name in os.listdir(self.input_path):

@@ -2,18 +2,18 @@ import os
 import shutil
 import glob
 import fnmatch
-from .config import define_paths
+from .config import read_yaml, define_paths
 
 class run_megalib():
 
-	def __init__(self, inputs={}, input_path=None, output_path=None, mass_model_path=None, config_revan=None, config_mimrec=None):
+	def __init__(self, input_file={}, input_path=None, output_path=None, mass_model_path=None, config_revan=None, config_mimrec=None):
 		"""
 		Run cosima, revan, and/or mimrec.
 
 		Parameters
 		----------
-		inputs : dict, optional
-			Contents of input yaml file
+		input_file : str
+			Path to input .yaml file
 		input_path : str, optional
 			Path to directory housing MEGAlib input files
 		output_path : str, optional
@@ -25,6 +25,8 @@ class run_megalib():
 		config_mimrec : str, optional
 			Path to mimrec configuration file
 		"""
+
+		inputs = read_yaml(input_file)
 
 		if not input_path == None:
 			self.input_cosima = input_path

@@ -1,23 +1,21 @@
 import os
 import numpy as np
 from .event import event
-from .config import define_paths
+from .config import read_yaml, define_paths
 
 class source_files():
 
-	def __init__(self, inputs):
+	def __init__(self, input_file):
 		"""
 		Create MEGAlib source files from source inputs.
 
 		Parameters
 		----------
-		inputs : dict
-			Contents of input yaml file 
-		input_path : str
-			Path to MEGAlib input files
-		output_path : str
-			Path to save MEGAlib source files
+		input_file : str
+			Path to input .yaml file
 		"""
+
+		inputs = read_yaml(input_file)
 
 		[self.input_path, self.output_path] = define_paths([inputs['paths']['input'], inputs['paths']['output']], [False, True])
 

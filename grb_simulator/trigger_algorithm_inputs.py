@@ -2,20 +2,22 @@ import ROOT as root
 import os
 import random
 import shutil
-from .config import suppress_output, define_paths
+from .config import suppress_output, read_yaml, define_paths
 from .load_megalib import load_megalib
 
 class trigger_algorithm_inputs():
 
-	def __init__(self, inputs):
+	def __init__(self, input_file):
 		"""
 		Create trigger algorithm input files.
 
 		Parameters
 		----------
-		inputs : dict
-			Contents of input yaml file 
+		input_file : str
+			Path to input .yaml file
 		"""
+
+		inputs = read_yaml(input_file)
 
 		[self.source_path, 
 		 self.background_path, 

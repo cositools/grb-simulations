@@ -1,18 +1,20 @@
 import os
 from gbm.finder import BurstCatalog, TriggerFtp
-from .config import fill_dict, write_yaml, define_paths
+from .config import fill_dict, read_yaml, write_yaml, define_paths
 
 class download_gbm_data():
 
-	def __init__(self, inputs):
+	def __init__(self, input_file):
 		"""
 		Download data from GBM.
 
 		Parameters
 		----------
-		inputs : dict
-			Contents of input yaml file 
+		input_file : str
+			Path to input .yaml file 
 		"""
+
+		inputs = read_yaml(input_file)
 
 		self.output_path = define_paths([inputs['paths']['output']], [True])[0]
 
