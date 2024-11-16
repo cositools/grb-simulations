@@ -37,7 +37,7 @@ class run_megalib():
 		if 'sim_files' in inputs['paths'] and 'tra_files' in inputs['paths'] and 'mass_model' in inputs['paths'] and 'config' in inputs['revan']:
 			[self.input_revan, 
 			 self.output_revan, 
-			 mass_model_path,
+			 self.mass_model,
 			 self.config_revan] = define_paths([inputs['paths']['sim_files'], inputs['paths']['tra_files'], 
 			 									inputs['paths']['mass_model'], inputs['revan']['config']], 
 			 								   [False, True, False, False])
@@ -45,7 +45,7 @@ class run_megalib():
 		if 'tra_files' in inputs['paths'] and 'extracted_tra_files' in inputs['paths'] and 'mass_model' in inputs['paths'] and 'config' in inputs['mimrec']:
 			[self.input_mimrec, 
 			 self.output_mimrec, 
-			 mass_model_path,
+			 self.mass_model,
 			 self.config_mimrec] = define_paths([inputs['paths']['tra_files'], inputs['paths']['extracted_tra_files'], 
 			 									 inputs['paths']['mass_model'], inputs['mimrec']['config']], 
 			 								    [False, True, False, False])

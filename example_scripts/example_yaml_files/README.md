@@ -30,21 +30,25 @@ Parameters to be defined in the .yaml file:
     - output: path to directory to store .source files (e.g. 'MEGAlib_source_files/')  
     - source_input: path to directory where .source files should look for lightcurve and spectral .dat files (optional, only needed if different than input path)      
     - mass_model: path to mass model  
+    - orientation: path to orientation file (optional, only needed if coordinate system is galactic)
 - position:        
     - zenith: incidence (zenith) angle or list of incidence (zenith) angles (between 0 and 180 where 90 degrees is on-axis)    
     - zenith_range: list of minimum and maximum incidence (zenith) angles (between 0 and 180 where 90 degrees is on-axis, only used if 'zenith' is not defined)     
     - azimuth: azimuthal angle or list of azimuthal angles (between 0 and 360)    
     - azimuth_range: minimum and maximum azimuthal angles (between 0 and 360, only used if 'azimuth' is not defined)     
+    - latitude: galactic latitude or list of galactic latitudes (between -90 and 90)       
+    - longitude: galactic longitude or list of galactic longitudes (between 0 and 360)             
 - spectra_and_lightcurves:       
     - photon_flux: flux or list of fluxes in ph/cm<sup>2</sup>/s   
     - photon_flux_range: list of minimum and maximum fluxes in ph/cm<sup>2</sup>/s (only used if 'photon_flux' is not defined)    
     - energy_flux: flux or list of fluxes in erg/cm<sup>2</sup>/s (only used if 'photon_flux' & 'photon_flux_range' are not defined)      
     - energy_flux_range: list of minimum and maximum fluxes in erg/cm<sup>2</sup>/s (only used if 'energy_flux', 'photon_flux', & 'photon_flux_range' are not defined)     
     - spectrum_type: file type to use for spectrum ('yaml' to use built in MEGAlib spectral models with parameters defined in .yaml files or 'dat' to use .dat files with spectral shape)  
-    - mix_or_match: whether to mix or match lightcurves and spectra ('match' will use lightcurves and spectra from same event, 'mix' will randomly match lightcurves with spectra from input directory)     
+    - mix_or_match: whether to mix or match lightcurves and spectra ('match' will use lightcurves and spectra from same event, 'mix' will randomly match lightcurves with spectra from input directory)       
+    - start_time: time or list with minimum and maximum times in s at which source lightcurves will begin (optional, if not provided, will use the unmodified lightcurves for local coordinates, and choose random times within the orientation file for galactic coordinates)         
 - general:       
     - shield_counts: whether to include line in .source files to store background shield counts in MEGAlib .sim files (optional, 'y' or True to include)   
-    - coordinate_system: Coordinate system of .source files ('local' for detector coordinates or 'galactic' for galactic coordinates), galactic is not yet supported   
+    - coordinate_system: Coordinate system of .source files ('local' for detector coordinates or 'galactic' for galactic coordinates)   
 
 The `example-spectraltype_spectrum.yaml` files are examples of each of the MEGAlib spectral models supported by `sample_source_file_generation.py`: monoenergetic, Band function, Comptonized, power law, and broken power law. The parameters needed depend on the model. These files must end in '_spectrum.yaml' and be located in the `paths: input` directory indicated in the input .yaml file when running `source_file_generation.py`.      
 
