@@ -1,6 +1,7 @@
 import numpy as np
 from astropy.coordinates import SkyCoord, spherical_to_cartesian
-from scoords import Attitude
+import astropy.units as u
+from scoords import Attitude, SpacecraftFrame
 from .config import read_yaml
 from .model import model
 
@@ -24,7 +25,7 @@ class event():
 		self.coordsys = coordsys
 		self.orientation = orientation
 
-		if not self.orientation == None:
+		if not type(self.orientation) == 'NoneType':
 			self.t = self.orientation[:, 0]
 			self.xb = self.orientation[:, 1]
 			self.xl = self.orientation[:, 2]

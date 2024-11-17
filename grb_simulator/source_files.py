@@ -364,24 +364,25 @@ class source_files():
 
 		lines = []
 		with open(path + lightcurve, newline='\n') as file:
-  			reader = csv.reader(file, delimiter=' ', skipinitialspace=True)
-  			for row in reader:
-    			lines.append(row)
+			reader = csv.reader(file, delimiter=' ', skipinitialspace=True)
+			for row in reader:
+				lines.append(row)
 
-    	lightcurve_start = float(lines[0][1])
-    	time_add = time - lightcurve_start
+		lightcurve_contents = np.loadtxt(self.input_source + lightcurve, usecols=(1, 2), delimiter=' ', skiprows=1, comments=("#", "EN"))
+		lightcurve_start = np.min(lightcurve_contents[:, 0])
+		time_add = time - lightcurve_start
 
 		for i in range(len(lines)):
-  			if lines[i][0] == 'DP':
-    			lines[i][1] = str(float(lines[i][1]) + time_add)
+			if lines[i][0] == 'DP':
+				lines[i][1] = str(float(lines[i][1]) + time_add)
 
 		with open(path + lightcurve, 'w') as file:
-  			for i in range(len(lines)):
-    			for j in range(len(lines[i])):
-      				if j == len(lines[i]) - 1:
-        				file.write(lines[i][j] + '\n')
-      				else:
-        				file.write(lines[i][j] + ' ')
+			for i in range(len(lines)):
+				for j in range(len(lines[i])):
+					if j == len(lines[i]) - 1:
+						file.write(lines[i][j] + '\n')
+					else:
+						file.write(lines[i][j] + ' ')
 
 	def make_source_file(self, event, filename, flux, spectrum_text, lightcurve_text, e_flux, sim_time, z=None, a=None, l=None, b=None):
 		"""
@@ -429,7 +430,7 @@ class source_files():
 			f.write('GRBSim.FileName             ' + event + '\n')
 			f.write('GRBSim.Time                 ' + str(sim_time) + '\n')
 			if self.coordsys == 'galactic':
-				f.write('GRBSim.OrientationSky                 Galactic File NoLoop' + self.orientation + '\n')
+				f.write('GRBSim.OrientationSky       Galactic File NoLoop' + self.orientation + '\n')
 			f.write('GRBSim.Source               ' + event + '\n')
 			f.write(event + '.ParticleType    1\n')
 			if self.coordsys == 'galactic':
@@ -438,7 +439,7 @@ class source_files():
 					f.write('\n# Orientation\n')
 				else:
 					f.write('\n# Orientation corresponding to zenith = ' + str(z) + ' degrees and azimuth = ' + str(a) + ' degrees\n')
-				f.write(event + '.Orientation            Galactic Fixed ' + str(b) + ' ' + str(l) + '\n')
+				f.write(event + '.Orientation     Galactic Fixed ' + str(b) + ' ' + str(l) + '\n')
 			else:
 				f.write(event + '.Beam            FarFieldPointSource ' + str(z) + ' ' + str(a) + '\n')
 			f.write('\n# Spectrum \n')
@@ -460,7 +461,7 @@ class source_files():
 		self.write_readme()
 
 		if not self.orientation == None:
-			if not hasattr(self, orientation_contents):
+			if not hasattr(self, 'orientation_contents'):
 				self.orientation_contents = np.loadtxt(self.orientation, usecols=(1, 2, 3, 4, 5), delimiter=' ', skiprows=1, comments=("#", "EN"))
 		else:
 			self.orientation_contents = None
@@ -474,7 +475,7 @@ class source_files():
 					source_begin = self.start_time
 				else:
 					source_begin = np.random.uniform(float(self.start_time[0]), float(self.start_time[1]))
-				edit_lightcurve_times(self.lightcurves[this_event], source_begin)
+				self.edit_lightcurve_times(self.lightcurves[this_event], source_begin)
 			if self.spectra[this_event].endswith('_spectrum.yaml'):
 				spectrum_text, lightcurve_text, spectrum, parameters, e_range = self.lightcurve_spectrum_text(this_event, self.lightcurves[this_event], self.spectra[this_event], source)
 				if self.coordsys == 'local':
