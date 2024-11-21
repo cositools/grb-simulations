@@ -430,7 +430,7 @@ class source_files():
 			f.write('GRBSim.FileName             ' + event + '\n')
 			f.write('GRBSim.Time                 ' + str(sim_time) + '\n')
 			if self.coordsys == 'galactic':
-				f.write('GRBSim.OrientationSky       Galactic File NoLoop' + self.orientation + '\n')
+				f.write('GRBSim.OrientationSky       Galactic File NoLoop ' + self.orientation + '\n')
 			f.write('GRBSim.Source               ' + event + '\n')
 			f.write(event + '.ParticleType    1\n')
 			if self.coordsys == 'galactic':
