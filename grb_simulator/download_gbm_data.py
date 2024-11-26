@@ -52,14 +52,14 @@ class download_gbm_data():
 		with open(self.output_path + 'README.md', 'w') as f:
 			f.write('# Fermi-GBM Data\n\n')
 			if self.filters == None:
-				f.write('This directory contains all Fermi-GBM GRBs downloaded on ' + str(date.today()) '. ')
+				f.write('This directory contains all Fermi-GBM GRBs downloaded on ' + str(date.today()) + '. ')
 			else:
-				f.write('This directory contains Fermi-GBM GRBs downloaded on ' + str(date.today()) ' with the following filters:           \n')
+				f.write('This directory contains Fermi-GBM GRBs downloaded on ' + str(date.today()) + ' with the following filters:           \n')
 				for item in self.filters:
-					f.write(str(item) + ': ' + str(self.filters[item]) '          \n')
-			f.write('The columns downloaded from the burst catalog are:          \n')
+					f.write('\t' + str(item) + ': ' + str(self.filters[item]) + '          \n')
+			f.write('         \nThe columns downloaded from the burst catalog are:          \n')
 			for column in self.download:
-				f.write(str(column) + '          \n')
+				f.write('\t' + str(column) + '          \n')
 
 	def download_events(self):
 		"""

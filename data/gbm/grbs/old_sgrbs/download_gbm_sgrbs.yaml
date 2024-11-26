@@ -1,7 +1,8 @@
-output_path: 'gbm_data/'              # Path to directory to store downloaded files
-filters:                              # Parameters to filter bursts (https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dfermigbrst&Action=More+Options)
-  t90: [0.0, 2.5]                     # Download short GRBs only (T90 < 2 s)
-download:                             # Columns of GBM burst data to download
+paths:
+  output: 'gbm_data/old_sgrbs/sgrbs/'           # Path to directory to store downloaded files
+filters:                                        # Parameters to filter bursts (https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dfermigbrst&Action=More+Options)
+  t90: [0.0, 2.5]                               # Download short GRBs only (T90 < 2.5 s)
+download:                                       # Columns of GBM burst data to download
   - trigger_name
   - bcat_detector_mask
   - t90

@@ -1,4 +1,5 @@
-output_path: 'gbm_data/lgrbs/'        # Path to directory to store downloaded files
+paths:
+  output: 'gbm_data/lgrbs/'           # Path to directory to store downloaded files
 filters:                              # Parameters to filter bursts (https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dfermigbrst&Action=More+Options)
   t90: [2.0, 100.]                    # Download long GRBs only
 download:                             # Columns of GBM burst data to download
