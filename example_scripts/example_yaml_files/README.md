@@ -32,8 +32,8 @@ Parameters to be defined in the .yaml file:
     - mass_model: path to mass model  
     - orientation: path to orientation file (optional, only needed if coordinate system is galactic)
 - position:        
-    - zenith: incidence (zenith) angle or list of incidence (zenith) angles (between -90 and 90 where 90 degrees is on-axis)    
-    - zenith_range: list of minimum and maximum incidence (zenith) angles (between -90 and 90 where 90 degrees is on-axis, only used if 'zenith' is not defined)     
+    - zenith: incidence (zenith) angle or list of incidence (zenith) angles (between 0 and 180 where 0 degrees is on-axis)    
+    - zenith_range: list of minimum and maximum incidence (zenith) angles (between 0 and 180 where 0 degrees is on-axis, only used if 'zenith' is not defined)     
     - azimuth: azimuthal angle or list of azimuthal angles (between 0 and 360)    
     - azimuth_range: minimum and maximum azimuthal angles (between 0 and 360, only used if 'azimuth' is not defined)     
     - latitude: galactic latitude or list of galactic latitudes (between -90 and 90)       

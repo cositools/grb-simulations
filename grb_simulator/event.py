@@ -107,8 +107,10 @@ class event():
 		x = SkyCoord(np.deg2rad(x_longitude)*u.rad, np.deg2rad(x_latitude)*u.rad, frame='galactic')
 		z = SkyCoord(np.deg2rad(z_longitude)*u.rad, np.deg2rad(z_latitude)*u.rad, frame='galactic')
 		attitude = Attitude.from_axes(x=x, z=z, frame='galactic')
+
+		zenith_astropy = 90 - zenith
 		
-		x_loc, y_loc, z_loc = spherical_to_cartesian(1, np.deg2rad(zenith)*u.rad, np.deg2rad(azimuth)*u.rad)
+		x_loc, y_loc, z_loc = spherical_to_cartesian(1, np.deg2rad(zenith_astropy)*u.rad, np.deg2rad(azimuth)*u.rad)
 		c_loc = SkyCoord(x_loc, y_loc, z_loc, representation_type='cartesian', frame = SpacecraftFrame(attitude=attitude))
 		c_galactic = c_loc.transform_to('galactic')
 		
