@@ -7,7 +7,7 @@ spectra_and_lightcurves:
   spectrum_type: 'yaml'                                                                                       # File type to use for spectrum (e.g. 'yaml' for .yaml file with spectral parameters or 'dat' for .dat file with discrete spectrum)
   mix_or_match: 'match'                                                                                       # Choose whether to mix or match spectra and lightcurves ('match' to use spectrum and lightcurve from same event or 'mix' to use spectra and lightcurves from different events)
 position:
-  zenith_range: [0, 120]                                                                                      # Minimum & maximum zenith angles in degrees (90 degrees is on-axis)
+  zenith_range: [0, 120]                                                                                      # Minimum & maximum zenith angles in degrees (0 degrees is on-axis)
   azimuth_range: [0, 360]                                                                                     # Minimum & maximum azimuthal angles in degrees
 general:
   shield_counts: True                                                                                         # Whether to store background shield counts in .sim file ('y' for yes, 'n' for no)
