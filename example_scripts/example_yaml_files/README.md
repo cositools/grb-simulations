@@ -31,6 +31,7 @@ Parameters to be defined in the .yaml file:
     - source_input: path to directory where .source files should look for lightcurve and spectral .dat files (optional, only needed if different than input path)      
     - mass_model: path to mass model  
     - orientation: path to orientation file (optional, only needed if coordinate system is galactic)
+    - source_orientation: path to where .source files should file orientation file (optional, only needed if different than orientation path)
 - position:        
     - zenith: incidence (zenith) angle or list of incidence (zenith) angles (between 0 and 180 where 0 degrees is on-axis)    
     - zenith_range: list of minimum and maximum incidence (zenith) angles (between 0 and 180 where 0 degrees is on-axis, only used if 'zenith' is not defined)     

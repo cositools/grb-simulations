@@ -82,6 +82,11 @@ class source_files():
 			self.orientation = inputs['paths']['orientation']
 		else:
 			self.orientation = None
+
+		if 'source_orientation' in inputs['paths']:
+			self.source_orientation = inputs['paths']['source_orientation']
+		else:
+			self.source_orientation = None
 		
 		if 'coordinate_system' in inputs['general'] and (inputs['general']['coordinate_system'] == 'local' or inputs['general']['coordinate_system'] == 'galactic'):
 			self.coordsys = inputs['general']['coordinate_system']
@@ -338,10 +343,10 @@ class source_files():
 			Maximum time of simulation in s
 		"""
 
-		lightcurve_contents = np.loadtxt(self.input_source + lightcurve, usecols=(1, 2), delimiter=' ', skiprows=1, comments=("#", "EN"))
+		lightcurve_contents = np.loadtxt(self.input_path + lightcurve, usecols=(1, 2), delimiter=' ', skiprows=1, comments=("#", "EN"))
 
 		start_time = np.min(lightcurve_contents[:, 0])
-		sim_time = np.max(lightcurve_contents[:, 0]) + 50.
+		sim_time = np.max(lightcurve_contents[:, 0]) + 50. - start_time
 
 		return start_time, sim_time
 
@@ -357,18 +362,13 @@ class source_files():
 			Time at which event begins
 		"""
 
-		if self.input_source == None:
-			path = self.input_path
-		else:
-			path = self.input_source
-
 		lines = []
-		with open(path + lightcurve, newline='\n') as file:
+		with open(self.input_path + lightcurve, newline='\n') as file:
 			reader = csv.reader(file, delimiter=' ', skipinitialspace=True)
 			for row in reader:
 				lines.append(row)
 
-		lightcurve_contents = np.loadtxt(self.input_source + lightcurve, usecols=(1, 2), delimiter=' ', skiprows=1, comments=("#", "EN"))
+		lightcurve_contents = np.loadtxt(self.input_path + lightcurve, usecols=(1, 2), delimiter=' ', skiprows=1, comments=("#", "EN"))
 		lightcurve_start = np.min(lightcurve_contents[:, 0])
 		time_add = time - lightcurve_start
 
@@ -376,7 +376,7 @@ class source_files():
 			if lines[i][0] == 'DP':
 				lines[i][1] = str(float(lines[i][1]) + time_add)
 
-		with open(path + lightcurve, 'w') as file:
+		with open(self.input_path + lightcurve, 'w') as file:
 			for i in range(len(lines)):
 				for j in range(len(lines[i])):
 					if j == len(lines[i]) - 1:
@@ -430,7 +430,10 @@ class source_files():
 			f.write('GRBSim.FileName             ' + event + '\n')
 			f.write('GRBSim.Time                 ' + str(sim_time) + '\n')
 			if self.coordsys == 'galactic':
-				f.write('GRBSim.OrientationSky       Galactic File NoLoop ' + self.orientation + '\n')
+				if self.source_orientation == None:
+					f.write('GRBSim.OrientationSky       Galactic File NoLoop ' + self.orientation + '\n')
+				else:
+					f.write('GRBSim.OrientationSky       Galactic File NoLoop ' + self.source_orientation + '\n')
 			f.write('GRBSim.Source               ' + event + '\n')
 			f.write(event + '.ParticleType    1\n')
 			if self.coordsys == 'galactic':
@@ -480,10 +483,10 @@ class source_files():
 				spectrum_text, lightcurve_text, spectrum, parameters, e_range = self.lightcurve_spectrum_text(this_event, self.lightcurves[this_event], self.spectra[this_event], source)
 				if self.coordsys == 'local':
 					zenith, azimuth, flux, e_flux = source.define_angles_flux(spectrum['type'], parameters, e_range, self.zenith, self.zenith_range, self.azimuth, self.azimuth_range, self.ph_flux, self.ph_flux_range, self.e_flux, self.e_flux_range, self.latitude, self.longitude, source_begin)
-					self.make_source_file(this_event, source_filename, flux, spectrum_text, lightcurve_text, e_flux, sim_time, z=zenith, a=azimuth)
+					self.make_source_file(this_event, source_filename, flux, spectrum_text, lightcurve_text, e_flux, sim_time+source_begin, z=zenith, a=azimuth)
 				else:
 					longitude, latitude, flux, e_flux = source.define_angles_flux(spectrum['type'], parameters, e_range, self.zenith, self.zenith_range, self.azimuth, self.azimuth_range, self.ph_flux, self.ph_flux_range, self.e_flux, self.e_flux_range, self.latitude, self.longitude, source_begin)
-					self.make_source_file(this_event, source_filename, flux, spectrum_text, lightcurve_text, e_flux, sim_time, l=longitude, b=latitude)
+					self.make_source_file(this_event, source_filename, flux, spectrum_text, lightcurve_text, e_flux, sim_time+source_begin, l=longitude, b=latitude)
 			else:
 				spectrum_text, lightcurve_text, spectrum = self.lightcurve_spectrum_text(this_event, self.lightcurves[this_event], self.spectra[this_event], source, source_filename)
 				raise RuntimeError(".dat spectral files not yet supported.")
