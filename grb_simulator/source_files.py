@@ -18,7 +18,9 @@ class source_files():
 
 		inputs = read_yaml(input_file)
 
-		[self.input_path, self.output_path, self.mass_model] = define_paths([inputs['paths']['input'], inputs['paths']['output'], inputs['paths']['mass_model']], [False, True, False])
+		[self.input_path, self.output_path] = define_paths([inputs['paths']['input'], inputs['paths']['output']], [False, True])
+
+		self.mass_model = inputs['paths']['mass_model']
 
 		if 'shield_counts' in inputs['general'] and inputs['general']['shield_counts'] == 'y' or inputs['general']['shield_counts'] == True:
 			self.shield_counts = True
