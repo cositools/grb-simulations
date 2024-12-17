@@ -29,7 +29,7 @@ class run_megalib():
 			else:
 				self.cosima_parallel = False
 
-			if 'cosima' in inputs 'zip' in inputs['cosima'] and not inputs['cosima']['zip']:
+			if 'cosima' in inputs and 'zip' in inputs['cosima'] and not inputs['cosima']['zip']:
 				self.cosima_zip = False
 			else:
 				self.cosima_zip = True
