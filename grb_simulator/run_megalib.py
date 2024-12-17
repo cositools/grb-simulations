@@ -22,14 +22,14 @@ class run_megalib():
 		if 'source_files' in inputs['paths'] and 'sim_files' in inputs['paths']:
 			[self.input_cosima, self.output_cosima] = define_paths([inputs['paths']['source_files'], inputs['paths']['sim_files']], [False, True])
 
-			if 'parallel' in inputs['cosima'] and inputs['cosima']['parallel']:
+			if 'cosima' in inputs and 'parallel' in inputs['cosima'] and inputs['cosima']['parallel']:
 				self.cosima_parallel = True
 				if 'instances' in inputs['cosima']:
 					self.cosima_instances = int(inputs['cosima']['instances'])
 			else:
 				self.cosima_parallel = False
 
-			if 'zip' in inputs['cosima'] and not inputs['cosima']['zip']:
+			if 'cosima' in inputs 'zip' in inputs['cosima'] and not inputs['cosima']['zip']:
 				self.cosima_zip = False
 			else:
 				self.cosima_zip = True
