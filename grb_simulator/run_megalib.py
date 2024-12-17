@@ -219,9 +219,9 @@ class run_megalib():
 			cosima_func = lambda file: self.mcosima(file, output_path, self.cosima_zip, instances=instances)
 			
 		if zipped:
-			self.run_on_all(mcosima_func, input_path, output_path, ['source'], 'sim.gz', 'Simulating')
+			self.run_on_all(cosima_func, input_path, output_path, ['source'], 'sim.gz', 'Simulating')
 		else:
-			self.run_on_all(mcosima_func, input_path, output_path, ['source'], 'sim', 'Simulating')
+			self.run_on_all(cosima_func, input_path, output_path, ['source'], 'sim', 'Simulating')
 
 		with open(output_path + 'README.md', 'w') as f:
 			f.write('# .sim Files\n\n')
