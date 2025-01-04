@@ -6,7 +6,7 @@ from .config import read_yaml, define_paths
 
 class run_megalib():
 
-	def __init__(self, input_file={}):
+	def __init__(self, input_file):
 		"""
 		Run cosima, revan, and/or mimrec.
 
@@ -17,7 +17,6 @@ class run_megalib():
 		"""
 
 		inputs = read_yaml(input_file)
-
 
 		if 'source_files' in inputs['paths'] and 'sim_files' in inputs['paths']:
 			[self.input_cosima, self.output_cosima] = define_paths([inputs['paths']['source_files'], inputs['paths']['sim_files']], [False, True])

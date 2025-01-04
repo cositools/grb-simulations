@@ -115,6 +115,11 @@ class source_files():
 			else:
 				raise RuntimeError("An orientation file must be provided to create .source files in galactic coordinates.")
 
+		if 'time_difference' in inputs['spectra_and_lightcurves']:
+			self.time_difference = inputs['spectra_and_lightcurves']['time_difference']
+		else:
+			self.time_difference = None
+
 		if self.coordsys == 'galactic':
 			if self.latitude == None or self.longitude == None:
 				if (self.zenith == None and self.zenith_range == None) or (self.azimuth == None and self.azimuth_range == None):
@@ -130,6 +135,15 @@ class source_files():
 				raise RuntimeError("To create .source files in local coordinates, the position must be defined in input .yaml file in local coordinates.")
 			else:
 				print('Creating .source files in local coordinates.')
+
+		self.file_dict = {}
+
+		self.file_dict['event'] = []
+		self.file_dict['start'] = []
+		self.file_dict['duration'] = []
+		self.file_dict['ph_flux'] = []
+		self.file_dict['zenith'] = []
+		self.file_dict['azimuth'] = []
 
 	def write_readme(self):
 		"""
@@ -184,6 +198,9 @@ class source_files():
 					f.write('The start times of each source were chosen randomly between ' + str(self.start_time[0]) + ' and ' + str(self.start_time[1]) + ' s. ')
 				else:
 					raise RuntimeError("'start_time' in input .yaml file must be int, float, or list.")
+			elif self.coordsys == 'galactic':
+				f.write('The start times of each source were chosen randomly within the orientation file. ')
+
 
 			if not self.ph_flux == None:
 				if type(self.ph_flux) == int or type(self.ph_flux) == float:
@@ -457,6 +474,17 @@ class source_files():
 			f.write('\n# Lightcurve\n')
 			f.write(lightcurve_text)
 
+	def write_event_list(self):
+		"""
+		Write file with time, flux, and position of each event.
+		"""
+
+		with open(self.output_path + 'event_list.txt', 'w') as f:
+			f.write('Event name, Start time (s), Duration (s), Photon flux (ph/cm^2/s), Energy flux (erg/cm^2/s), Zenith (degrees), Azimuth (degrees)\n')
+			for i in range(len(self.file_dict['event'])):
+				f.write(self.file_dict['event'][i] + ', ' + str(self.file_dict['start'][i]) + ', ' + str(self.file_dict['duration'][i]) + ', ' + str(self.file_dict['photon_flux'][i]) + ', ' + 
+						str(self.file_dict['energy_flux'][i]) + ', ' + str(self.file_dict['zenith'][i]) + ', ' + str(self.file_dict['azimuth'][i]) + '\n')
+
 	def make_source_files(self):
 		"""
 		Write .source files for all events in input directory.
@@ -475,20 +503,53 @@ class source_files():
 			source_filename = self.output_path + this_event + '.source'
 			source = event(self.input_path, self.coordsys, self.orientation_contents)
 			source_begin, sim_time = self.lightcurve_times(self.lightcurves[this_event])
+
 			if not self.start_time == None:
 				if type(self.start_time) == int or type(self.start_time) == float:
 					source_begin = self.start_time
 				else:
-					source_begin = np.random.uniform(float(self.start_time[0]), float(self.start_time[1]))
+					if self.time_difference == None:
+						source_begin = np.random.uniform(float(self.start_time[0]), float(self.start_time[1]))
+					else:
+						if type(self.time_difference) == int or type(self.time_difference) == float:
+							time_difference = float(self.time_difference)
+						elif type(self.time_difference) == list:
+							difference_min = float(self.time_difference[0])
+							difference_max = float(self.time_difference[1])
+							time_difference = np.random.uniform(difference_min, difference_max)
+						else:
+							raise RuntimeError("'time_difference' in input .yaml file must be int, float, or list.")
+						if len(self.file_dict['event']) == 0:
+							source_begin = float(self.start_time[0])
+						else:
+							previous_end_time = self.file_dict['start'][-1] + self.file_dict['duration'][-1]
+							source_begin = previous_end_time + time_difference
+							if source_begin > float(self.start_time[1]):
+								source_begin = float(self.start_time[0])
+
 				self.edit_lightcurve_times(self.lightcurves[this_event], source_begin)
+
 			if self.spectra[this_event].endswith('_spectrum.yaml'):
 				spectrum_text, lightcurve_text, spectrum, parameters, e_range = self.lightcurve_spectrum_text(this_event, self.lightcurves[this_event], self.spectra[this_event], source)
 				if self.coordsys == 'local':
-					zenith, azimuth, flux, e_flux = source.define_angles_flux(spectrum['type'], parameters, e_range, self.zenith, self.zenith_range, self.azimuth, self.azimuth_range, self.ph_flux, self.ph_flux_range, self.e_flux, self.e_flux_range, self.latitude, self.longitude, source_begin)
+					zenith, azimuth, flux, e_flux = source.define_angles_flux(spectrum['type'], parameters, e_range, self.zenith, self.zenith_range, self.azimuth, self.azimuth_range, self.ph_flux, 
+																			  self.ph_flux_range, self.e_flux, self.e_flux_range, self.latitude, self.longitude, source_begin)
 					self.make_source_file(this_event, source_filename, flux, spectrum_text, lightcurve_text, e_flux, sim_time+source_begin, z=zenith, a=azimuth)
 				else:
-					longitude, latitude, flux, e_flux = source.define_angles_flux(spectrum['type'], parameters, e_range, self.zenith, self.zenith_range, self.azimuth, self.azimuth_range, self.ph_flux, self.ph_flux_range, self.e_flux, self.e_flux_range, self.latitude, self.longitude, source_begin)
+					longitude, latitude, flux, e_flux = source.define_angles_flux(spectrum['type'], parameters, e_range, self.zenith, self.zenith_range, self.azimuth, self.azimuth_range, self.ph_flux, 
+																				  self.ph_flux_range, self.e_flux, self.e_flux_range, self.latitude, self.longitude, source_begin)
 					self.make_source_file(this_event, source_filename, flux, spectrum_text, lightcurve_text, e_flux, sim_time+source_begin, l=longitude, b=latitude)
+					zenith, azimuth = event.local_position_at_time(longitude, latitude, source_begin)
 			else:
 				spectrum_text, lightcurve_text, spectrum = self.lightcurve_spectrum_text(this_event, self.lightcurves[this_event], self.spectra[this_event], source, source_filename)
 				raise RuntimeError(".dat spectral files not yet supported.")
+
+			self.file_dict['event'].append(this_event)
+			self.file_dict['start'].append(source_begin)
+			self.file_dict['duration'].append(sim_time - 50.)
+			self.file_dict['photon_flux'].append(flux)
+			self.file_dict['energy_flux'].append(e_flux)
+			self.file_dict['zenith'].append(zenith)
+			self.file_dict['azimuth'].append(azimuth)
+
+		self.write_event_list()

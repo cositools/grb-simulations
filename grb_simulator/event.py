@@ -111,13 +111,55 @@ class event():
 		zenith_astropy = 90 - zenith
 		
 		x_loc, y_loc, z_loc = spherical_to_cartesian(1, np.deg2rad(zenith_astropy)*u.rad, np.deg2rad(azimuth)*u.rad)
-		c_loc = SkyCoord(x_loc, y_loc, z_loc, representation_type='cartesian', frame = SpacecraftFrame(attitude=attitude))
+		c_loc = SkyCoord(x_loc, y_loc, z_loc, representation_type='cartesian', frame=SpacecraftFrame(attitude=attitude))
 		c_galactic = c_loc.transform_to('galactic')
 		
 		longitude = c_galactic.l.deg
 		latitude = c_galactic.b.deg	
 
 		return longitude, latitude
+
+	def calculate_local_position(self, longitude, latitude, x_latitude, x_longitude, z_latitude, z_longitude):
+		"""
+		Calculate position in local coordinates from spacecraft pointing, galactic latitude, and galactic longitude.
+
+		Parameters
+		----------
+		longitude : float
+			Galactic longitude of source in degrees
+		latitude : float
+			Galactic latitude of source in degrees
+		x_latitude : float
+			Galactic latitude in degrees of spacecraft x direction
+		x_longitude : float
+			Galactic longitude in degrees of spacecraft x direction
+		z_latitude : float
+			Galactic latitude in degrees of spacecraft z direction
+		z_longitude : float
+			Galactic longitude in degrees of spacecraft z direction
+
+		Returns
+		----------
+		zenith : float
+			Zenith angle in degrees
+		azimuth : float
+			Azimuth angle in degrees
+		"""
+
+		x = SkyCoord(np.deg2rad(x_longitude)*u.rad, np.deg2rad(x_latitude)*u.rad, frame='galactic')
+		z = SkyCoord(np.deg2rad(z_longitude)*u.rad, np.deg2rad(z_latitude)*u.rad, frame='galactic')
+		attitude = Attitude.from_axes(x=x, z=z, frame='galactic')
+
+		x_gal, y_gal, z_gal = spherical_to_cartesian(1, np.deg2rad(latitude)*u.rad, np.deg2rad(longitude)*u.rad)
+		c_galactic = SkyCoord(x_gal, y_gal, z_gal, representation_type='cartesian', frame='galactic')
+		c_loc = c_galactic.transform_to(SpacecraftFrame(attitude=attitude))
+
+		zenith_astropy = c_galactic.lat.deg
+		azimuth = c_galactic.lon.deg
+
+		zenith = 90 - zenith_astropy 
+
+		return zenith, azimuth
 
 	def define_angles_flux(self, spectrum_name=None, parameters=None, e_range=None, zenith=None, zenith_range=None, azimuth=None, azimuth_range=None, ph_flux=None, ph_flux_range=None, e_flux=None, e_flux_range=None, latitude=None, longitude=None, time=None):
 		"""
@@ -250,3 +292,29 @@ class event():
 			self.longitude = longitude
 			self.latitude = latitude
 			return longitude, latitude, flux, e_flux
+
+	def local_position_at_time(self, longitude, latitude, time):
+		"""
+		Return position in local coordinates at time in orientation file for a galactic latitude and longitude.
+
+		Parameters
+		----------
+		longitude : float
+			Galactic longitude of source in degrees
+		latitude : float
+			Galactic latitude of source in degrees
+		time : float
+			Time at which event begins
+
+		Returns
+		----------
+		zenith : float
+			Zenith angle in degrees
+		azimuth : float
+			Azimuth angle in degrees
+		"""
+
+		index = np.absolute(self.t - time).argmin()
+		zenith, azimuth = self.calculate_local_position(longitude, latitude, self.xb[index], self.xl[index], self.zb[index], self.zl[index])
+
+		return zenith, azimuth
