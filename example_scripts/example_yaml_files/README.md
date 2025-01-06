@@ -46,7 +46,8 @@ Parameters to be defined in the .yaml file:
     - energy_flux_range: list of minimum and maximum fluxes in erg/cm<sup>2</sup>/s (only used if 'energy_flux', 'photon_flux', & 'photon_flux_range' are not defined)     
     - spectrum_type: file type to use for spectrum ('yaml' to use built in MEGAlib spectral models with parameters defined in .yaml files or 'dat' to use .dat files with spectral shape)  
     - mix_or_match: whether to mix or match lightcurves and spectra ('match' will use lightcurves and spectra from same event, 'mix' will randomly match lightcurves with spectra from input directory)       
-    - start_time: time or list with minimum and maximum times in s at which source lightcurves will begin (optional, if not provided, will use the unmodified lightcurves for local coordinates, and choose random times within the orientation file for galactic coordinates)         
+    - start_time: time or list with minimum and maximum times in s at which source lightcurves will begin (optional, if not provided, will use the unmodified lightcurves for local coordinates, and choose random times within the orientation file unless 'time_difference' is provided for galactic coordinates)         
+    - time_difference: time or range of times (list of minimum and maximum) between end of one event and beginning of next event in s (optional)        
 - general:       
     - shield_counts: whether to include line in .source files to store background shield counts in MEGAlib .sim files (optional, 'y' or True to include)   
     - coordinate_system: Coordinate system of .source files ('local' for detector coordinates or 'galactic' for galactic coordinates)   

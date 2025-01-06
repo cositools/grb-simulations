@@ -141,7 +141,8 @@ class source_files():
 		self.file_dict['event'] = []
 		self.file_dict['start'] = []
 		self.file_dict['duration'] = []
-		self.file_dict['ph_flux'] = []
+		self.file_dict['photon_flux'] = []
+		self.file_dict['energy_flux'] = []
 		self.file_dict['zenith'] = []
 		self.file_dict['azimuth'] = []
 
@@ -195,7 +196,15 @@ class source_files():
 				if type(self.start_time) == int or type(self.start_time) == float:
 					f.write('All events begin at ' + str(self.start_time) + ' s. ')
 				elif type(self.start_time) == list:
-					f.write('The start times of each source were chosen randomly between ' + str(self.start_time[0]) + ' and ' + str(self.start_time[1]) + ' s. ')
+					if self.time_difference == None:
+						f.write('The start times of each event were chosen randomly between ' + str(self.start_time[0]) + ' and ' + str(self.start_time[1]) + ' s. ')
+					elif type(self.time_difference) == int or type(self.time_difference) == float:
+						f.write('The events occur between ' + str(self.start_time[0]) + ' and ' + str(self.start_time[1]) + ' s with ' + str(self.time_difference) + ' s in between. ')
+					elif type(self.time_difference) == list:
+						f.write('The events occur between ' + str(self.start_time[0]) + ' and ' + str(self.start_time[1]) + ' s with between ' + str(self.time_difference[0]) + ' and ' +  + str(self.time_difference[1]) + ' s in between. ')
+					else:
+						raise RuntimeError("'time_difference' in input .yaml file must be int, float, or list.")
+
 				else:
 					raise RuntimeError("'start_time' in input .yaml file must be int, float, or list.")
 			elif self.coordsys == 'galactic':
@@ -513,12 +522,8 @@ class source_files():
 					else:
 						if type(self.time_difference) == int or type(self.time_difference) == float:
 							time_difference = float(self.time_difference)
-						elif type(self.time_difference) == list:
-							difference_min = float(self.time_difference[0])
-							difference_max = float(self.time_difference[1])
-							time_difference = np.random.uniform(difference_min, difference_max)
 						else:
-							raise RuntimeError("'time_difference' in input .yaml file must be int, float, or list.")
+							time_difference = np.random.uniform(float(self.time_difference[0]), float(self.time_difference[1]))
 						if len(self.file_dict['event']) == 0:
 							source_begin = float(self.start_time[0])
 						else:
@@ -539,7 +544,7 @@ class source_files():
 					longitude, latitude, flux, e_flux = source.define_angles_flux(spectrum['type'], parameters, e_range, self.zenith, self.zenith_range, self.azimuth, self.azimuth_range, self.ph_flux, 
 																				  self.ph_flux_range, self.e_flux, self.e_flux_range, self.latitude, self.longitude, source_begin)
 					self.make_source_file(this_event, source_filename, flux, spectrum_text, lightcurve_text, e_flux, sim_time+source_begin, l=longitude, b=latitude)
-					zenith, azimuth = event.local_position_at_time(longitude, latitude, source_begin)
+					zenith, azimuth = source.local_position_at_time(longitude, latitude, source_begin)
 			else:
 				spectrum_text, lightcurve_text, spectrum = self.lightcurve_spectrum_text(this_event, self.lightcurves[this_event], self.spectra[this_event], source, source_filename)
 				raise RuntimeError(".dat spectral files not yet supported.")

@@ -154,8 +154,8 @@ class event():
 		c_galactic = SkyCoord(x_gal, y_gal, z_gal, representation_type='cartesian', frame='galactic')
 		c_loc = c_galactic.transform_to(SpacecraftFrame(attitude=attitude))
 
-		zenith_astropy = c_galactic.lat.deg
-		azimuth = c_galactic.lon.deg
+		zenith_astropy = c_loc.lat.deg
+		azimuth = c_loc.lon.deg
 
 		zenith = 90 - zenith_astropy 
 
@@ -262,7 +262,7 @@ class event():
 		elif not ph_flux_range == None:
 			flux_min = float(ph_flux_range[0])
 			flux_max = float(ph_flux_range[1])
-			flux = np.random.uniform(flux_min, flux_max)
+			flux = np.exp(np.random.uniform(np.log(flux_min), np.log(flux_max)))
 		elif not e_flux == None:
 			if type(e_flux) == int or type(e_flux) == float:
 				pass
@@ -273,7 +273,7 @@ class event():
 		elif not e_flux_range == None:
 			e_flux_min = float(e_flux_range[0])
 			e_flux_max = float(e_flux_range[1])
-			e_flux = np.random.uniform(e_flux_min, e_flux_max)
+			e_flux = np.exp(np.random.uniform(np.log(e_flux_min), np.log(e_flux_max)))
 		else:
 			raise RuntimeError("Must specify flux(es) in input .yaml file.")
 
