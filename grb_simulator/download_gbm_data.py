@@ -73,6 +73,7 @@ class download_gbm_data():
 
 		for i in range(len(event_list)):
 			name = event_list[i][self.download.index('trigger_name')]
+			print(event_list[i][self.download.index('flnc_best_fitting_model')])
 			print('Downloading data for ' + name + ' (' + str(i+1) + '/' + str(len(event_list)) + ')')
 			if not os.path.isdir(self.output_path + name):
 				os.mkdir(self.output_path + name)

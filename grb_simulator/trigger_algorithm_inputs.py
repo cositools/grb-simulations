@@ -2,6 +2,7 @@ import ROOT as root
 import os
 import random
 import shutil
+import pandas as pd
 from .config import suppress_output, read_yaml, define_paths
 from .load_megalib import load_megalib
 
@@ -25,14 +26,18 @@ class trigger_algorithm_inputs():
 		 self.source_file_path, 
 		 self.mass_model_path] = define_paths([inputs['paths']['input'], inputs['paths']['background'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model']], 
 		 									  [False, False, True, False, False])
+
+		if 'event_list' in inputs['paths']:
+			self.event_list = inputs['paths']['event_list']
+
 		if inputs['background']['type'] == 'file':
 			self.background_path = self.background_path[:-1]
 		self.mass_model_path = self.mass_model_path[:-1]
 
-		if inputs['mass_model_version'] == 8 or inputs['mass_model_version'] == 12:
+		if inputs['mass_model_version'] == 8 or inputs['mass_model_version'] == 12 or inputs['mass_model_version'] == 'dc3':
 			self.mass_model_version = inputs['mass_model_version']
 		else:
-			raise RuntimeError('Mass model version ' + str(self.mass_model_version) + ' is not supported. Must be 8 or 12')
+			raise RuntimeError('Mass model version ' + str(self.mass_model_version) + ' is not supported. Must be 8, 12, or dc3')
 
 		if 'time' in inputs['background']:
 			self.background_time = inputs['background']['time']
@@ -47,7 +52,7 @@ class trigger_algorithm_inputs():
 		if 'type' in inputs['background']:
 			self.background_type = inputs['background']['type']
 
-		if self.background_length >= 86400:
+		if hasattr(self, 'background_length') and self.background_length >= 86400:
 			raise RuntimeError('For now, background simulations must be shorter than a day to avoid potential error with make_hit_dict()')
 
 		self.init_variables()
@@ -74,6 +79,10 @@ class trigger_algorithm_inputs():
 			ged3_z = [28.2, 29.6]
 			ged4_z = [30.7, 32.1]
 
+			self.bgo_pos = [bgob_pos, bgox1_pos, bgox2_pos, bgoy1_pos, bgoy2_pos]
+			self.ged_pos = [ged1_z, ged2_z, ged3_z, ged4_z]
+			self.detector_keys = ['ged1', 'ged2', 'ged3', 'ged4', 'bgox1', 'bgox2', 'bgoy1', 'bgoy2', 'bgob']
+
 		elif self.mass_model_version == 12:
 			bgob_pos = [-21.1, 21.1, -18.3, 18.3, 13.6, 16.]
 			bgox1_pos = [19., 21.2, -18.3, 18.3, 16.3, 35.3]
@@ -85,10 +94,20 @@ class trigger_algorithm_inputs():
 			ged3_z = [27.6, 29.0]
 			ged4_z = [30.2, 31.6]
 
-		self.bgo_pos = [bgob_pos, bgox1_pos, bgox2_pos, bgoy1_pos, bgoy2_pos]
-		self.ged_pos = [ged1_z, ged2_z, ged3_z, ged4_z]
+			self.bgo_pos = [bgob_pos, bgox1_pos, bgox2_pos, bgoy1_pos, bgoy2_pos]
+			self.ged_pos = [ged1_z, ged2_z, ged3_z, ged4_z]
+			self.detector_keys = ['ged1', 'ged2', 'ged3', 'ged4', 'bgox1', 'bgox2', 'bgoy1', 'bgoy2', 'bgob']
 
-		self.detector_keys = ['ged1', 'ged2', 'ged3', 'ged4', 'bgox1', 'bgox2', 'bgoy1', 'bgoy2', 'bgob']
+		elif self.mass_model_version == 'dc3':
+			bgob1_pos = [3., 7.]
+			bgob2_pos = [3., 7.]
+			bgox1_pos = [15., -10.]
+			bgox2_pos = [-10., -10.]
+			bgoy1_pos = [15., 7.]
+			bgoy2_pos = [-10., 7.]
+
+			self.bgo_pos = [bgob1_pos, bgob2_pos, bgox1_pos, bgox2_pos, bgoy1_pos, bgoy2_pos]
+			self.detector_keys = ['bgox1', 'bgox2', 'bgoy1', 'bgoy2', 'bgob1', 'bgob2']
 
 	def make_hit_dict(self, reader, end_time=None):
 		"""
@@ -142,22 +161,46 @@ class trigger_algorithm_inputs():
 							break
       
 					if hit.GetDetector() == self.bgo_num and energy >= self.bgo_elim:
-						if self.bgo_pos[0][0] <= position[0] <= self.bgo_pos[0][1] and self.bgo_pos[0][2] <= position[1] <= self.bgo_pos[0][3] and self.bgo_pos[0][4] <= position[2] <= self.bgo_pos[0][5]:
-							times['bgob'].append(time)
-							energies['bgob'].append(energy)
-						elif self.bgo_pos[1][0] <= position[0] <= self.bgo_pos[1][1] and self.bgo_pos[1][2] <= position[1] <= self.bgo_pos[1][3] and self.bgo_pos[1][4] <= position[2] <= self.bgo_pos[1][5]:
-							times['bgox1'].append(time)
-							energies['bgox1'].append(energy)
-						elif self.bgo_pos[2][0] <= position[0] <= self.bgo_pos[2][1] and self.bgo_pos[2][2] <= position[1] <= self.bgo_pos[2][3] and self.bgo_pos[2][4] <= position[2] <= self.bgo_pos[2][5]:
-							times['bgox2'].append(time)
-							energies['bgox2'].append(energy)
-						elif self.bgo_pos[3][0] <= position[0] <= self.bgo_pos[3][1] and self.bgo_pos[3][2] <= position[1] <= self.bgo_pos[3][3] and self.bgo_pos[3][4] <= position[2] <= self.bgo_pos[3][5]:
-							times['bgoy1'].append(time)
-							energies['bgoy1'].append(energy)
-						elif self.bgo_pos[4][0] <= position[0] <= self.bgo_pos[4][1] and self.bgo_pos[4][2] <= position[1] <= self.bgo_pos[4][3] and self.bgo_pos[4][4] <= position[2] <= self.bgo_pos[4][5]:
-							times['bgoy2'].append(time)
-							energies['bgoy2'].append(energy)
-					elif hit.GetDetector() == self.ged_num:
+						if len(self.bgo_pos) == 5:
+							# This may not be correct, events missing
+							if self.bgo_pos[0][0] <= position[0] <= self.bgo_pos[0][1] and self.bgo_pos[0][2] <= position[1] <= self.bgo_pos[0][3] and self.bgo_pos[0][4] <= position[2] <= self.bgo_pos[0][5]:
+								times['bgob'].append(time)
+								energies['bgob'].append(energy)
+							elif self.bgo_pos[1][0] <= position[0] <= self.bgo_pos[1][1] and self.bgo_pos[1][2] <= position[1] <= self.bgo_pos[1][3] and self.bgo_pos[1][4] <= position[2] <= self.bgo_pos[1][5]:
+								times['bgox1'].append(time)
+								energies['bgox1'].append(energy)
+							elif self.bgo_pos[2][0] <= position[0] <= self.bgo_pos[2][1] and self.bgo_pos[2][2] <= position[1] <= self.bgo_pos[2][3] and self.bgo_pos[2][4] <= position[2] <= self.bgo_pos[2][5]:
+								times['bgox2'].append(time)
+								energies['bgox2'].append(energy)
+							elif self.bgo_pos[3][0] <= position[0] <= self.bgo_pos[3][1] and self.bgo_pos[3][2] <= position[1] <= self.bgo_pos[3][3] and self.bgo_pos[3][4] <= position[2] <= self.bgo_pos[3][5]:
+								times['bgoy1'].append(time)
+								energies['bgoy1'].append(energy)
+							elif self.bgo_pos[4][0] <= position[0] <= self.bgo_pos[4][1] and self.bgo_pos[4][2] <= position[1] <= self.bgo_pos[4][3] and self.bgo_pos[4][4] <= position[2] <= self.bgo_pos[4][5]:
+								times['bgoy2'].append(time)
+								energies['bgoy2'].append(energy)
+						else:
+							if position[1] > self.bgo_pos[0][0] and position[2] < self.bgo_pos[0][1]:
+								times['bgob1'].append(time)
+								energies['bgob1'].append(energy)
+							elif position[1] < self.bgo_pos[1][0] and position[2] < self.bgo_pos[1][1]:
+								times['bgob2'].append(time)
+								energies['bgob2'].append(energy)
+							elif position[1] > self.bgo_pos[2][0] and position[2] > self.bgo_pos[2][1]:
+								times['bgox1'].append(time)
+								energies['bgox1'].append(energy)
+							elif position[1] < self.bgo_pos[3][0] and position[2] > self.bgo_pos[3][1]:
+								times['bgox2'].append(time)
+								energies['bgox2'].append(energy)
+							elif position[0] > self.bgo_pos[4][0] and position[2] > self.bgo_pos[4][1]:
+								times['bgoy1'].append(time)
+								energies['bgoy1'].append(energy)
+							elif position[0] < self.bgo_pos[5][0] and position[2] > self.bgo_pos[5][1]:
+								times['bgoy2'].append(time)
+								energies['bgoy2'].append(energy)
+							else:
+								print('coordinate ' + str(position) + ' not found')
+
+					elif hit.GetDetector() == self.ged_num and hasattr(self, 'ged_pos'):
 						if self.ged_pos[0][0] <= position[2] <= self.ged_pos[0][1]:
 							times['ged1'].append(time)
 							energies['ged1'].append(energy)
@@ -170,7 +213,7 @@ class trigger_algorithm_inputs():
 						elif self.ged_pos[3][0] <= position[2] <= self.ged_pos[3][1]:
 							times['ged4'].append(time)
 							energies['ged4'].append(energy)
-        
+
 		return times, energies
 
 	def choose_background(self):
@@ -208,7 +251,7 @@ class trigger_algorithm_inputs():
 
 		return background_paths, background_start, background_end
 
-	def read_background(self, megalib, path, end_time):
+	def read_background_sim(self, megalib, path, end_time):
 		"""
 		Fill hit directories for each background component.
 
@@ -232,6 +275,56 @@ class trigger_algorithm_inputs():
 		megalib.open_file(path)
 		print('Reading background file: ' + path.split('/')[-1])
 		times, energies = self.make_hit_dict(megalib.reader, end_time)
+
+		return times, energies
+
+	def read_background_csv(self, path, end_time):
+		"""
+		Fill hit directories for each background component.
+
+		Parameters
+		----------
+		path : str
+			Path to background file
+		end_time : int or float
+			Time at which to stop reading background .csv file
+
+		Returns
+		----------
+		times : dict
+			Times of hits in each detector
+		energies : dict
+			Energies of hits in each detector
+		"""
+
+		times = {}
+		energies = {}
+
+		print('Reading background file: ' + path.split('/')[-1])
+		data = pd.read_csv(path, compression='gzip')
+		
+		for i in range(len(data['timestamp[s]'])):
+			if not end_time == None:
+				if data['timestamp[s]'][i] > end_time:
+					break
+			if data['bgo_bottom_1[keV]'][i] != 0.0:
+				times['bgob1'].append(data['timestamp[s]'][i])
+				energies['bgob1'].append(data['bgo_bottom_1[keV]'][i])
+			elif data['bgo_bottom_2[keV]'][i] != 0.0:
+				times['bgob2'].append(data['timestamp[s]'][i])
+				energies['bgob2'].append(data['bgo_bottom_2[keV]'][i])
+			elif data['bgo_x1[keV]'][i] != 0.0:
+				times['bgox1'].append(data['timestamp[s]'][i])
+				energies['bgox1'].append(data['bgo_x1[keV]'][i])
+			elif data['bgo_x2[keV]'][i] != 0.0:
+				times['bgox2'].append(data['timestamp[s]'][i])
+				energies['bgox2'].append(data['bgo_x2[keV]'][i])
+			elif data['bgo_y1[keV]'][i] != 0.0:
+				times['bgoy1'].append(data['timestamp[s]'][i])
+				energies['bgoy1'].append(data['bgo_y1[keV]'][i])
+			elif data['bgo_y2[keV]'][i] != 0.0:
+				times['bgoy2'].append(data['timestamp[s]'][i])
+				energies['bgoy2'].append(data['bgo_y2[keV]'][i])
 
 		return times, energies
 
@@ -266,7 +359,10 @@ class trigger_algorithm_inputs():
 			energies[item] = []
 
 		for i in range(len(background_paths)):
-			component_times, component_energies = self.read_background(megalib, background_paths[i], end_time)
+			if 'sim' in background_paths[i].split('.'):
+				component_times, component_energies = self.read_background_sim(megalib, background_paths[i], end_time)
+			elif 'csv' in background_paths[i].split('.'):
+				component_times, component_energies = self.read_background_csv(background_paths[i], end_time)
 			for key in component_times.keys():
 				for j in range(len(component_times[key])):
 					if component_times[key][j] > start_time:
@@ -275,7 +371,7 @@ class trigger_algorithm_inputs():
 
 		return times, energies
 
-	def combine(self, source_times, source_energies, background_times, background_energies):
+	def combine_single_source(self, source_times, source_energies, background_times, background_energies):
 		"""
 		Combine source and background hits by placing source in the middle of background.
 
@@ -408,26 +504,50 @@ class trigger_algorithm_inputs():
 
 		self.copy_readme()
 
-		for file in os.listdir(self.source_path):
-			filename = os.fsdecode(file)
-			source_name = file.split('.')[0]
-			if not os.path.isdir(self.output_path + source_name) and os.path.isfile(self.source_path + file) and (file[-3:] == 'sim' or file[-6:] == 'sim.gz'):
-				self.megalib.open_file(self.source_path + filename)
-				os.mkdir(self.output_path + source_name + '/')
-				print('Reading source file: ' + filename)
-				source_times, source_energies = self.make_hit_dict(self.megalib.reader)
+		if self.single_file == True:
+			# read event list
+			# split into different background files
+			# create directory for each file
+			for file in os.listdir(self.source_path):
+				filename = os.fsdecode(file)
+				source_name = file.split('.')[0]
+
+				if file[-3:] == 'sim' or file[-6:] == 'sim.gz':
+
+
+		else:
+			for file in os.listdir(self.source_path):
+				filename = os.fsdecode(file)
+				source_name = file.split('.')[0]
+
+				if not os.path.isdir(self.output_path + source_name) and os.path.isfile(self.source_path + file) and (file[-3:] == 'sim' or file[-6:] == 'sim.gz'):
+					self.megalib.open_file(self.source_path + filename)
+					os.mkdir(self.output_path + source_name + '/')
+					print('Reading source file: ' + filename)
+					source_times, source_energies = self.make_hit_dict(self.megalib.reader)
     
-				if self.background_type == 'random':
-					background_paths, start, end = self.choose_background()
-					background_times, background_energies = self.select_background(self.megalib, background_paths, start, end)
-				else:
-					self.megalib.open_file(self.background_path)
-					print('Reading background file: ' + self.background_path.split('/')[-1])
-					background_times, background_energies = self.make_hit_dict(self.megalib.reader)
+					if self.background_type == 'random':
+						background_paths, start, end = self.choose_background()
+						background_times, background_energies = self.select_background(self.megalib, background_paths, start, end)
+					elif self.background_type == 'file':
+						self.megalib.open_file(self.background_path)
+						print('Reading background file: ' + self.background_path.split('/')[-1])
+						background_times, background_energies = self.make_hit_dict(self.megalib.reader)
+					elif self.background_type == 'none':
 
-				times, energies, start_time = self.combine(source_times, source_energies, background_times, background_energies)
 
-				for key in times.keys():
-					self.write_hits(self.output_path + source_name + '/' + key + '.txt', times[key], energies[key])
+					times, energies, start_time = self.combine_single_source(source_times, source_energies, background_times, background_energies)
 
-				self.write_readme(source_name, start_time)
+					for key in times.keys():
+						self.write_hits(self.output_path + source_name + '/' + key + '.txt', times[key], energies[key])
+
+					self.write_readme(source_name, start_time)
+
+# paths: event_list
+# combination: individual, multiple (for multiple, lightcurve times need to already be correct, and need to give event list)
+
+# background type: concatenated_file (individual/multiple), components (individual/multiple), random (individual), none (individual)
+# assume correct timestamps if multiple
+
+# check in code if backgroud files are csv or sim and read in accordingly
+# randomly choosing background only works for sim
