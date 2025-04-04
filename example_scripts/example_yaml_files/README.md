@@ -88,17 +88,25 @@ Parameters to be defined in the .yaml file:
 
 `example_trigger_algorithm.yaml` is a sample .yaml file used as input for `trigger_algorithm_list_generation.py`.    
 Parameters to be defined in the .yaml file:    
+- configuration: ('dc2' or 'dc3')
 - paths:       
     - input: path to directory housing source .sim files (e.g. 'MEGAlib_outputs/')  
     - output: path to directory to store output (e.g. 'trigger_inputs/')    
     - source_files: path to directory housing source files used to simulate .sim files (e.g. 'MEGAlib_source_files/')
     - mass_model: path to geometry file, must match the geometry used to create simulations but must be altered to not veto BGO hits
-    - background: if background_type is 'random', path to directory housing background .sim files, and if background_type is 'file', the path to the concatenated background file (e.g. 'MEGAlib_backgrounds/')        
+    - background: for 'dc2' configuration, if background_type is 'random', path to directory housing background .sim files (e.g. 'MEGAlib_backgrounds/'), and if background_type is 'file', the path to the concatenated background file (e.g. 'MEGAlib_backgrounds/background.sim'). For 'dc3' configuration, path to directory housing background .csv files (e.g. 'MEGAlib_backgrounds/') or not included to not combine with background)        
+    - event_list: path to event list file (e.g. 'event_list.txt', only necessary for 'dc3' configuration)
 - background:       
-    - type: whether to randomly select background regions for each source ('random') or use same background file for all sources ('file')  
-    - number: number of background files for each component (only necessary if background_type is 'random')    
-    - file_length: length in s of each background file (only necessary if background_type is 'random')    
-    - time: amount of background in s to add to each source, source will be added to the middle of the background time interval    
-    - components: list of background components to include, file names must begin with component names (only necessary if background_type is 'random')    
-    - file_type: whether the background files begin one after another in time ('sequential') or if they begin at the same time ('simultaneous') (only necessary if background_type is 'random')    
-- mass_model_version: version of mass model   
+    - type: whether to randomly select background regions for each source ('random') or use same background file for all sources ('file') (only necessary for 'dc2' configuration)
+    - number: number of background files for each component (only necessary if type is 'random')    
+    - file_length: length in s of each background file (only necessary if type is 'random')    
+    - time: amount of background in s to add to each source, source will be added to the middle of the background time interval (only necessary for 'dc2' configuration) 
+    - components: list of background components to include, file names must begin with component names (only necessary if type is 'random')    
+    - file_type: whether the background files begin one after another in time ('sequential') or if they begin at the same time ('simultaneous') (only necessary if type is 'random')    
+- mass_model_version: version of mass model ('8' or '12', only necessary for 'dc2' configuration)   
+
+
+
+
+
+

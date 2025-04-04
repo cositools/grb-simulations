@@ -3,6 +3,7 @@ import os
 import random
 import shutil
 import pandas as pd
+import h5py
 from .config import suppress_output, read_yaml, define_paths
 from .load_megalib import load_megalib
 
@@ -20,55 +21,86 @@ class trigger_algorithm_inputs():
 
 		inputs = read_yaml(input_file)
 
-		[self.source_path, 
-		 self.background_path, 
-		 self.output_path,
-		 self.source_file_path, 
-		 self.mass_model_path] = define_paths([inputs['paths']['input'], inputs['paths']['background'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model']], 
-		 									  [False, False, True, False, False])
+		self.config = inputs['configuration']
 
-		if 'event_list' in inputs['paths']:
-			self.event_list = inputs['paths']['event_list']
+		if self.config == 'dc2':
+			[self.source_path, 
+		 	 self.background_path, 
+		 	 self.output_path,
+		 	 self.source_file_path, 
+		 	 self.mass_model_path] = define_paths([inputs['paths']['input'], inputs['paths']['background'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model']], 
+		 									  	  [False, False, True, False, False])
 
-		if inputs['background']['type'] == 'file':
-			self.background_path = self.background_path[:-1]
-		self.mass_model_path = self.mass_model_path[:-1]
+		 	init_dc2_mass_model(inputs['mass_model_version'])
 
-		if inputs['mass_model_version'] == 8 or inputs['mass_model_version'] == 12 or inputs['mass_model_version'] == 'dc3':
-			self.mass_model_version = inputs['mass_model_version']
+		 	if 'time' in inputs['background']:
+				self.background_time = inputs['background']['time']
+			if 'number' in inputs['background']:
+				self.background_num = inputs['background']['number']
+			if 'file_length' in inputs['background']:
+				self.background_length = inputs['background']['file_length']
+			if 'components' in inputs['background']:
+				self.background_components = inputs['background']['components']
+			if 'file_type' in inputs['background']:
+				self.background_file_type = inputs['background']['file_type']
+			if 'type' in inputs['background']:
+				self.background_type = inputs['background']['type']
+
+			if hasattr(self, 'background_length') and self.background_length >= 86400:
+				raise RuntimeError('For now, background simulations must be shorter than a day to avoid potential error with make_hit_dict()')
+
+		elif self.config == 'dc3':
+
+			if 'background' in inputs['paths']:
+				[self.source_path, 
+		 	 	 self.background_path, 
+		 	 	 self.output_path,
+		 	 	 self.source_file_path, 
+		 	 	 self.mass_model_path,
+		 	 	 event_list_file] = define_paths([inputs['paths']['input'], inputs['paths']['background'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model'], inputs['paths']['event_list']], 
+		 									  	 [False, False, True, False, False, False])
+
+		 	 else:
+		 	 	[self.source_path,  
+		 	 	 self.output_path,
+		 	 	 self.source_file_path, 
+		 	 	 self.mass_model_path,
+		 	 	 event_list_file] = define_paths([inputs['paths']['input'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model'], inputs['paths']['event_list']], 
+		 									  	 [False, True, False, False, False])
+
+		 	self.event_list = self.read_event_list(event_list_file)
+
+			bgob1_pos = [3., 7.]
+			bgob2_pos = [3., 7.]
+			bgox1_pos = [15., -10.]
+			bgox2_pos = [-10., -10.]
+			bgoy1_pos = [15., 7.]
+			bgoy2_pos = [-10., 7.]
+
+			self.bgo_pos = [bgob1_pos, bgob2_pos, bgox1_pos, bgox2_pos, bgoy1_pos, bgoy2_pos]
+			self.detector_keys = ['bgox1', 'bgox2', 'bgoy1', 'bgoy2', 'bgob1', 'bgob2']
+
 		else:
-			raise RuntimeError('Mass model version ' + str(self.mass_model_version) + ' is not supported. Must be 8, 12, or dc3')
+			raise RuntimeError('Configuration must be dc2 or dc3')
 
-		if 'time' in inputs['background']:
-			self.background_time = inputs['background']['time']
-		if 'number' in inputs['background']:
-			self.background_num = inputs['background']['number']
-		if 'file_length' in inputs['background']:
-			self.background_length = inputs['background']['file_length']
-		if 'components' in inputs['background']:
-			self.background_components = inputs['background']['components']
-		if 'file_type' in inputs['background']:
-			self.background_file_type = inputs['background']['file_type']
-		if 'type' in inputs['background']:
-			self.background_type = inputs['background']['type']
 
-		if hasattr(self, 'background_length') and self.background_length >= 86400:
-			raise RuntimeError('For now, background simulations must be shorter than a day to avoid potential error with make_hit_dict()')
-
-		self.init_variables()
+		#if inputs['background']['type'] == 'file':
+		#	self.background_path = self.background_path[:-1]
+		#self.mass_model_path = self.mass_model_path[:-1]
 
 		self.megalib = load_megalib(self.mass_model_path)
 
-	def init_variables(self):
+	def init_dc2_mass_model(self, mass_model_version):
 		"""
-		Initialize variables.
+		Initialize mass model variables.
+
+		Parameters
+		----------
+		mass_model_version : str
+			Version of DC2 mass model ('8' or '12')
 		"""
 
-		self.bgo_num = 4
-		self.ged_num = 3
-		self.bgo_elim = 80
-
-		if self.mass_model_version == 8:
+		if mass_model_version == 8:
 			bgob_pos = [-19.2, 19.2, -17.5, 17.5, 14.6, 16.5]
 			bgox1_pos = [17.5, 19.3, -17.5, 17.5, 16.9, 34.7]
 			bgox2_pos = [-19.3, -17.5, -17.5, 17.5, 16.9, 34.7]
@@ -83,7 +115,7 @@ class trigger_algorithm_inputs():
 			self.ged_pos = [ged1_z, ged2_z, ged3_z, ged4_z]
 			self.detector_keys = ['ged1', 'ged2', 'ged3', 'ged4', 'bgox1', 'bgox2', 'bgoy1', 'bgoy2', 'bgob']
 
-		elif self.mass_model_version == 12:
+		elif mass_model_version == 12:
 			bgob_pos = [-21.1, 21.1, -18.3, 18.3, 13.6, 16.]
 			bgox1_pos = [19., 21.2, -18.3, 18.3, 16.3, 35.3]
 			bgox2_pos = [-21.2, -19., -18.3, 18.3, 16.3, 35.3]
@@ -98,16 +130,270 @@ class trigger_algorithm_inputs():
 			self.ged_pos = [ged1_z, ged2_z, ged3_z, ged4_z]
 			self.detector_keys = ['ged1', 'ged2', 'ged3', 'ged4', 'bgox1', 'bgox2', 'bgoy1', 'bgoy2', 'bgob']
 
-		elif self.mass_model_version == 'dc3':
-			bgob1_pos = [3., 7.]
-			bgob2_pos = [3., 7.]
-			bgox1_pos = [15., -10.]
-			bgox2_pos = [-10., -10.]
-			bgoy1_pos = [15., 7.]
-			bgoy2_pos = [-10., 7.]
+		else:
+			raise RuntimeError('Mass model version ' + str(mass_model_version) + ' is not supported. Must be 8 or 12 for dc2')
 
-			self.bgo_pos = [bgob1_pos, bgob2_pos, bgox1_pos, bgox2_pos, bgoy1_pos, bgoy2_pos]
-			self.detector_keys = ['bgox1', 'bgox2', 'bgoy1', 'bgoy2', 'bgob1', 'bgob2']
+	def read_event_list(self, event_list):
+		"""
+		Read event list file and save as a dictionary.
+
+		Parameters
+		----------
+		event_list : dict
+			Event list data
+		"""
+
+		with open(event_list, 'r', newline='', encoding='utf-8') as csvfile:
+			reader = csv.reader(csvfile)
+			header = next(reader)  # Read the header row
+			data = {}
+			for col_name in header:
+				data[col_name] = []
+
+			for row in reader:
+				for i, value in enumerate(row):
+					data[header[i]].append(value)
+
+		return data
+
+	def read_events_dc2(self, times, energies, hit):
+		'''
+		Sort hits into detectors based on positions.
+
+		Parameters
+		----------
+		times : dict
+			Times of hits in each detector
+		energies : dict
+			Energies of hits in each detector
+		hit : ?
+			New hit to add to dictionaries
+
+		Returns
+		----------
+		times : dict
+			Times of hits in each detector with new hit added
+		energies : dict
+			Energies of hits in each detector with new hit added
+		'''
+
+		if hit.GetDetector() == self.bgo_num and energy >= self.bgo_elim:
+			if len(self.bgo_pos) == 5:
+				# This may not be correct, events missing
+				if self.bgo_pos[0][0] <= position[0] <= self.bgo_pos[0][1] and self.bgo_pos[0][2] <= position[1] <= self.bgo_pos[0][3] and self.bgo_pos[0][4] <= position[2] <= self.bgo_pos[0][5]:
+					times['bgob'].append(time)
+					energies['bgob'].append(energy)
+				elif self.bgo_pos[1][0] <= position[0] <= self.bgo_pos[1][1] and self.bgo_pos[1][2] <= position[1] <= self.bgo_pos[1][3] and self.bgo_pos[1][4] <= position[2] <= self.bgo_pos[1][5]:
+					times['bgox1'].append(time)
+					energies['bgox1'].append(energy)
+				elif self.bgo_pos[2][0] <= position[0] <= self.bgo_pos[2][1] and self.bgo_pos[2][2] <= position[1] <= self.bgo_pos[2][3] and self.bgo_pos[2][4] <= position[2] <= self.bgo_pos[2][5]:
+					times['bgox2'].append(time)
+					energies['bgox2'].append(energy)
+				elif self.bgo_pos[3][0] <= position[0] <= self.bgo_pos[3][1] and self.bgo_pos[3][2] <= position[1] <= self.bgo_pos[3][3] and self.bgo_pos[3][4] <= position[2] <= self.bgo_pos[3][5]:
+					times['bgoy1'].append(time)
+					energies['bgoy1'].append(energy)
+				elif self.bgo_pos[4][0] <= position[0] <= self.bgo_pos[4][1] and self.bgo_pos[4][2] <= position[1] <= self.bgo_pos[4][3] and self.bgo_pos[4][4] <= position[2] <= self.bgo_pos[4][5]:
+					times['bgoy2'].append(time)
+					energies['bgoy2'].append(energy)
+
+		elif hit.GetDetector() == self.ged_num and hasattr(self, 'ged_pos'):
+			if self.ged_pos[0][0] <= position[2] <= self.ged_pos[0][1]:
+				times['ged1'].append(time)
+				energies['ged1'].append(energy)
+			elif self.ged_pos[1][0] <= position[2] <= self.ged_pos[1][1]:
+				times['ged2'].append(time)
+				energies['ged2'].append(energy)
+			elif self.ged_pos[2][0] <= position[2] <= self.ged_pos[2][1]:
+				times['ged3'].append(time)
+				energies['ged3'].append(energy)
+			elif self.ged_pos[3][0] <= position[2] <= self.ged_pos[3][1]:
+				times['ged4'].append(time)
+				energies['ged4'].append(energy)
+
+		return times, energies
+
+	def read_events_dc3(self, times, energies, hit):
+		'''
+		Sort hits into detectors based on positions.
+
+		Parameters
+		----------
+		times : dict
+			Times of hits in each detector
+		energies : dict
+			Energies of hits in each detector
+		event : ?
+			New event to add to dictionaries
+
+		Returns
+		----------
+		times : dict
+			Times of hits in each detector with new event added
+		energies : dict
+			Energies of hits in each detector with new event added
+		'''
+
+		bottom_Zplus_1 = 0.
+		bottom_Zplus_2 = 0.
+		bottom_Zplus_3 = 0.
+		bottom_Zplus_4 = 0.
+		bottom_Zplus_5 = 0.
+		bottom_Zminus_1 = 0.
+		bottom_Zminus_2 = 0.
+		bottom_Zminus_3 = 0.
+		bottom_Zminus_4 = 0.
+		bottom_Zminus_5 = 0.
+		x1_1 = 0.
+		x1_2 = 0.
+		x1_3 = 0.
+		x2_1 = 0.
+		x2_2 = 0.
+		x2_3 = 0.
+		y1_1 = 0.
+		y1_2 = 0.
+		y1_3 = 0.
+		y2_1 = 0.
+		y2_2 = 0.
+		y2_3 = 0.
+
+		time = float(event.GetTime().GetAsSeconds())
+
+		for i in range(event.GetNHTs()):
+			hit = event.GetHTAt(i)
+
+			if hit.GetDetectorType() == 8:
+				x=hit.GetPosition().X()
+				y=hit.GetPosition().Y()
+				z=hit.GetPosition().Z()
+		
+				#bottom_Zplus
+				if x<-11.2 and y>3 and z<7:
+					bottom_Zplus_1+=(Hit.GetEnergy())
+				elif x>-11.2 and x<-2.5 and y>3 and z<7:
+					bottom_Zplus_2+=(Hit.GetEnergy())
+				elif x>-2.5 and x<4.6 and y>3 and z<7:
+					bottom_Zplus_3+=(Hit.GetEnergy())
+				elif x>4.6 and x<11.2 and y>3 and z<7:
+					bottom_Zplus_4+=(Hit.GetEnergy())
+				elif x>4.6 and y>3 and z<7:
+					bottom_Zplus_5+=(Hit.GetEnergy())
+               
+				#bottom Zminus
+				elif x<-11.2 and y<3 and z<7:
+					bottom_Zminus_1+=(Hit.GetEnergy())
+				elif x>-11.2 and x<-2.5 and y<3 and z<7:
+					bottom_Zminus_2+=(Hit.GetEnergy())
+				elif x>-2.5 and x<4.6 and y<3 and z<7:
+					bottom_Zminus_3+=(Hit.GetEnergy())
+				elif x>4.6 and x<11.2 and y<3 and z<7:
+ 					bottom_Zminus_4+=(Hit.GetEnergy())
+				elif x>4.6 and y<3 and z<7:
+					bottom_Zminus_5+=(Hit.GetEnergy())
+                
+				#y1 pannel
+				elif z>7 and y <-2.6 and y>-14 and x>15:
+					y1_1+=(Hit.GetEnergy())
+				elif z>7 and y >-2.6 and y <9 and x>15:
+					y1_2+=(Hit.GetEnergy())
+				elif z>7 and y >9 and y<20.6 and x>15:
+					y1_3+=(Hit.GetEnergy())
+                
+				#y2 pannel
+				elif z>7 and y <-2.6 and y>-14 and x<-10:
+					y2_1+=(Hit.GetEnergy())
+				elif z>7 and y >-2.6 and y <9 and x<-10:
+					y2_2+=(Hit.GetEnergy())
+				elif z>7 and y >9 and y<20.6 and  x<-10:
+					y2_3+=(Hit.GetEnergy())
+
+				#x1 panel
+				elif z>-10 and x<-6 and y>15:
+					x1_1+=(Hit.GetEnergy())
+				elif z>-10 and x >-6 and x <6 and y>15:
+					x1_2+=(Hit.GetEnergy())
+				elif z>-10 and x >6 and y>15:
+					x1_3+=(Hit.GetEnergy())
+
+				#x2 panel
+				elif z>-10 and x<-6 and y<-10:
+					x2_1+=(Hit.GetEnergy())
+				elif z>-10 and x >-6 and x <6 and y<-10:
+					x2_2+=(Hit.GetEnergy())
+				elif z>-10 and x >6 and y<-10:
+					x2_3+=(Hit.GetEnergy())
+				
+				else:
+					print(str(x)+" "+str(y)+" "+str(z))
+					print("Error: Coordinate not found")
+
+		if bottom_Zplus_1 >= 80.:
+			times['bgob1'].append(time)
+			energies['bgob1'].append(bottom_Zplus_1)
+		if bottom_Zplus_2 >= 80.:
+			times['bgob1'].append(time)
+			energies['bgob1'].append(bottom_Zplus_2)
+		if bottom_Zplus_3 >= 80.:
+			times['bgob1'].append(time)
+			energies['bgob1'].append(bottom_Zplus_3)
+		if bottom_Zplus_4 >= 80.:
+			times['bgob1'].append(time)
+			energies['bgob1'].append(bottom_Zplus_4)
+		if bottom_Zplus_5 >= 80.:
+			times['bgob1'].append(time)
+			energies['bgob1'].append(bottom_Zplus_5)
+		if bottom_Zminus_1 >= 80.:
+			times['bgob2'].append(time)
+			energies['bgob2'].append(bottom_Zminus_1)
+		if bottom_Zminus_2 >= 80.:
+			times['bgob2'].append(time)
+			energies['bgob2'].append(bottom_Zminus_2)
+		if bottom_Zminus_3 >= 80.:
+			times['bgob2'].append(time)
+			energies['bgob2'].append(bottom_Zminus_3)
+		if bottom_Zminus_4 >= 80.:
+			times['bgob2'].append(time)
+			energies['bgob2'].append(bottom_Zminus_4)
+		if bottom_Zminus_5 >= 80.:
+			times['bgob2'].append(time)
+			energies['bgob2'].append(bottom_Zminus_5)
+		if x1_1 >= 80.:
+			times['bgox1'].append(time)
+			energies['bgox1'].append(x1_1)
+		if x1_2 >= 80.:
+			times['bgox1'].append(time)
+			energies['bgox1'].append(x1_2)
+		if x1_3 >= 80.:
+			times['bgox1'].append(time)
+			energies['bgox1'].append(x1_3)
+		if x2_1 >= 80.:
+			times['bgox2'].append(time)
+			energies['bgox2'].append(x2_1)
+		if x2_2 >= 80.:
+			times['bgox2'].append(time)
+			energies['bgox2'].append(x2_2)
+		if x2_3 >= 80.:
+			times['bgox2'].append(time)
+			energies['bgox2'].append(x2_3)
+		if y1_1 >= 80.:
+			times['bgoy1'].append(time)
+			energies['bgoy1'].append(y1_1)
+		if y1_2 >= 80.:
+			times['bgoy1'].append(time)
+			energies['bgoy1'].append(y1_2)
+		if y1_3 >= 80.:
+			times['bgoy1'].append(time)
+			energies['bgoy1'].append(y1_3)
+		if y2_1 >= 80.:
+			times['bgoy2'].append(time)
+			energies['bgoy2'].append(y2_1)
+		if y2_2 >= 80.:
+			times['bgoy2'].append(time)
+			energies['bgoy2'].append(y2_2)
+		if y2_3 >= 80.:
+			times['bgoy2'].append(time)
+			energies['bgoy2'].append(y2_3)
+
+		return times, energies
 
 	def make_hit_dict(self, reader, end_time=None):
 		"""
@@ -135,7 +421,6 @@ class trigger_algorithm_inputs():
 			times[item] = []
 			energies[item] = []
 
-		hrs_init = 19
 		reach_end = False
 
 		with suppress_output():
@@ -144,75 +429,22 @@ class trigger_algorithm_inputs():
 				if not event or reach_end:
 					break
 				root.SetOwnership(event, True)
+				time = float(event.GetTime().GetAsSeconds())
 
-				for i in range(event.GetNHTs()):
-					hit = event.GetHTAt(i)
-					position = hit.GetPosition()
-					energy = hit.GetEnergy()
-					hour = int(event.GetTime().GetHours() - hrs_init)
-					hour = int(hour + 24) if hour < 0 else hour
-					nanosecond = str(event.GetTime().GetNanoSeconds()).zfill(9)
-					seconds = str((hour * 3600) + (int(event.GetTime().GetMinutes()) * 60) + int(event.GetTime().GetSeconds()))
-					time = float(seconds + '.' + nanosecond)
+				if self.config == 'dc2':
+
+					for i in range(event.GetNHTs()):
+						hit = event.GetHTAt(i)
   
-					if not end_time == None:
-						if time > end_time:
-							reach_end = True
-							break
-      
-					if hit.GetDetector() == self.bgo_num and energy >= self.bgo_elim:
-						if len(self.bgo_pos) == 5:
-							# This may not be correct, events missing
-							if self.bgo_pos[0][0] <= position[0] <= self.bgo_pos[0][1] and self.bgo_pos[0][2] <= position[1] <= self.bgo_pos[0][3] and self.bgo_pos[0][4] <= position[2] <= self.bgo_pos[0][5]:
-								times['bgob'].append(time)
-								energies['bgob'].append(energy)
-							elif self.bgo_pos[1][0] <= position[0] <= self.bgo_pos[1][1] and self.bgo_pos[1][2] <= position[1] <= self.bgo_pos[1][3] and self.bgo_pos[1][4] <= position[2] <= self.bgo_pos[1][5]:
-								times['bgox1'].append(time)
-								energies['bgox1'].append(energy)
-							elif self.bgo_pos[2][0] <= position[0] <= self.bgo_pos[2][1] and self.bgo_pos[2][2] <= position[1] <= self.bgo_pos[2][3] and self.bgo_pos[2][4] <= position[2] <= self.bgo_pos[2][5]:
-								times['bgox2'].append(time)
-								energies['bgox2'].append(energy)
-							elif self.bgo_pos[3][0] <= position[0] <= self.bgo_pos[3][1] and self.bgo_pos[3][2] <= position[1] <= self.bgo_pos[3][3] and self.bgo_pos[3][4] <= position[2] <= self.bgo_pos[3][5]:
-								times['bgoy1'].append(time)
-								energies['bgoy1'].append(energy)
-							elif self.bgo_pos[4][0] <= position[0] <= self.bgo_pos[4][1] and self.bgo_pos[4][2] <= position[1] <= self.bgo_pos[4][3] and self.bgo_pos[4][4] <= position[2] <= self.bgo_pos[4][5]:
-								times['bgoy2'].append(time)
-								energies['bgoy2'].append(energy)
-						else:
-							if position[1] > self.bgo_pos[0][0] and position[2] < self.bgo_pos[0][1]:
-								times['bgob1'].append(time)
-								energies['bgob1'].append(energy)
-							elif position[1] < self.bgo_pos[1][0] and position[2] < self.bgo_pos[1][1]:
-								times['bgob2'].append(time)
-								energies['bgob2'].append(energy)
-							elif position[1] > self.bgo_pos[2][0] and position[2] > self.bgo_pos[2][1]:
-								times['bgox1'].append(time)
-								energies['bgox1'].append(energy)
-							elif position[1] < self.bgo_pos[3][0] and position[2] > self.bgo_pos[3][1]:
-								times['bgox2'].append(time)
-								energies['bgox2'].append(energy)
-							elif position[0] > self.bgo_pos[4][0] and position[2] > self.bgo_pos[4][1]:
-								times['bgoy1'].append(time)
-								energies['bgoy1'].append(energy)
-							elif position[0] < self.bgo_pos[5][0] and position[2] > self.bgo_pos[5][1]:
-								times['bgoy2'].append(time)
-								energies['bgoy2'].append(energy)
-							else:
-								print('coordinate ' + str(position) + ' not found')
+						if not end_time == None:
+							if time > end_time:
+								reach_end = True
+								break
+					times, energies = self.read_events_dc2(times, energies, hit)
 
-					elif hit.GetDetector() == self.ged_num and hasattr(self, 'ged_pos'):
-						if self.ged_pos[0][0] <= position[2] <= self.ged_pos[0][1]:
-							times['ged1'].append(time)
-							energies['ged1'].append(energy)
-						elif self.ged_pos[1][0] <= position[2] <= self.ged_pos[1][1]:
-							times['ged2'].append(time)
-							energies['ged2'].append(energy)
-						elif self.ged_pos[2][0] <= position[2] <= self.ged_pos[2][1]:
-							times['ged3'].append(time)
-							energies['ged3'].append(energy)
-						elif self.ged_pos[3][0] <= position[2] <= self.ged_pos[3][1]:
-							times['ged4'].append(time)
-							energies['ged4'].append(energy)
+				else:
+
+					times, energies = read_events_dc3(times, energies, event)
 
 		return times, energies
 
@@ -278,7 +510,7 @@ class trigger_algorithm_inputs():
 
 		return times, energies
 
-	def read_background_csv(self, path, end_time):
+	def read_background_csv(self, path, end_time=None):
 		"""
 		Fill hit directories for each background component.
 
@@ -447,11 +679,12 @@ class trigger_algorithm_inputs():
 			Energies of hits from source in each detector
 		"""
 
+		data = np.array([times, energies])
+
 		print('Writing to file: ' + file_path.split('/')[-1])
-		with open(file_path, 'w') as f:
-			f.write('time (s)           energy (keV)\n')
-			for i in range(len(times)):
-				f.write("{:.9f}".format(times[i]) + '        ' + str(energies[i]) + '\n')
+		with h5py.File(file_path, 'w') as f:
+			dset = hf.create_dataset('trigger_data', data=data, compression='gzip')
+			dset.attrs['columns'] = ['time (s)', 'energy (keV)']
 
 	def copy_readme(self):
 		"""
@@ -463,7 +696,7 @@ class trigger_algorithm_inputs():
 		else:
 			print('No README in .source file directory.')
 
-	def write_readme(self, source_name, start_time):
+	def write_readme_dc2(self, source_name, start_time):
 		"""
 		Write README for event directory.
 
@@ -497,6 +730,40 @@ class trigger_algorithm_inputs():
 			f.write('photon flux: ' + ph_flux + '\n')
 			f.write('event start time: ' + str(start_time) + '\n')
 
+	def write_event_readme_dc3(self, source_name):
+		"""
+		Write README for event directory.
+
+		source_name : str
+			Name of source
+		"""
+
+		source_index = np.where(np.array(self.event_list['Event name'])==source_name)[0][0]
+
+		with open(self.output_path + source_name + '/' + 'README.md', 'w') as f:
+			f.write('zenith angle (deg): ' + self.event_list['Azimuth (degrees)'] + '\n')
+			f.write('azimuth angle (deg): ' + self.event_list['Zenith (degrees)'] + '\n')
+			f.write('energy flux (erg/cm^2/s): ' + self.event_list['Energy flux (erg/cm^2/s)'] + '\n')
+			f.write('photon flux (ph/cm^2/s): ' + self.event_list['Photon flux (ph/cm^2/s)'] + '\n')
+			f.write('event start time (s): ' + str(self.event_list['Start time (s)']) + '\n')
+			f.write('event duration (s): ' + str(self.event_list['Duration (s)']) + '\n')
+
+	def write_readme_dc3(self, directory_path, event_list):
+		"""
+		Write README for directory of multiple events combined with background.
+
+		directory_path : str
+			Path to directory containing trigger files
+		event_list : list
+			Event list for events in directory
+		"""
+
+		with open(directory_path + 'README.md', 'w') as f:
+			f.write('Event name, Start time (s), Duration (s), Photon flux (ph/cm^2/s), Energy flux (erg/cm^2/s), Zenith (degrees), Azimuth (degrees)\n')
+			for i in range(len(event_list['Event name'])):
+				f.write(event_list['Event name'][i] + ', ' + str(event_list['Start time (s)'][i]) + ', ' + str(event_list['Duration (s)'][i]) + ', ' + str(event_list['Photon flux (ph/cm^2/s)'][i]) + ', ' + 
+						str(event_list['Energy flux (erg/cm^2/s)'][i]) + ', ' + str(event_list['Zenith (degrees)'][i]) + ', ' + str(event_list['Azimuth (degrees)'][i]) + '\n')
+
 	def create_event_files(self):
 		"""
 		Create trigger algorithm input files for all events in input directory.
@@ -504,16 +771,108 @@ class trigger_algorithm_inputs():
 
 		self.copy_readme()
 
-		if self.single_file == True:
-			# read event list
-			# split into different background files
-			# create directory for each file
-			for file in os.listdir(self.source_path):
-				filename = os.fsdecode(file)
-				source_name = file.split('.')[0]
+		if self.config == 'dc3':
 
-				if file[-3:] == 'sim' or file[-6:] == 'sim.gz':
+			if hasattr(self, background_path):
+				n_background_files = 0
+				for background_file in os.listdir(background_path):
+					if n_background_files == 0:
+						background_times, background_energies = self.read_background_csv(background_path + background_file)
+					else:
+						component_times, component_energies = self.read_background_csv(background_path + background_file)
+						for key in background_times.keys():
+							background_times[key].extend(component_times)
+							background_energies[key].extend(component_energies)
+					n_background_files += 1
+				for key in background_times.keys():
+					background_times[key], background_energies[key] = (list(x) for x in zip(*sorted(zip(background_times[key], background_energies[key]))))
 
+				directory_number = 0
+				for i in range(len(self.event_list['Event name'])):
+
+					this_time = self.event_list['Start time (s)']
+
+					event_list_values = []
+					for key in self.event_list:
+    					event_list_values.append(self.event_list[key][i])
+
+    				filename = None
+    				for file in os.listdir(self.source_path):
+      					if file.startswith(self.event_list['Event name'][i]):
+        					filename = file
+        			if filename is None:
+        				print('.sim file for ' + self.event_list['Event name'][i] + ' not found')
+        				continue
+    					
+    				self.megalib.open_file(self.source_path + filename)
+
+					if directory_number == 0 or previous_time > this_time:
+
+						if directory_number > 0:
+							self.write_readme_dc3(directory_path, this_event_list)
+							time_values = []
+							for key in background_times:
+    							time_values.append(background_times[key][i])
+							for key, value in zip(batch_times, time_values):
+    							batch_times[key].append(value)
+    						energy_values = []
+							for key in background_energies:
+    							energy_values.append(background_energies[key][i])
+							for key, value in zip(batch_energies, energy_values):
+    							batch_energies[key].append(value)
+    						for item in self.detector_keys:
+								times_sorted[item] = []
+								energies_sorted[item] = []
+							times_sorted[key], energies_sorted[key] = (list(x) for x in zip(*sorted(zip(batch_times[key], batch_energies[key]))))
+							for key in times.keys():
+								self.write_hits(self.output_path + source_name + '/' + key + '.hdf5', times[key], energies[key])
+
+						directory_path = self.output_path + 'batch_' + str(directory_number) + '/'
+						os.mkdir(directory_path)
+
+						this_event_list= {'Event name': [], 'Start time (s)': [], 'Duration (s)': [], 'Photon flux (ph/cm^2/s)': [], 'Energy flux (erg/cm^2/s)': [], 'Zenith (degrees)': [], 'Azimuth (degrees)': []}
+    					for key, value in zip(this_event_list, event_list_values):
+    						this_event_list[key].append(value)
+
+						print('Reading source file: ' + filename)
+						batch_times, batch_energies = self.make_hit_dict(self.megalib.reader)
+
+						directory_number += 1
+
+					else:
+
+    					for key, value in zip(this_event_list, event_list_values):
+    						this_event_list[key].append(value)
+    					print('Reading source file: ' + filename)
+						these_times, these_energies = self.make_hit_dict(self.megalib.reader)
+						time_values = []
+						for key in these_times:
+    						time_values.append(these_times[key][i])
+						for key, value in zip(batch_times, time_values):
+    						batch_times[key].append(value)
+    					energy_values = []
+						for key in these_energies:
+    						energy_values.append(these_energies[key][i])
+						for key, value in zip(batch_energies, energy_values):
+    						batch_energies[key].append(value)
+					
+					previous_time = this_time
+
+			else:
+				for file in os.listdir(self.source_path):
+					filename = os.fsdecode(file)
+					source_name = file.split('.')[0]
+
+					if not os.path.isdir(self.output_path + source_name) and os.path.isfile(self.source_path + file) and (file[-3:] == 'sim' or file[-6:] == 'sim.gz'):
+						self.megalib.open_file(self.source_path + filename)
+						os.mkdir(self.output_path + source_name + '/')
+						print('Reading source file: ' + filename)
+						source_times, source_energies = self.make_hit_dict(self.megalib.reader)
+
+						for key in times.keys():
+							self.write_hits(self.output_path + source_name + '/' + key + '.hdf5', times[key], energies[key])
+
+						self.write_event_readme_dc3(source_name)
 
 		else:
 			for file in os.listdir(self.source_path):
@@ -533,21 +892,10 @@ class trigger_algorithm_inputs():
 						self.megalib.open_file(self.background_path)
 						print('Reading background file: ' + self.background_path.split('/')[-1])
 						background_times, background_energies = self.make_hit_dict(self.megalib.reader)
-					elif self.background_type == 'none':
-
-
+					
 					times, energies, start_time = self.combine_single_source(source_times, source_energies, background_times, background_energies)
 
 					for key in times.keys():
-						self.write_hits(self.output_path + source_name + '/' + key + '.txt', times[key], energies[key])
+						self.write_hits(self.output_path + source_name + '/' + key + '.hdf5', times[key], energies[key])
 
-					self.write_readme(source_name, start_time)
-
-# paths: event_list
-# combination: individual, multiple (for multiple, lightcurve times need to already be correct, and need to give event list)
-
-# background type: concatenated_file (individual/multiple), components (individual/multiple), random (individual), none (individual)
-# assume correct timestamps if multiple
-
-# check in code if backgroud files are csv or sim and read in accordingly
-# randomly choosing background only works for sim
+					self.write_readme_dc2(source_name, start_time)
