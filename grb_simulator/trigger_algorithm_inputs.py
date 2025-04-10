@@ -4,6 +4,7 @@ import random
 import shutil
 import pandas as pd
 import h5py
+import csv
 from .config import suppress_output, read_yaml, define_paths
 from .load_megalib import load_megalib
 
