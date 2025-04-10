@@ -817,10 +817,10 @@ class trigger_algorithm_inputs():
 								batch_times[key].append(value)
 							energy_values = []
 							for key in background_energies:
-    							energy_values.append(background_energies[key][i])
+								energy_values.append(background_energies[key][i])
 							for key, value in zip(batch_energies, energy_values):
 								batch_energies[key].append(value)
-    						for item in self.detector_keys:
+							for item in self.detector_keys:
 								times_sorted[item] = []
 								energies_sorted[item] = []
 							times_sorted[key], energies_sorted[key] = (list(x) for x in zip(*sorted(zip(batch_times[key], batch_energies[key]))))
@@ -831,7 +831,7 @@ class trigger_algorithm_inputs():
 						os.mkdir(directory_path)
 
 						this_event_list= {'Event name': [], 'Start time (s)': [], 'Duration (s)': [], 'Photon flux (ph/cm^2/s)': [], 'Energy flux (erg/cm^2/s)': [], 'Zenith (degrees)': [], 'Azimuth (degrees)': []}
-    					for key, value in zip(this_event_list, event_list_values):
+						for key, value in zip(this_event_list, event_list_values):
     						this_event_list[key].append(value)
 
 						print('Reading source file: ' + filename)
@@ -841,20 +841,20 @@ class trigger_algorithm_inputs():
 
 					else:
 
-    					for key, value in zip(this_event_list, event_list_values):
-    						this_event_list[key].append(value)
-    					print('Reading source file: ' + filename)
+						for key, value in zip(this_event_list, event_list_values):
+							this_event_list[key].append(value)
+						print('Reading source file: ' + filename)
 						these_times, these_energies = self.make_hit_dict(self.megalib.reader)
 						time_values = []
 						for key in these_times:
     						time_values.append(these_times[key][i])
 						for key, value in zip(batch_times, time_values):
     						batch_times[key].append(value)
-    					energy_values = []
+						energy_values = []
 						for key in these_energies:
     						energy_values.append(these_energies[key][i])
 						for key, value in zip(batch_energies, energy_values):
-    						batch_energies[key].append(value)
+							batch_energies[key].append(value)
 					
 					previous_time = this_time
 
