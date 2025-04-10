@@ -847,12 +847,12 @@ class trigger_algorithm_inputs():
 						these_times, these_energies = self.make_hit_dict(self.megalib.reader)
 						time_values = []
 						for key in these_times:
-    						time_values.append(these_times[key][i])
+							time_values.append(these_times[key][i])
 						for key, value in zip(batch_times, time_values):
-    						batch_times[key].append(value)
+							batch_times[key].append(value)
 						energy_values = []
 						for key in these_energies:
-    						energy_values.append(these_energies[key][i])
+							energy_values.append(these_energies[key][i])
 						for key, value in zip(batch_energies, energy_values):
 							batch_energies[key].append(value)
 					
