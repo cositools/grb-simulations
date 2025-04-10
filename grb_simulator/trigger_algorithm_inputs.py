@@ -31,9 +31,9 @@ class trigger_algorithm_inputs():
 		 	 self.mass_model_path] = define_paths([inputs['paths']['input'], inputs['paths']['background'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model']], 
 		 									  	  [False, False, True, False, False])
 
-		 	init_dc2_mass_model(inputs['mass_model_version'])
+			init_dc2_mass_model(inputs['mass_model_version'])
 
-		 	if 'time' in inputs['background']:
+			if 'time' in inputs['background']:
 				self.background_time = inputs['background']['time']
 			if 'number' in inputs['background']:
 				self.background_num = inputs['background']['number']
