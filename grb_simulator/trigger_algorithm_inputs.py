@@ -832,7 +832,7 @@ class trigger_algorithm_inputs():
 
 						this_event_list= {'Event name': [], 'Start time (s)': [], 'Duration (s)': [], 'Photon flux (ph/cm^2/s)': [], 'Energy flux (erg/cm^2/s)': [], 'Zenith (degrees)': [], 'Azimuth (degrees)': []}
 						for key, value in zip(this_event_list, event_list_values):
-    						this_event_list[key].append(value)
+							this_event_list[key].append(value)
 
 						print('Reading source file: ' + filename)
 						batch_times, batch_energies = self.make_hit_dict(self.megalib.reader)
