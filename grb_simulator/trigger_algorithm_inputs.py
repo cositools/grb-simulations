@@ -794,17 +794,17 @@ class trigger_algorithm_inputs():
 
 					event_list_values = []
 					for key in self.event_list:
-    					event_list_values.append(self.event_list[key][i])
+						event_list_values.append(self.event_list[key][i])
 
-    				filename = None
-    				for file in os.listdir(self.source_path):
-      					if file.startswith(self.event_list['Event name'][i]):
-        					filename = file
-        			if filename is None:
-        				print('.sim file for ' + self.event_list['Event name'][i] + ' not found')
-        				continue
+					filename = None
+					for file in os.listdir(self.source_path):
+						if file.startswith(self.event_list['Event name'][i]):
+							filename = file
+					if filename is None:
+						print('.sim file for ' + self.event_list['Event name'][i] + ' not found')
+						continue
     					
-    				self.megalib.open_file(self.source_path + filename)
+					self.megalib.open_file(self.source_path + filename)
 
 					if directory_number == 0 or previous_time > this_time:
 
@@ -812,14 +812,14 @@ class trigger_algorithm_inputs():
 							self.write_readme_dc3(directory_path, this_event_list)
 							time_values = []
 							for key in background_times:
-    							time_values.append(background_times[key][i])
+								time_values.append(background_times[key][i])
 							for key, value in zip(batch_times, time_values):
-    							batch_times[key].append(value)
-    						energy_values = []
+								batch_times[key].append(value)
+							energy_values = []
 							for key in background_energies:
     							energy_values.append(background_energies[key][i])
 							for key, value in zip(batch_energies, energy_values):
-    							batch_energies[key].append(value)
+								batch_energies[key].append(value)
     						for item in self.detector_keys:
 								times_sorted[item] = []
 								energies_sorted[item] = []
