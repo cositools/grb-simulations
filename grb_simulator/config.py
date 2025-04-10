@@ -109,6 +109,7 @@ def define_paths(paths, create_dir):
 
 	if len(paths) == len(create_dir):
 		for i in range(len(paths)):
+			this_path = paths[i]
 			if create_dir[i]:
 				if not os.path.isdir(this_path):
 					os.makedirs(this_path)

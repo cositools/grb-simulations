@@ -56,19 +56,17 @@ class trigger_algorithm_inputs():
 		 	 	 self.background_path, 
 		 	 	 self.output_path,
 		 	 	 self.source_file_path, 
-		 	 	 self.mass_model_path,
-		 	 	 event_list_file] = define_paths([inputs['paths']['input'], inputs['paths']['background'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model'], inputs['paths']['event_list']], 
-		 									  	 [False, False, True, False, False, False])
+		 	 	 self.mass_model_path] = define_paths([inputs['paths']['input'], inputs['paths']['background'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model']], 
+		 									  		  [False, False, True, False, False])
 
 			else:
 		 		[self.source_path,  
 		 		 self.output_path,
 		 		 self.source_file_path, 
-		 		 self.mass_model_path,
-		 		 event_list_file] = define_paths([inputs['paths']['input'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model'], inputs['paths']['event_list']], 
-		 									  	 [False, True, False, False, False])
+		 		 self.mass_model_path] = define_paths([inputs['paths']['input'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model']], 
+		 									  		  [False, True, False, False])
 
-			self.event_list = self.read_event_list(event_list_file)
+			self.event_list = self.read_event_list(self.source_file_path + 'event_list.txt')
 
 			bgob1_pos = [3., 7.]
 			bgob2_pos = [3., 7.]
