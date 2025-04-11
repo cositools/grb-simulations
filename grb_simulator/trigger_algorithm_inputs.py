@@ -153,8 +153,6 @@ class trigger_algorithm_inputs():
 				for i, value in enumerate(row):
 					data[header[i]].append(value)
 
-		print(data.keys())
-
 		return data
 
 	def read_events_dc2(self, times, energies, hit):
@@ -742,12 +740,12 @@ class trigger_algorithm_inputs():
 		source_index = np.where(np.array(self.event_list['Event name'])==source_name)[0][0]
 
 		with open(self.output_path + source_name + '/' + 'README.md', 'w') as f:
-			f.write('zenith angle (deg): ' + self.event_list['Azimuth (degrees)'] + '\n')
-			f.write('azimuth angle (deg): ' + self.event_list['Zenith (degrees)'] + '\n')
-			f.write('energy flux (erg/cm^2/s): ' + self.event_list['Energy flux (erg/cm^2/s)'] + '\n')
-			f.write('photon flux (ph/cm^2/s): ' + self.event_list['Photon flux (ph/cm^2/s)'] + '\n')
-			f.write('event start time (s): ' + str(self.event_list['Start time (s)']) + '\n')
-			f.write('event duration (s): ' + str(self.event_list['Duration (s)']) + '\n')
+			f.write('zenith angle (deg): ' + self.event_list[' Azimuth (degrees)'] + '\n')
+			f.write('azimuth angle (deg): ' + self.event_list[' Zenith (degrees)'] + '\n')
+			f.write('energy flux (erg/cm^2/s): ' + self.event_list[' Energy flux (erg/cm^2/s)'] + '\n')
+			f.write('photon flux (ph/cm^2/s): ' + self.event_list[' Photon flux (ph/cm^2/s)'] + '\n')
+			f.write('event start time (s): ' + str(self.event_list[' Start time (s)']) + '\n')
+			f.write('event duration (s): ' + str(self.event_list[' Duration (s)']) + '\n')
 
 	def write_readme_dc3(self, directory_path, event_list):
 		"""
@@ -791,7 +789,7 @@ class trigger_algorithm_inputs():
 				directory_number = 0
 				for i in range(len(self.event_list['Event name'])):
 
-					this_time = self.event_list['Start time (s)']
+					this_time = self.event_list[' Start time (s)']
 
 					event_list_values = []
 					for key in self.event_list:
