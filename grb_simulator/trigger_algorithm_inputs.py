@@ -528,8 +528,8 @@ class trigger_algorithm_inputs():
 			Energies of hits in each detector
 		"""
 
-		times = {}
-		energies = {}
+		times = {'bgob1': [], 'bgob2': [], 'bgox1': [], 'bgox2': [], 'bgoy1': [], 'bgoy2': []}
+		energies = {'bgob1': [], 'bgob2': [], 'bgox1': [], 'bgox2': [], 'bgoy1': [], 'bgoy2': []}
 
 		print('Reading background file: ' + path.split('/')[-1])
 		data = pd.read_csv(path, compression='gzip')
