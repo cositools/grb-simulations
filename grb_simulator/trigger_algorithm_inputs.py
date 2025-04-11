@@ -807,7 +807,7 @@ class trigger_algorithm_inputs():
 
 					if directory_number == 0 or previous_time > this_time:
 
-						if directory_number > 0:
+						if directory_number > 0 or i == len(self.event_list['Event name']) - 1:
 							self.write_readme_dc3(directory_path, this_event_list)
 							time_values = []
 							for key in background_times:
