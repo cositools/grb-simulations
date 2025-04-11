@@ -267,59 +267,59 @@ class trigger_algorithm_inputs():
 		
 				#bottom_Zplus
 				if x<-11.2 and y>3 and z<7:
-					bottom_Zplus_1+=(Hit.GetEnergy())
+					bottom_Zplus_1+=(hit.GetEnergy())
 				elif x>-11.2 and x<-2.5 and y>3 and z<7:
-					bottom_Zplus_2+=(Hit.GetEnergy())
+					bottom_Zplus_2+=(hit.GetEnergy())
 				elif x>-2.5 and x<4.6 and y>3 and z<7:
-					bottom_Zplus_3+=(Hit.GetEnergy())
+					bottom_Zplus_3+=(hit.GetEnergy())
 				elif x>4.6 and x<11.2 and y>3 and z<7:
-					bottom_Zplus_4+=(Hit.GetEnergy())
+					bottom_Zplus_4+=(hit.GetEnergy())
 				elif x>4.6 and y>3 and z<7:
-					bottom_Zplus_5+=(Hit.GetEnergy())
+					bottom_Zplus_5+=(hit.GetEnergy())
                
 				#bottom Zminus
 				elif x<-11.2 and y<3 and z<7:
-					bottom_Zminus_1+=(Hit.GetEnergy())
+					bottom_Zminus_1+=(hit.GetEnergy())
 				elif x>-11.2 and x<-2.5 and y<3 and z<7:
-					bottom_Zminus_2+=(Hit.GetEnergy())
+					bottom_Zminus_2+=(hit.GetEnergy())
 				elif x>-2.5 and x<4.6 and y<3 and z<7:
-					bottom_Zminus_3+=(Hit.GetEnergy())
+					bottom_Zminus_3+=(hit.GetEnergy())
 				elif x>4.6 and x<11.2 and y<3 and z<7:
- 					bottom_Zminus_4+=(Hit.GetEnergy())
+ 					bottom_Zminus_4+=(hit.GetEnergy())
 				elif x>4.6 and y<3 and z<7:
-					bottom_Zminus_5+=(Hit.GetEnergy())
+					bottom_Zminus_5+=(hit.GetEnergy())
                 
 				#y1 pannel
 				elif z>7 and y <-2.6 and y>-14 and x>15:
-					y1_1+=(Hit.GetEnergy())
+					y1_1+=(hit.GetEnergy())
 				elif z>7 and y >-2.6 and y <9 and x>15:
-					y1_2+=(Hit.GetEnergy())
+					y1_2+=(hit.GetEnergy())
 				elif z>7 and y >9 and y<20.6 and x>15:
-					y1_3+=(Hit.GetEnergy())
+					y1_3+=(hit.GetEnergy())
                 
 				#y2 pannel
 				elif z>7 and y <-2.6 and y>-14 and x<-10:
-					y2_1+=(Hit.GetEnergy())
+					y2_1+=(hit.GetEnergy())
 				elif z>7 and y >-2.6 and y <9 and x<-10:
-					y2_2+=(Hit.GetEnergy())
+					y2_2+=(hit.GetEnergy())
 				elif z>7 and y >9 and y<20.6 and  x<-10:
-					y2_3+=(Hit.GetEnergy())
+					y2_3+=(hit.GetEnergy())
 
 				#x1 panel
 				elif z>-10 and x<-6 and y>15:
-					x1_1+=(Hit.GetEnergy())
+					x1_1+=(hit.GetEnergy())
 				elif z>-10 and x >-6 and x <6 and y>15:
-					x1_2+=(Hit.GetEnergy())
+					x1_2+=(hit.GetEnergy())
 				elif z>-10 and x >6 and y>15:
-					x1_3+=(Hit.GetEnergy())
+					x1_3+=(hit.GetEnergy())
 
 				#x2 panel
 				elif z>-10 and x<-6 and y<-10:
-					x2_1+=(Hit.GetEnergy())
+					x2_1+=(hit.GetEnergy())
 				elif z>-10 and x >-6 and x <6 and y<-10:
-					x2_2+=(Hit.GetEnergy())
+					x2_2+=(hit.GetEnergy())
 				elif z>-10 and x >6 and y<-10:
-					x2_3+=(Hit.GetEnergy())
+					x2_3+=(hit.GetEnergy())
 				
 				else:
 					print(str(x)+" "+str(y)+" "+str(z))
