@@ -211,7 +211,7 @@ class trigger_algorithm_inputs():
 
 		return times, energies
 
-	def read_events_dc3(self, times, energies, hit):
+	def read_events_dc3(self, times, energies, event):
 		'''
 		Sort hits into detectors based on positions.
 
