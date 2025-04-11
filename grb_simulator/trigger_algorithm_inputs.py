@@ -153,7 +153,7 @@ class trigger_algorithm_inputs():
 				for i, value in enumerate(row):
 					data[header[i]].append(value)
 
-		print(data.keys)
+		print(data.keys())
 
 		return data
 
