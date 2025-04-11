@@ -153,6 +153,8 @@ class trigger_algorithm_inputs():
 				for i, value in enumerate(row):
 					data[header[i]].append(value)
 
+		print(data.keys)
+
 		return data
 
 	def read_events_dc2(self, times, energies, hit):
