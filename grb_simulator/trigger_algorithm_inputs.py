@@ -772,13 +772,13 @@ class trigger_algorithm_inputs():
 
 		if self.config == 'dc3':
 
-			if hasattr(self, background_path):
+			if hasattr(self, 'background_path'):
 				n_background_files = 0
-				for background_file in os.listdir(background_path):
+				for background_file in os.listdir(self.background_path):
 					if n_background_files == 0:
-						background_times, background_energies = self.read_background_csv(background_path + background_file)
+						background_times, background_energies = self.read_background_csv(self.background_path + background_file)
 					else:
-						component_times, component_energies = self.read_background_csv(background_path + background_file)
+						component_times, component_energies = self.read_background_csv(self.background_path + background_file)
 						for key in background_times.keys():
 							background_times[key].extend(component_times)
 							background_energies[key].extend(component_energies)
