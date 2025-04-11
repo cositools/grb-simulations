@@ -683,7 +683,7 @@ class trigger_algorithm_inputs():
 
 		print('Writing to file: ' + file_path.split('/')[-1])
 		with h5py.File(file_path, 'w') as f:
-			dset = hf.create_dataset('trigger_data', data=data, compression='gzip')
+			dset = f.create_dataset('trigger_data', data=data, compression='gzip')
 			dset.attrs['columns'] = ['time (s)', 'energy (keV)']
 
 	def copy_readme(self):
