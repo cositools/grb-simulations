@@ -819,7 +819,7 @@ class trigger_algorithm_inputs():
 								energies_sorted[item] = []
 							times_sorted[key], energies_sorted[key] = (list(x) for x in zip(*sorted(zip(batch_times[key], batch_energies[key]))))
 							for key in times_sorted.keys():
-								self.write_hits(self.output_path + source_name + '/' + key + '.hdf5', times_sorted[key], energies_sorted[key])
+								self.write_hits(directory_path + key + '.hdf5', times_sorted[key], energies_sorted[key])
 						continue
     					
 					self.megalib.open_file(self.source_path + filename)
@@ -845,7 +845,7 @@ class trigger_algorithm_inputs():
 								energies_sorted[item] = []
 							times_sorted[key], energies_sorted[key] = (list(x) for x in zip(*sorted(zip(batch_times[key], batch_energies[key]))))
 							for key in times_sorted.keys():
-								self.write_hits(self.output_path + source_name + '/' + key + '.hdf5', times_sorted[key], energies_sorted[key])
+								self.write_hits(directory_path + key + '.hdf5', times_sorted[key], energies_sorted[key])
 
 						directory_path = self.output_path + 'batch_' + str(directory_number) + '/'
 						os.mkdir(directory_path)
