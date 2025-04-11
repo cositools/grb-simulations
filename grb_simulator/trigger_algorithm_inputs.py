@@ -833,7 +833,7 @@ class trigger_algorithm_inputs():
 						for key, value in zip(this_event_list, event_list_values):
 							this_event_list[key].append(value)
 
-						print('Reading source file: ' + filename)
+						print('Reading sim file: ' + filename)
 						batch_times, batch_energies = self.make_hit_dict(self.megalib.reader)
 
 						directory_number += 1
@@ -842,16 +842,18 @@ class trigger_algorithm_inputs():
 
 						for key, value in zip(this_event_list, event_list_values):
 							this_event_list[key].append(value)
-						print('Reading source file: ' + filename)
+						print('Reading sim file: ' + filename)
 						these_times, these_energies = self.make_hit_dict(self.megalib.reader)
 						time_values = []
 						for key in these_times:
-							time_values.append(these_times[key][i])
+							for i in range(len(these_times[key])):
+								time_values.append(these_times[key][i])
 						for key, value in zip(batch_times, time_values):
 							batch_times[key].append(value)
 						energy_values = []
 						for key in these_energies:
-							energy_values.append(these_energies[key][i])
+							for i in range(len(these_energies[key])):
+								energy_values.append(these_energies[key][i])
 						for key, value in zip(batch_energies, energy_values):
 							batch_energies[key].append(value)
 					
@@ -865,7 +867,7 @@ class trigger_algorithm_inputs():
 					if not os.path.isdir(self.output_path + source_name) and os.path.isfile(self.source_path + file) and (file[-3:] == 'sim' or file[-6:] == 'sim.gz'):
 						self.megalib.open_file(self.source_path + filename)
 						os.mkdir(self.output_path + source_name + '/')
-						print('Reading source file: ' + filename)
+						print('Reading sim file: ' + filename)
 						source_times, source_energies = self.make_hit_dict(self.megalib.reader)
 
 						for key in times.keys():
@@ -881,7 +883,7 @@ class trigger_algorithm_inputs():
 				if not os.path.isdir(self.output_path + source_name) and os.path.isfile(self.source_path + file) and (file[-3:] == 'sim' or file[-6:] == 'sim.gz'):
 					self.megalib.open_file(self.source_path + filename)
 					os.mkdir(self.output_path + source_name + '/')
-					print('Reading source file: ' + filename)
+					print('Reading sim file: ' + filename)
 					source_times, source_energies = self.make_hit_dict(self.megalib.reader)
     
 					if self.background_type == 'random':
