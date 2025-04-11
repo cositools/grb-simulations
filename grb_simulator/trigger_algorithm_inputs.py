@@ -801,6 +801,23 @@ class trigger_algorithm_inputs():
 							filename = file
 					if filename is None:
 						print('.sim file for ' + self.event_list['Event name'][i] + ' not found')
+						if i == len(self.event_list['Event name']) - 1:
+							time_values = []
+							for key in background_times:
+								time_values.append(background_times[key][i])
+							for key, value in zip(batch_times, time_values):
+								batch_times[key].append(value)
+							energy_values = []
+							for key in background_energies:
+								energy_values.append(background_energies[key][i])
+							for key, value in zip(batch_energies, energy_values):
+								batch_energies[key].append(value)
+							for item in self.detector_keys:
+								times_sorted[item] = []
+								energies_sorted[item] = []
+							times_sorted[key], energies_sorted[key] = (list(x) for x in zip(*sorted(zip(batch_times[key], batch_energies[key]))))
+							for key in times.keys():
+								self.write_hits(self.output_path + source_name + '/' + key + '.hdf5', times[key], energies[key])
 						continue
     					
 					self.megalib.open_file(self.source_path + filename)
