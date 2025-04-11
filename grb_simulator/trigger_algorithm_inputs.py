@@ -812,6 +812,8 @@ class trigger_algorithm_inputs():
 								energy_values.append(background_energies[key][i])
 							for key, value in zip(batch_energies, energy_values):
 								batch_energies[key].append(value)
+							times_sorted = {}
+							energies_sorted = {}
 							for item in self.detector_keys:
 								times_sorted[item] = []
 								energies_sorted[item] = []
@@ -836,6 +838,8 @@ class trigger_algorithm_inputs():
 								energy_values.append(background_energies[key][i])
 							for key, value in zip(batch_energies, energy_values):
 								batch_energies[key].append(value)
+							times_sorted = {}
+							energies_sorted = {}
 							for item in self.detector_keys:
 								times_sorted[item] = []
 								energies_sorted[item] = []
