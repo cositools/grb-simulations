@@ -443,7 +443,7 @@ class trigger_algorithm_inputs():
 
 				else:
 
-					times, energies = read_events_dc3(times, energies, event)
+					times, energies = self.read_events_dc3(times, energies, event)
 
 		return times, energies
 
