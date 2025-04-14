@@ -83,11 +83,6 @@ class trigger_algorithm_inputs():
 		else:
 			raise RuntimeError('Configuration must be dc2 or dc3')
 
-
-		#if inputs['background']['type'] == 'file':
-		#	self.background_path = self.background_path[:-1]
-		#self.mass_model_path = self.mass_model_path[:-1]
-
 		self.megalib = load_megalib(self.mass_model_path)
 
 	def init_dc2_mass_model(self, mass_model_version):
@@ -181,34 +176,34 @@ class trigger_algorithm_inputs():
 			if len(self.bgo_pos) == 5:
 				# This may not be correct, events missing
 				if self.bgo_pos[0][0] <= position[0] <= self.bgo_pos[0][1] and self.bgo_pos[0][2] <= position[1] <= self.bgo_pos[0][3] and self.bgo_pos[0][4] <= position[2] <= self.bgo_pos[0][5]:
-					times['bgob'].append(time)
-					energies['bgob'].append(energy)
+					times['bgob'].append(float(time))
+					energies['bgob'].append(float(energy))
 				elif self.bgo_pos[1][0] <= position[0] <= self.bgo_pos[1][1] and self.bgo_pos[1][2] <= position[1] <= self.bgo_pos[1][3] and self.bgo_pos[1][4] <= position[2] <= self.bgo_pos[1][5]:
-					times['bgox1'].append(time)
-					energies['bgox1'].append(energy)
+					times['bgox1'].append(float(time))
+					energies['bgox1'].append(float(energy))
 				elif self.bgo_pos[2][0] <= position[0] <= self.bgo_pos[2][1] and self.bgo_pos[2][2] <= position[1] <= self.bgo_pos[2][3] and self.bgo_pos[2][4] <= position[2] <= self.bgo_pos[2][5]:
-					times['bgox2'].append(time)
-					energies['bgox2'].append(energy)
+					times['bgox2'].append(float(time))
+					energies['bgox2'].append(float(energy))
 				elif self.bgo_pos[3][0] <= position[0] <= self.bgo_pos[3][1] and self.bgo_pos[3][2] <= position[1] <= self.bgo_pos[3][3] and self.bgo_pos[3][4] <= position[2] <= self.bgo_pos[3][5]:
-					times['bgoy1'].append(time)
-					energies['bgoy1'].append(energy)
+					times['bgoy1'].append(float(time))
+					energies['bgoy1'].append(float(energy))
 				elif self.bgo_pos[4][0] <= position[0] <= self.bgo_pos[4][1] and self.bgo_pos[4][2] <= position[1] <= self.bgo_pos[4][3] and self.bgo_pos[4][4] <= position[2] <= self.bgo_pos[4][5]:
-					times['bgoy2'].append(time)
-					energies['bgoy2'].append(energy)
+					times['bgoy2'].append(float(time))
+					energies['bgoy2'].append(float(energy))
 
 		elif hit.GetDetector() == self.ged_num and hasattr(self, 'ged_pos'):
 			if self.ged_pos[0][0] <= position[2] <= self.ged_pos[0][1]:
-				times['ged1'].append(time)
-				energies['ged1'].append(energy)
+				times['ged1'].append(float(time))
+				energies['ged1'].append(float(energy))
 			elif self.ged_pos[1][0] <= position[2] <= self.ged_pos[1][1]:
-				times['ged2'].append(time)
-				energies['ged2'].append(energy)
+				times['ged2'].append(float(time))
+				energies['ged2'].append(float(energy))
 			elif self.ged_pos[2][0] <= position[2] <= self.ged_pos[2][1]:
-				times['ged3'].append(time)
-				energies['ged3'].append(energy)
+				times['ged3'].append(float(time))
+				energies['ged3'].append(float(energy))
 			elif self.ged_pos[3][0] <= position[2] <= self.ged_pos[3][1]:
-				times['ged4'].append(time)
-				energies['ged4'].append(energy)
+				times['ged4'].append(float(time))
+				energies['ged4'].append(float(energy))
 
 		return times, energies
 
@@ -327,71 +322,71 @@ class trigger_algorithm_inputs():
 					print("Error: Coordinate not found")
 
 		if bottom_Zplus_1 >= 80.:
-			times['bgob1'].append(time)
-			energies['bgob1'].append(bottom_Zplus_1)
+			times['bgob1'].append(float(time))
+			energies['bgob1'].append(float(bottom_Zplus_1))
 		if bottom_Zplus_2 >= 80.:
-			times['bgob1'].append(time)
-			energies['bgob1'].append(bottom_Zplus_2)
+			times['bgob1'].append(float(time))
+			energies['bgob1'].append(float(bottom_Zplus_2))
 		if bottom_Zplus_3 >= 80.:
-			times['bgob1'].append(time)
-			energies['bgob1'].append(bottom_Zplus_3)
+			times['bgob1'].append(float(time))
+			energies['bgob1'].append(float(bottom_Zplus_3))
 		if bottom_Zplus_4 >= 80.:
-			times['bgob1'].append(time)
-			energies['bgob1'].append(bottom_Zplus_4)
+			times['bgob1'].append(float(time))
+			energies['bgob1'].append(float(bottom_Zplus_4))
 		if bottom_Zplus_5 >= 80.:
-			times['bgob1'].append(time)
-			energies['bgob1'].append(bottom_Zplus_5)
+			times['bgob1'].append(float(time))
+			energies['bgob1'].append(float(bottom_Zplus_5))
 		if bottom_Zminus_1 >= 80.:
-			times['bgob2'].append(time)
-			energies['bgob2'].append(bottom_Zminus_1)
+			times['bgob2'].append(float(time))
+			energies['bgob2'].append(float(bottom_Zminus_1))
 		if bottom_Zminus_2 >= 80.:
-			times['bgob2'].append(time)
-			energies['bgob2'].append(bottom_Zminus_2)
+			times['bgob2'].append(float(time))
+			energies['bgob2'].append(float(bottom_Zminus_2))
 		if bottom_Zminus_3 >= 80.:
-			times['bgob2'].append(time)
-			energies['bgob2'].append(bottom_Zminus_3)
+			times['bgob2'].append(float(time))
+			energies['bgob2'].append(float(bottom_Zminus_3))
 		if bottom_Zminus_4 >= 80.:
-			times['bgob2'].append(time)
-			energies['bgob2'].append(bottom_Zminus_4)
+			times['bgob2'].append(float(time))
+			energies['bgob2'].append(float(bottom_Zminus_4))
 		if bottom_Zminus_5 >= 80.:
-			times['bgob2'].append(time)
-			energies['bgob2'].append(bottom_Zminus_5)
+			times['bgob2'].append(float(time))
+			energies['bgob2'].append(float(bottom_Zminus_5))
 		if x1_1 >= 80.:
-			times['bgox1'].append(time)
-			energies['bgox1'].append(x1_1)
+			times['bgox1'].append(float(time))
+			energies['bgox1'].append(float(x1_1))
 		if x1_2 >= 80.:
-			times['bgox1'].append(time)
-			energies['bgox1'].append(x1_2)
+			times['bgox1'].append(float(time))
+			energies['bgox1'].append(float(x1_2))
 		if x1_3 >= 80.:
-			times['bgox1'].append(time)
-			energies['bgox1'].append(x1_3)
+			times['bgox1'].append(float(time))
+			energies['bgox1'].append(float(x1_3))
 		if x2_1 >= 80.:
-			times['bgox2'].append(time)
-			energies['bgox2'].append(x2_1)
+			times['bgox2'].append(float(time))
+			energies['bgox2'].append(float(x2_1))
 		if x2_2 >= 80.:
-			times['bgox2'].append(time)
-			energies['bgox2'].append(x2_2)
+			times['bgox2'].append(float(time))
+			energies['bgox2'].append(float(x2_2))
 		if x2_3 >= 80.:
-			times['bgox2'].append(time)
-			energies['bgox2'].append(x2_3)
+			times['bgox2'].append(float(time))
+			energies['bgox2'].append(float(x2_3))
 		if y1_1 >= 80.:
-			times['bgoy1'].append(time)
-			energies['bgoy1'].append(y1_1)
+			times['bgoy1'].append(float(time))
+			energies['bgoy1'].append(float(y1_1))
 		if y1_2 >= 80.:
-			times['bgoy1'].append(time)
-			energies['bgoy1'].append(y1_2)
+			times['bgoy1'].append(float(time))
+			energies['bgoy1'].append(float(y1_2))
 		if y1_3 >= 80.:
-			times['bgoy1'].append(time)
-			energies['bgoy1'].append(y1_3)
+			times['bgoy1'].append(float(time))
+			energies['bgoy1'].append(float(y1_3))
 		if y2_1 >= 80.:
-			times['bgoy2'].append(time)
-			energies['bgoy2'].append(y2_1)
+			times['bgoy2'].append(float(time))
+			energies['bgoy2'].append(float(y2_1))
 		if y2_2 >= 80.:
-			times['bgoy2'].append(time)
-			energies['bgoy2'].append(y2_2)
+			times['bgoy2'].append(float(time))
+			energies['bgoy2'].append(float(y2_2))
 		if y2_3 >= 80.:
-			times['bgoy2'].append(time)
-			energies['bgoy2'].append(y2_3)
+			times['bgoy2'].append(float(time))
+			energies['bgoy2'].append(float(y2_3))
 
 		return times, energies
 
@@ -540,23 +535,23 @@ class trigger_algorithm_inputs():
 				if data['timestamp[s]'][i] > end_time:
 					break
 			if data['bgo_bottom_1[keV]'][i] != 0.0:
-				times['bgob1'].append(data['timestamp[s]'][i])
-				energies['bgob1'].append(data['bgo_bottom_1[keV]'][i])
+				times['bgob1'].append(float(data['timestamp[s]'][i]))
+				energies['bgob1'].append(float(data['bgo_bottom_1[keV]'][i]))
 			elif data['bgo_bottom_2[keV]'][i] != 0.0:
-				times['bgob2'].append(data['timestamp[s]'][i])
-				energies['bgob2'].append(data['bgo_bottom_2[keV]'][i])
+				times['bgob2'].append(float(data['timestamp[s]'][i]))
+				energies['bgob2'].append(float(data['bgo_bottom_2[keV]'][i]))
 			elif data['bgo_x1[keV]'][i] != 0.0:
-				times['bgox1'].append(data['timestamp[s]'][i])
-				energies['bgox1'].append(data['bgo_x1[keV]'][i])
+				times['bgox1'].append(float(data['timestamp[s]'][i]))
+				energies['bgox1'].append(float(data['bgo_x1[keV]'][i]))
 			elif data['bgo_x2[keV]'][i] != 0.0:
-				times['bgox2'].append(data['timestamp[s]'][i])
-				energies['bgox2'].append(data['bgo_x2[keV]'][i])
+				times['bgox2'].append(float(data['timestamp[s]'][i]))
+				energies['bgox2'].append(float(data['bgo_x2[keV]'][i]))
 			elif data['bgo_y1[keV]'][i] != 0.0:
-				times['bgoy1'].append(data['timestamp[s]'][i])
-				energies['bgoy1'].append(data['bgo_y1[keV]'][i])
+				times['bgoy1'].append(float(data['timestamp[s]'][i]))
+				energies['bgoy1'].append(float(data['bgo_y1[keV]'][i]))
 			elif data['bgo_y2[keV]'][i] != 0.0:
-				times['bgoy2'].append(data['timestamp[s]'][i])
-				energies['bgoy2'].append(data['bgo_y2[keV]'][i])
+				times['bgoy2'].append(float(data['timestamp[s]'][i]))
+				energies['bgoy2'].append(float(data['bgo_y2[keV]'][i]))
 
 		return times, energies
 
