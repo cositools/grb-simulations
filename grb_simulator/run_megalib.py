@@ -2,134 +2,144 @@ import os
 import shutil
 import glob
 import fnmatch
-from .config import define_paths
+from .config import read_yaml, define_paths
 
 class run_megalib():
 
-	def __init__(self, inputs={}, input_path=None, output_path=None, mass_model_path=None, config_revan=None, config_mimrec=None):
+	def __init__(self, input_file):
 		"""
 		Run cosima, revan, and/or mimrec.
 
 		Parameters
 		----------
-		inputs : dict, optional
-			Contents of input yaml file
-		input_path : str, optional
-			Path to directory housing MEGAlib input files
-		output_path : str, optional
-			Path to directory to store MEGAlib output files
-		mass_model_path : str, optional
-			Path to instrument mass model, required if running revan or mimrec
-		config_revan : str, optional
-			Path to revan configuration file
-		config_mimrec : str, optional
-			Path to mimrec configuration file
+		input_file : str
+			Path to input .yaml file
 		"""
 
-		if not input_path == None:
-			self.input_cosima = input_path
-			self.input_revan = input_path
-			self.input_mimrec = input_path
+		inputs = read_yaml(input_file)
 
-		if not output_path == None:
-			self.output_cosima = output_path
-			self.output_revan = output_path
-			self.output_mimrec = output_path
+		if 'source_files' in inputs['paths'] and 'sim_files' in inputs['paths']:
+			[self.input_cosima, self.output_cosima] = define_paths([inputs['paths']['source_files'], inputs['paths']['sim_files']], [False, True])
 
-		if not mass_model_path == None:
-			self.mass_model = mass_model_path
-
-		if not config_revan == None:
-			self.config_revan = config_revan
-
-		if not config_mimrec == None:
-			self.config_mimrec = config_mimrec
-
-		if 'input_path' in inputs.keys() and 'output_path' in inputs.keys():
-			if 'mass_model_path' in inputs.keys() and 'config_file_path' in inputs.keys():
-				[input_path, 
-		 	 	 output_path, 
-		 	 	 mass_model_path, 
-		 	 	 config_file_path] = define_paths([inputs['input_path'], inputs['output_path'], inputs['mass_model_path'], inputs['config_file_path']], 
-		 									  	  [False, True, False, False])
-				mass_model_path = mass_model_path[:-1]
-				config_file_path = config_file_path[:-1]
-				if not hasattr(self, 'mass_model'):
-					self.mass_model = mass_model_path
-				if not hasattr(self, 'config_revan'):
-					self.config_revan = config_file_path
-				if not hasattr(self, 'config_mimrec'):
-					self.config_mimrec = config_file_path
+			if 'cosima' in inputs and 'parallel' in inputs['cosima'] and inputs['cosima']['parallel']:
+				self.cosima_parallel = True
+				if 'instances' in inputs['cosima']:
+					self.cosima_instances = int(inputs['cosima']['instances'])
 			else:
-				[input_path, output_path] = define_paths([inputs['input_path'], inputs['output_path']], [False, True])
-			
-			if not hasattr(self, 'input_cosima'):
-				self.input_cosima = input_path
-				self.input_revan = input_path
-				self.input_mimrec = input_path
-			if not hasattr(self, 'output_cosima'):
-				self.output_cosima = output_path
-				self.output_revan = output_path
-				self.output_mimrec = output_path
+				self.cosima_parallel = False
 
-	def cosima(self, file, output_path):
+			if 'cosima' in inputs and 'zip' in inputs['cosima'] and not inputs['cosima']['zip']:
+				self.cosima_zip = False
+			else:
+				self.cosima_zip = True
+
+		if 'sim_files' in inputs['paths'] and 'tra_files' in inputs['paths'] and 'mass_model' in inputs['paths'] and 'config' in inputs['revan']:
+			[self.input_revan, 
+			 self.output_revan, 
+			 self.mass_model,
+			 self.config_revan] = define_paths([inputs['paths']['sim_files'], inputs['paths']['tra_files'], 
+			 									inputs['paths']['mass_model'], inputs['revan']['config']], 
+			 								   [False, True, False, False])
+
+		if 'tra_files' in inputs['paths'] and 'extracted_tra_files' in inputs['paths'] and 'mass_model' in inputs['paths'] and 'config' in inputs['mimrec']:
+			[self.input_mimrec, 
+			 self.output_mimrec, 
+			 self.mass_model,
+			 self.config_mimrec] = define_paths([inputs['paths']['tra_files'], inputs['paths']['extracted_tra_files'], 
+			 									 inputs['paths']['mass_model'], inputs['mimrec']['config']], 
+			 								    [False, True, False, False])
+
+	def cosima(self, file, output_path, zipped):
 		"""
-		Run cosima on a source file.
+		Run cosima on a .source file.
 
 		Parameters
 		----------
 		file : str
-			Source file name 
+			Name of .source file
+		output_path : str
+			Path to directory to store output .sim or .sim.gz files
+		zipped : bool
+			Whether to produce gzipped .sim files
 		"""
 
 		if not os.path.isdir(output_path + 'output/'):
-					os.makedirs(output_path + 'output/')
-		os.system('cosima -z ' + file + ' > ' + output_path + 'output/output_' + file.split('.')[0] + '.txt')
+			os.makedirs(output_path + 'output/')
 
-	def mcosima(self, file, output_path, instances=None):
-		"""
-		Run mcosima on a source file.
-
-		Parameters
-		----------
-		file : str
-			Source file name 
-		"""
-
-		if not os.path.isdir(output_path + 'output/'):
-					os.makedirs(output_path + 'output/')
-		if instances == None:
-			os.system('mcosima -z ' + file + ' > ' + output_path + 'output/output_' + file.split('.')[0] + '.txt')
+		if zipped:
+			os.system('cosima ' + file + ' > ' + output_path + 'output/output_' + file.split('.')[0] + '.txt')
 		else:
-			os.system('mcosima -t ' + instances + ' -z ' + file + ' > ' + output_path + '/output_' + file.split('.')[0] + '.txt')
+			os.system('cosima -u ' + file + ' > ' + output_path + 'output/output_' + file.split('.')[0] + '.txt')
+
+	def mcosima(self, file, output_path, zipped, instances=None):
+		"""
+		Run mcosima on a .source file.
+
+		Parameters
+		----------
+		file : str
+			Name of .source file
+		output_path : str
+			Path to directory to store output .sim or .sim.gz files
+		zipped : bool
+			Whether to produce gzipped .sim files
+		instances : int, optional
+			Number of mcosima instances to run, default is number of CPU cores
+		"""
+
+		if not os.path.isdir(output_path + 'output/'):
+			os.makedirs(output_path + 'output/')
+
+		if instances == None:
+			if zipped:
+				os.system('mcosima -z ' + file + ' > ' + output_path + 'output/output_' + file.split('.')[0] + '.txt')
+			else:
+				os.system('mcosima ' + file + ' > ' + output_path + 'output/output_' + file.split('.')[0] + '.txt')
+		else:
+			if zipped:
+				os.system('mcosima -t ' + instances + ' -z ' + file + ' > ' + output_path + '/output_' + file.split('.')[0] + '.txt')
+			else:
+				os.system('mcosima -t ' + instances + file + ' > ' + output_path + '/output_' + file.split('.')[0] + '.txt')
 
 	def revan(self, file, output_path, mass_model, config_file):
 		"""
-		Run revan on a sim file.
+		Run revan on a .sim file.
 
 		Parameters
 		----------
 		file : str
-			Sim or sim.gz file name 
+			Name of .sim or .sim.gz file
+		output_path : str
+			Path to directory to store output .tra.gz files
+		mass_model : str
+			Path to mass model
+		config_file : int, optional
+			Path to revan configuration file
 		"""
 
 		if not os.path.isdir(output_path + 'output/'):
-					os.makedirs(output_path + 'output/')
+			os.makedirs(output_path + 'output/')
 		os.system('revan -f ' + file + ' -g ' + mass_model + ' -c ' + config_file + ' -n -a > ' + output_path + 'output/output_' + file.split('.')[0] + '.txt')
 
 	def mimrec(self, file, output_path, mass_model, config_file):
 		"""
-		Run mimrec on a tra file.
+		Run mimrec on a .tra file.
 
 		Parameters
 		----------
 		file : str
-			Tra or tra.gz file name 
+			Name of .tra or .tra.gz file
+		output_path : str
+			Path to directory to store output extracted .tra files
+		mass_model : str
+			Path to mass model
+		config_file : int, optional
+			Path to mimrec configuration file
 		"""
 
 		if not os.path.isdir(output_path + 'output/'):
-					os.makedirs(output_path + 'output/')
-		os.system('mimrec -f ' + file + ' -g ' + mass_model + ' -c ' + config_mimrec + ' -n -x > ' + output_mimrec + 'output/output_' + file.split('.')[0] + '.txt')
+			os.makedirs(output_path + 'output/')
+		os.system('mimrec -f ' + file + ' -g ' + mass_model + ' -c ' + config_file + ' -n -x > ' + output_path + 'output/output_' + file.split('.')[0] + '.txt')
 
 	def run_on_all(self, run_func, input_path, output_path, input_ext, output_ext, print_text):
 		"""
@@ -171,107 +181,132 @@ class run_megalib():
 		if os.path.exists(cwd + '/absorptions'):
 			shutil.rmtree(cwd + '/absorptions')
 
-	def run_cosima(self, input_path=None, output_path=None, zipped=True):
+	def run_cosima(self, input_path=None, output_path=None, zipped=None, instances=None):
 		"""
-		Run cosima on all source files in a directory.
+		Run cosima or mcosima on all .source files in a directory.
 
 		Parameters
 		----------
-		input_path : str
-			Path to directory housing source files
+		input_path : str, optional
+			Path to directory housing .source files, if different from path defined when creating run_megalib object
 		output_path : str, optional
-			Path to directory to store output sim or sim.gz files, if different from path defined when creating run_megalib object
+			Path to directory to store output .sim or .sim.gz files, if different from path defined when creating run_megalib object
 		zipped : bool, optional
 			Whether to zip output .sim files
+		instances : int, optional
+			Number of instances to run for mcosima, default is number of CPU cores
 		"""
 
 		if input_path == None:
-			input_path = self.input_cosima
+			if hasattr(self, 'input_cosima'):
+				input_path = self.input_cosima
+			else:
+				raise RuntimeError(".source file directory must be provided in input .yaml file or as an argument when running run_cosima().")
 		if output_path == None:
-			output_path = self.output_cosima
+			if hasattr(self, 'output_cosima'):
+				output_path = self.output_cosima
+			else:
+				raise RuntimeError(".sim file directory must be provided in input .yaml file or as an argument when running run_cosima().")
+		if zipped == None:
+			zipped = self.cosima_zip
 
-		cosima_func = lambda file: self.cosima(file, output_path)
-
+		if not self.cosima_parallel:
+			cosima_func = lambda file: self.cosima(file, output_path, self.cosima_zip)
+		else:
+			if instances == None and hasattr(self, 'cosima_instances'):
+				instances = self.cosima_instances
+			cosima_func = lambda file: self.mcosima(file, output_path, self.cosima_zip, instances=instances)
+			
 		if zipped:
 			self.run_on_all(cosima_func, input_path, output_path, ['source'], 'sim.gz', 'Simulating')
 		else:
 			self.run_on_all(cosima_func, input_path, output_path, ['source'], 'sim', 'Simulating')
 
-	def run_mcosima(self, input_path=None, output_path=None, instances=None, zipped=True):
+		with open(output_path + 'README.md', 'w') as f:
+			f.write('# .sim Files\n\n')
+			f.write('This directory contains .sim files created using cosima from the .source files in `' + input_path + '`.')
+			if self.cosima_parallel:
+				if instances == None:
+					f.write('This directory contains .sim files created using mcosima from the .source files in `' + input_path + '`.')
+				else:
+					f.write('This directory contains .sim files created using mcosima with ' + str(instances) + ' instances from the .source files in `' + input_path + '`.')
+
+	def run_revan(self, input_path=None, output_path=None, config_file=None):
 		"""
-		Run mcosima on all source files in a directory.
+		Run revan on all .sim and .sim.gz files in a directory.
 
 		Parameters
 		----------
-		input_path : str
-			Path to directory housing source files
+		input_path : str, optional
+			Path to directory housing .sim and/or .sim.gz files, if different from path defined when creating run_megalib object
 		output_path : str, optional
-			Path to directory to store output sim or sim.gz files, if different from path defined when creating run_megalib object
-		instances : int, optional
-			Number of instances to run, default is number of CPU cores
-		zipped : bool, optional
-			Whether to zip output .sim files
+			Path to directory to store output .tra.gz files, if different from path defined when creating run_megalib object
+		config_file : str, optional
+			Path to revan configuration file, if different from path defined when creating run_megalib object
 		"""
 
 		if input_path == None:
-			input_path = self.input_cosima
+			if hasattr(self, 'input_revan'):
+				input_path = self.input_revan
+			else:
+				raise RuntimeError(".sim file directory must be provided in input .yaml file or as an argument when running run_revan().")
 		if output_path == None:
-			output_path = self.output_cosima
-
-		mcosima_func = lambda file: self.mcosima(file, output_path, instances=instances)
-
-		if zipped:
-			self.run_on_all(mcosima_func, input_path, output_path, ['source'], 'sim.gz', 'Simulating')
-		else:
-			self.run_on_all(mcosima_func, input_path, output_path, ['source'], 'sim', 'Simulating')
-
-	def run_revan(self, input_path=None, output_path=None, config_file=None, zipped=True):
-		"""
-		Run revan on all sim and sim.gz files in a directory.
-
-		Parameters
-		----------
-		input_path : str
-			Path to directory housing sim and/or sim.gz files
-		output_path : str, optional
-			Path to directory to store output tra or tra.gz files, if different from path defined when creating run_megalib object
-		zipped : bool, optional
-			Whether to zip output tra files
-		"""
-
-		if input_path == None:
-			input_path = self.input_revan
-		if output_path == None:
-			output_path = self.output_revan
+			if hasattr(self, 'output_revan'):
+				output_path = self.output_revan
+			else:
+				raise RuntimeError(".tra file directory must be provided in input .yaml file or as an argument when running run_revan().")
 		if config_file == None:
-			config_file = self.config_revan
+			if hasattr(self, 'config_revan'):
+				config_file = self.config_revan
+			else:
+				raise RuntimeError("Configuration file path must be provided in input .yaml file or as an argument when running run_revan().")
+		if not hasattr(self, 'mass_model'):
+			raise RuntimeError("Mass model path must be provided in input .yaml file or as an argument when running run_revan().")
 
 		revan_func = lambda file: self.revan(file, output_path, self.mass_model, config_file)
 
-		if zipped:
-			self.run_on_all(revan_func, input_path, output_path, ['sim','sim.gz'], 'tra.gz', 'Reconstructing')
-		else:
-			self.run_on_all(revan_func, input_path, output_path, ['sim','sim.gz'], 'tra', 'Reconstructing')
+		self.run_on_all(revan_func, input_path, output_path, ['sim','sim.gz'], 'tra.gz', 'Reconstructing')
+
+		with open(output_path + 'README.md', 'w') as f:
+			f.write('# .tra Files\n\n')
+			f.write('This directory contains .tra files created using revan from the .sim files in `' + input_path + '` using `' + config_file + '` as the configuration file.')
 
 	def run_mimrec(self, input_path=None, output_path=None, config_file=None):
 		"""
-		Run mimrec on all tra and tra.gz files in a directory.
+		Run mimrec on all .tra and .tra.gz files in a directory.
 
 		Parameters
 		----------
-		input_path : str
-			Path to directory housing tra and/or tra.gz files
+		input_path : str, optional
+			Path to directory housing .tra and/or .tra.gz files, if different from path defined when creating run_megalib object
 		output_path : str, optional
-			Path to directory to store output extracted tra files, if different from path defined when creating run_megalib object
+			Path to directory to store output extracted .tra files, if different from path defined when creating run_megalib object
+		config_file : str, optional
+			Path to mimrec configuration file, if different from path defined when creating run_megalib object
 		"""
 
 		if input_path == None:
-			input_path = self.input_mimrec
+			if hasattr(self, 'input_mimrec'):
+				input_path = self.input_mimrec
+			else:
+				raise RuntimeError(".tra file directory must be provided in input .yaml file or as an argument when running run_mimrec().")
 		if output_path == None:
-			output_path = self.output_mimrec
+			if hasattr(self, 'output_mimrec'):
+				output_path = self.output_mimrec
+			else:
+				raise RuntimeError("Extracted .tra file directory must be provided in input .yaml file or as an argument when running run_mimrec().")
 		if config_file == None:
-			config_file = self.config_mimrec
+			if hasattr(self, 'config_mimrec'):
+				config_file = self.config_mimrec
+			else:
+				raise RuntimeError("Configuration file path must be provided in input .yaml file or as an argument when running run_mimrec().")
+		if not hasattr(self, 'mass_model'):
+			raise RuntimeError("Mass model path must be provided in input .yaml file or as an argument when running run_mimrec().")
 
 		mimrec_func = lambda file: self.mimrec(file, output_path, self.mass_model, config_file)
 
 		self.run_on_all(mimrec_func, input_path, output_path, ['tra','tra.gz'], 'extracted.tra', 'Extracting events for')
+
+		with open(output_path + 'README.md', 'w') as f:
+			f.write('# Extracted .tra Files\n\n')
+			f.write('This directory contains extracted .tra files created using mimrec from the .tra files in `' + input_path + '` using `' + config_file + '` as the configuration file.')

@@ -109,11 +109,17 @@ def define_paths(paths, create_dir):
 
 	if len(paths) == len(create_dir):
 		for i in range(len(paths)):
-			this_path = os.path.abspath(paths[i]) + '/'
-			output_paths.append(this_path)
+			this_path = paths[i]
 			if create_dir[i]:
 				if not os.path.isdir(this_path):
 					os.makedirs(this_path)
+			if os.path.isfile(this_path):
+				this_path = os.path.abspath(paths[i])
+			elif os.path.isdir(this_path):
+				this_path = os.path.abspath(paths[i]) + '/'
+			else:
+				raise RuntimeError(this_path + ' does not exist')
+			output_paths.append(this_path)
 
 	return output_paths
 

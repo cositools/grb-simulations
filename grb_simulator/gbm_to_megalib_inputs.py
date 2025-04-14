@@ -7,38 +7,33 @@ from gbm.data import TTE
 from gbm.binning.unbinned import bin_by_time
 from gbm.background import BackgroundFitter, BackgroundRates
 from gbm.background.binned import Polynomial
-from gbm.plot import Lightcurve, Spectrum
+from gbm.plot import Lightcurve
 from .config import read_yaml, write_yaml, define_paths
 
 class gbm_to_megalib_inputs():
 
-	def __init__(self, inputs):
+	def __init__(self, input_file):
 		"""
 		Convert data downloaded from GBM to MEGAlib input files.
 
 		Parameters
 		----------
-		inputs : dict
-			Contents of input yaml file 
-		input_path : str
-			Path to GBM data 
-		output_path : str
-			Path to save MEGAlib input files
-		plot_path : str
-			Path to save plots
+		input_file : str
+			Path to input .yaml file
 		"""
+
+		inputs = read_yaml(input_file)
 
 		[self.input_path, 
 		 self.output_path, 
-		 self.plot_path] = define_paths([inputs['input_path'], inputs['output_path'], inputs['plot_path']], 
+		 self.plot_path] = define_paths([inputs['paths']['input'], inputs['paths']['output'], inputs['paths']['plots']], 
 		 								[False, True, True])
 
-		self.energy_range = inputs['cosi_energy_range']
-		self.background_t_range = inputs['background_time_range']
-		self.source_t_range = inputs['source_time_range']
-		self.nai_e_range = inputs['nai_energy_range']
-		self.bgo_e_range = inputs['bgo_energy_range']
-		self.min_bin_size = inputs['min_duration']
+		self.energy_range = inputs['energy']['cosi_range']
+		self.background_t_range = inputs['time']['background_range']
+		self.source_t_range = inputs['time']['source_range']
+		self.nai_e_range = inputs['energy']['nai_range']
+		self.bgo_e_range = inputs['energy']['bgo_range']
 
 		self.n_sources = self.count_sources()
 
@@ -121,7 +116,7 @@ class gbm_to_megalib_inputs():
 
 		return bkgd_list, merge
 
-	def bin_data(self, merge, bin_rate, bin_rate2):
+	def bin_data(self, merge, bin_rate, bin_rate2, t90):
 		"""
 		Merge and bin data.
 
@@ -133,6 +128,8 @@ class gbm_to_megalib_inputs():
 			Time bin size for plotting and background fitting
 		bin_rate2 : float
 			Time bin size for MEGAlib lightcurve
+		t90 : float
+			Duration (T90) of event
 
 		Returns
 		----------
@@ -176,7 +173,7 @@ class gbm_to_megalib_inputs():
 			bin_sizes = np.append(bin_sizes, bins2[j+1] - bins2[j])
 
 		err = False
-		if min(bin_sizes) > self.min_bin_size or len(bin_sizes) == 1:
+		if min(bin_sizes) > t90 or len(bin_sizes) == 1:
 			print('Not finding event with Bayesian blocks. Not saving')
 			err = True
 
@@ -453,7 +450,7 @@ class gbm_to_megalib_inputs():
 		bkgd_list_nai, merge = self.read_detectors(n_detect, merge, self.nai_e_range)
 		bkgd_list_bgo, merge = self.read_detectors(b_detect, merge, self.bgo_e_range)
 
-		rates, bins2, lc_data, nbins, err = self.bin_data(merge, bin_rate, bin_rate2)
+		rates, bins2, lc_data, nbins, err = self.bin_data(merge, bin_rate, bin_rate2, float(source_info['t90']))
 		if not err:
 			tot_bkgd, err = self.fit_background(n_detect, b_detect, bkgd_list_nai, bkgd_list_bgo, bin_rate, float(source_info['t90_start']), float(source_info['t90']))
 
@@ -521,18 +518,41 @@ class gbm_to_megalib_inputs():
 		"""
 
 		source_info = read_yaml(self.input_path + name + '/' + name + '.yaml')
-		s_error = self.make_spectrum(source_info)
-		if not s_error:
-			lc_error = self.make_lightcurve(name, source_info)
-			if lc_error:
-				print('Deleting spectrum')
+		if (os.path.isfile(self.output_path + source_info['trigger_name'] + '_spectrum.yaml') and 
+			os.path.isfile(self.output_path + source_info['trigger_name'] + '_lightcurve.dat')):
+				print('Spectrum and lightcurve already exist')
+		else:
+			if os.path.isfile(self.output_path + source_info['trigger_name'] + '_spectrum.yaml'):
+				print('Spectrum file exists already. Deleting old file')
 				os.remove(self.output_path + source_info['trigger_name'] + '_spectrum.yaml')
+			elif os.path.isfile(self.output_path + source_info['trigger_name'] + '_lightcurve.dat'):
+				print('Lightcurve file exists already. Deleting old file')
+				os.remove(self.output_path + source_info['trigger_name'] + '_lightcurve.dat')
+			s_error = self.make_spectrum(source_info)
+			if not s_error:
+				lc_error = self.make_lightcurve(name, source_info)
+				if lc_error:
+					print('Deleting spectrum')
+					os.remove(self.output_path + source_info['trigger_name'] + '_spectrum.yaml')
+
+	def write_readme(self):
+		"""
+		Write README for MEGAlib input file directory.
+		"""
+
+		with open(self.output_path + 'README.md', 'w') as f:
+			f.write('# Spectra and Lightcurves\n\n')
+			f.write('This directory contains spectra and lightcurves of the Fermi-GBM data found in `' + self.input_path + 
+					'`. The lightcurves and spectra were binned using Bayesian blocks. The energy range for the spectral .yaml files is ' + 
+					str(self.energy_range[0]) + '-' + str(self.energy_range[1]) + ' keV. Only GRBs with Band and Comptonized best spectral fits are included.')
 
 	def make_spectra_lightcurves(self):
 		"""
 		Make spectra and lightcurves for all events in directory.
 		"""
 
+		self.write_readme()
+		
 		n = 0
 		for name in os.listdir(self.input_path):
 			if os.path.isdir(self.input_path + name):
