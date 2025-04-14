@@ -1,3 +1,4 @@
+configuration: 'dc2'                                                                                                                             # DC2 or DC3 configuration
 paths:
   input: '/path/to/sim/files/'                                                                                                                   # Path to directory housing source .sim files
   output: '/path/to/output/files/'                                                                                                               # Path to directory to store output
