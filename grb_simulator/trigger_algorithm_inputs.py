@@ -781,6 +781,12 @@ class trigger_algorithm_inputs():
 					n_background_files += 1
 				for key in background_times.keys():
 					background_times[key], background_energies[key] = (list(x) for x in zip(*sorted(zip(background_times[key], background_energies[key]))))
+					for item in background_times[key]:
+						if isinstance(item, str):
+							print(item)
+					for item in background_energies[key]:
+						if isinstance(item, str):
+							print(item)
 
 				directory_number = 0
 				for i in range(len(self.event_list['Event name'])):
