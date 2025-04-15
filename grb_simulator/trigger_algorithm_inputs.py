@@ -786,6 +786,12 @@ class trigger_algorithm_inputs():
 					for item in background_energies[key]:
 						if isinstance(item, str):
 							print(item)
+					print('printed strings')
+					for item in background_times[key]:
+						print(type(item))
+					for item in background_energies[key]:
+						print(type(item))
+					print('printed everything')
 					background_times[key], background_energies[key] = (list(x) for x in zip(*sorted(zip(background_times[key], background_energies[key]))))
 
 				directory_number = 0
