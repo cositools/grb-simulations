@@ -785,7 +785,7 @@ class trigger_algorithm_inputs():
 				directory_number = 0
 				for i in range(len(self.event_list['Event name'])):
 
-					this_time = self.event_list[' Start time (s)']
+					this_time = self.event_list[' Start time (s)'][i]
 
 					event_list_values = []
 					for key in self.event_list:
@@ -820,7 +820,7 @@ class trigger_algorithm_inputs():
     					
 					self.megalib.open_file(self.source_path + filename)
 
-					if directory_number == 0 or previous_time > this_time:
+					if directory_number == 0 or previous_time > this_time or i == len(self.event_list['Event name']) - 1:
 
 						if directory_number > 0 or i == len(self.event_list['Event name']) - 1:
 							self.write_readme_dc3(directory_path, this_event_list)
