@@ -776,22 +776,10 @@ class trigger_algorithm_inputs():
 					else:
 						component_times, component_energies = self.read_background_csv(self.background_path + background_file)
 						for key in background_times.keys():
-							background_times[key].extend(component_times)
-							background_energies[key].extend(component_energies)
+							background_times[key].extend(component_times[key])
+							background_energies[key].extend(component_energies[key])
 					n_background_files += 1
 				for key in background_times.keys():
-					for item in background_times[key]:
-						if isinstance(item, str):
-							print(item)
-					for item in background_energies[key]:
-						if isinstance(item, str):
-							print(item)
-					print('printed strings')
-					for item in background_times[key]:
-						print(type(item))
-					for item in background_energies[key]:
-						print(type(item))
-					print('printed everything')
 					background_times[key], background_energies[key] = (list(x) for x in zip(*sorted(zip(background_times[key], background_energies[key]))))
 
 				directory_number = 0
