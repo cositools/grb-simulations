@@ -782,6 +782,9 @@ class trigger_algorithm_inputs():
 				for key in background_times.keys():
 					background_times[key], background_energies[key] = (list(x) for x in zip(*sorted(zip(background_times[key], background_energies[key]))))
 
+				print('background times', background_times)
+
+				# !!! makes an extra directory and missing last event
 				directory_number = 0
 				for i in range(len(self.event_list['Event name'])):
 
@@ -875,6 +878,8 @@ class trigger_algorithm_inputs():
 							batch_energies[key].append(value)
 					
 					previous_time = this_time
+
+				print('sorted times', times_sorted)
 
 			else:
 				for file in os.listdir(self.source_path):
