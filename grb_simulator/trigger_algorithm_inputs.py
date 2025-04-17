@@ -779,10 +779,10 @@ class trigger_algorithm_inputs():
 							background_times[key].extend(component_times[key])
 							background_energies[key].extend(component_energies[key])
 					n_background_files += 1
+				print('background times') #######
 				for key in background_times.keys():
 					background_times[key], background_energies[key] = (list(x) for x in zip(*sorted(zip(background_times[key], background_energies[key]))))
-
-				print('background times', background_times)
+					print(len(background_times[key])) ########
 
 				# !!! makes an extra directory and missing last event
 				directory_number = 0
@@ -879,7 +879,9 @@ class trigger_algorithm_inputs():
 					
 					previous_time = this_time
 
-				print('sorted times', times_sorted)
+				print('sorted times') #######
+				for key in times_sorted.keys(): #######
+					print(len(times_sorted[key])) ########
 
 			else:
 				for file in os.listdir(self.source_path):
