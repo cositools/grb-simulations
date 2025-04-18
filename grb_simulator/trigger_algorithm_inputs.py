@@ -779,10 +779,8 @@ class trigger_algorithm_inputs():
 							background_times[key].extend(component_times[key])
 							background_energies[key].extend(component_energies[key])
 					n_background_files += 1
-				print('background times') #######
 				for key in background_times.keys():
 					background_times[key], background_energies[key] = (list(x) for x in zip(*sorted(zip(background_times[key], background_energies[key]))))
-					print(len(background_times[key])) ########
 
 				# !!! makes an extra directory and missing last event
 				directory_number = 0
@@ -801,22 +799,19 @@ class trigger_algorithm_inputs():
 					if filename is None:
 						print('.sim file for ' + self.event_list['Event name'][i] + ' not found')
 						if i == len(self.event_list['Event name']) - 1:
-							time_values = []
-							for key in background_times:
-								time_values.append(background_times[key][i])
-							for key, value in zip(batch_times, time_values):
-								batch_times[key].append(value)
-							energy_values = []
-							for key in background_energies:
-								energy_values.append(background_energies[key][i])
-							for key, value in zip(batch_energies, energy_values):
-								batch_energies[key].append(value)
+							for key in background_times.keys():
+								for i in range(len(background_times[key])):
+									batch_times[key].append(background_times[key][i])
+							for key in background_energies.keys():
+								for i in range(len(background_energies[key])):
+									batch_energies[key].append(background_energies[key][i])
 							times_sorted = {}
 							energies_sorted = {}
 							for item in self.detector_keys:
 								times_sorted[item] = []
 								energies_sorted[item] = []
-							times_sorted[key], energies_sorted[key] = (list(x) for x in zip(*sorted(zip(batch_times[key], batch_energies[key]))))
+							for key in background_times.keys():
+								times_sorted[key], energies_sorted[key] = (list(x) for x in zip(*sorted(zip(batch_times[key], batch_energies[key]))))
 							for key in times_sorted.keys():
 								self.write_hits(directory_path + key + '.hdf5', times_sorted[key], energies_sorted[key])
 						continue
@@ -827,22 +822,19 @@ class trigger_algorithm_inputs():
 
 						if directory_number > 0 or i == len(self.event_list['Event name']) - 1:
 							self.write_readme_dc3(directory_path, this_event_list)
-							time_values = []
-							for key in background_times:
-								time_values.append(background_times[key][i])
-							for key, value in zip(batch_times, time_values):
-								batch_times[key].append(value)
-							energy_values = []
-							for key in background_energies:
-								energy_values.append(background_energies[key][i])
-							for key, value in zip(batch_energies, energy_values):
-								batch_energies[key].append(value)
+							for key in background_times.keys():
+								for i in range(len(background_times[key])):
+									batch_times[key].append(background_times[key][i])
+							for key in background_energies.keys():
+								for i in range(len(background_energies[key])):
+									batch_energies[key].append(background_energies[key][i])
 							times_sorted = {}
 							energies_sorted = {}
 							for item in self.detector_keys:
 								times_sorted[item] = []
 								energies_sorted[item] = []
-							times_sorted[key], energies_sorted[key] = (list(x) for x in zip(*sorted(zip(batch_times[key], batch_energies[key]))))
+							for key in background_times.keys():
+								times_sorted[key], energies_sorted[key] = (list(x) for x in zip(*sorted(zip(batch_times[key], batch_energies[key]))))
 							for key in times_sorted.keys():
 								self.write_hits(directory_path + key + '.hdf5', times_sorted[key], energies_sorted[key])
 
@@ -864,18 +856,12 @@ class trigger_algorithm_inputs():
 							this_event_list[key].append(value)
 						print('Reading sim file: ' + filename)
 						these_times, these_energies = self.make_hit_dict(self.megalib.reader)
-						time_values = []
-						for key in these_times:
+						for key in these_times.keys():
 							for i in range(len(these_times[key])):
-								time_values.append(these_times[key][i])
-						for key, value in zip(batch_times, time_values):
-							batch_times[key].append(value)
-						energy_values = []
-						for key in these_energies:
+								batch_times[key].append(these_times[key][i])
+						for key in these_energies.keys():
 							for i in range(len(these_energies[key])):
-								energy_values.append(these_energies[key][i])
-						for key, value in zip(batch_energies, energy_values):
-							batch_energies[key].append(value)
+								batch_energies[key].append(these_energies[key][i])
 					
 					previous_time = this_time
 
