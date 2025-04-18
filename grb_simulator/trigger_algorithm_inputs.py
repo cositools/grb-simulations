@@ -695,6 +695,8 @@ class trigger_algorithm_inputs():
 		"""
 		Write README for event directory.
 
+		Parameters
+		----------
 		source_name : str
 			Name of source
 		start_time : float
@@ -729,6 +731,8 @@ class trigger_algorithm_inputs():
 		"""
 		Write README for event directory.
 
+		Parameters
+		----------
 		source_name : str
 			Name of source
 		"""
@@ -747,6 +751,8 @@ class trigger_algorithm_inputs():
 		"""
 		Write README for directory of multiple events combined with background.
 
+		Parameters
+		----------
 		directory_path : str
 			Path to directory containing trigger files
 		event_list : list
@@ -758,6 +764,45 @@ class trigger_algorithm_inputs():
 			for i in range(len(event_list['Event name'])):
 				f.write(event_list['Event name'][i] + ', ' + str(event_list['Start time (s)'][i]) + ', ' + str(event_list['Duration (s)'][i]) + ', ' + str(event_list['Photon flux (ph/cm^2/s)'][i]) + ', ' + 
 						str(event_list['Energy flux (erg/cm^2/s)'][i]) + ', ' + str(event_list['Zenith (degrees)'][i]) + ', ' + str(event_list['Azimuth (degrees)'][i]) + '\n')
+
+	def combine_multiple_events(self, source_times, source_energies, background_times, background_energies):
+		"""
+		Combine source & background events and sort by time.
+
+		Parameters
+		----------
+		source_times : dict
+			Times of source events
+		source_energies : dict
+			Energies of source events
+		background_times : dict
+			Times of source events
+		background_energies : dict
+			Energies of source events
+
+		Returns
+		----------
+		times_sorted : dict
+			Times of hits in each detector
+		energies_sorted : dict
+			Energies of hits in each detector
+		"""
+
+		for key in background_times.keys():
+			for i in range(len(background_times[key])):
+				source_times[key].append(background_times[key][i])
+		for key in background_energies.keys():
+			for i in range(len(background_energies[key])):
+				source_energies[key].append(background_energies[key][i])
+		times_sorted = {}
+		energies_sorted = {}
+		for item in self.detector_keys:
+			times_sorted[item] = []
+			energies_sorted[item] = []
+		for key in background_times.keys():
+			times_sorted[key], energies_sorted[key] = (list(x) for x in zip(*sorted(zip(source_times[key], source_energies[key]))))
+
+		return times_sorted, energies_sorted
 
 	def create_event_files(self):
 		"""
@@ -782,15 +827,20 @@ class trigger_algorithm_inputs():
 				for key in background_times.keys():
 					background_times[key], background_energies[key] = (list(x) for x in zip(*sorted(zip(background_times[key], background_energies[key]))))
 
-				# !!! makes an extra directory and missing last event
 				directory_number = 0
+				previous_time = -1.
 				for i in range(len(self.event_list['Event name'])):
 
 					this_time = self.event_list[' Start time (s)'][i]
 
-					event_list_values = []
-					for key in self.event_list:
-						event_list_values.append(self.event_list[key][i])
+					if previous_time > this_time:
+						directory_path = self.output_path + 'batch_' + str(directory_number) + '/'
+						os.mkdir(directory_path)
+						self.write_readme_dc3(directory_path, this_event_list)
+						times_sorted, energies_sorted = self.combine_multiple_events(batch_times, batch_energies, background_times, background_energies)
+						for key in times_sorted.keys():
+							self.write_hits(directory_path + key + '.hdf5', times_sorted[key], energies_sorted[key])
+						directory_number += 1
 
 					filename = None
 					for file in os.listdir(self.source_path):
@@ -799,56 +849,27 @@ class trigger_algorithm_inputs():
 					if filename is None:
 						print('.sim file for ' + self.event_list['Event name'][i] + ' not found')
 						if i == len(self.event_list['Event name']) - 1:
-							for key in background_times.keys():
-								for i in range(len(background_times[key])):
-									batch_times[key].append(background_times[key][i])
-							for key in background_energies.keys():
-								for i in range(len(background_energies[key])):
-									batch_energies[key].append(background_energies[key][i])
-							times_sorted = {}
-							energies_sorted = {}
-							for item in self.detector_keys:
-								times_sorted[item] = []
-								energies_sorted[item] = []
-							for key in background_times.keys():
-								times_sorted[key], energies_sorted[key] = (list(x) for x in zip(*sorted(zip(batch_times[key], batch_energies[key]))))
+							directory_path = self.output_path + 'batch_' + str(directory_number) + '/'
+							os.mkdir(directory_path)
+							self.write_readme_dc3(directory_path, this_event_list)
+							times_sorted, energies_sorted = self.combine_multiple_events(batch_times, batch_energies, background_times, background_energies)
 							for key in times_sorted.keys():
 								self.write_hits(directory_path + key + '.hdf5', times_sorted[key], energies_sorted[key])
 						continue
+
+					event_list_values = []
+					for key in self.event_list:
+						event_list_values.append(self.event_list[key][i])
     					
 					self.megalib.open_file(self.source_path + filename)
 
-					if directory_number == 0 or previous_time > this_time or i == len(self.event_list['Event name']) - 1:
-
-						if directory_number > 0 or i == len(self.event_list['Event name']) - 1:
-							self.write_readme_dc3(directory_path, this_event_list)
-							for key in background_times.keys():
-								for i in range(len(background_times[key])):
-									batch_times[key].append(background_times[key][i])
-							for key in background_energies.keys():
-								for i in range(len(background_energies[key])):
-									batch_energies[key].append(background_energies[key][i])
-							times_sorted = {}
-							energies_sorted = {}
-							for item in self.detector_keys:
-								times_sorted[item] = []
-								energies_sorted[item] = []
-							for key in background_times.keys():
-								times_sorted[key], energies_sorted[key] = (list(x) for x in zip(*sorted(zip(batch_times[key], batch_energies[key]))))
-							for key in times_sorted.keys():
-								self.write_hits(directory_path + key + '.hdf5', times_sorted[key], energies_sorted[key])
-
-						directory_path = self.output_path + 'batch_' + str(directory_number) + '/'
-						os.mkdir(directory_path)
+					if previous_time > this_time or i == 0:
 
 						this_event_list= {'Event name': [], 'Start time (s)': [], 'Duration (s)': [], 'Photon flux (ph/cm^2/s)': [], 'Energy flux (erg/cm^2/s)': [], 'Zenith (degrees)': [], 'Azimuth (degrees)': []}
 						for key, value in zip(this_event_list, event_list_values):
 							this_event_list[key].append(value)
-
 						print('Reading sim file: ' + filename)
 						batch_times, batch_energies = self.make_hit_dict(self.megalib.reader)
-
-						directory_number += 1
 
 					else:
 
@@ -862,12 +883,16 @@ class trigger_algorithm_inputs():
 						for key in these_energies.keys():
 							for i in range(len(these_energies[key])):
 								batch_energies[key].append(these_energies[key][i])
+
+						if i == len(self.event_list['Event name']) - 1:
+							directory_path = self.output_path + 'batch_' + str(directory_number) + '/'
+							os.mkdir(directory_path)
+							self.write_readme_dc3(directory_path, this_event_list)
+							times_sorted, energies_sorted = self.combine_multiple_events(batch_times, batch_energies, background_times, background_energies)
+							for key in times_sorted.keys():
+								self.write_hits(directory_path + key + '.hdf5', times_sorted[key], energies_sorted[key])
 					
 					previous_time = this_time
-
-				print('sorted times') #######
-				for key in times_sorted.keys(): #######
-					print(len(times_sorted[key])) ########
 
 			else:
 				for file in os.listdir(self.source_path):
