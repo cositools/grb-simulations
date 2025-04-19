@@ -830,6 +830,7 @@ class trigger_algorithm_inputs():
 				directory_number = 0
 				previous_time = -1.
 				for i in range(len(self.event_list['Event name'])):
+					print(i, len(self.event_list['Event name']) - 1)
 
 					this_time = float(self.event_list[' Start time (s)'][i])
 
