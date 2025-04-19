@@ -831,7 +831,7 @@ class trigger_algorithm_inputs():
 				previous_time = -1.
 				for i in range(len(self.event_list['Event name'])):
 
-					this_time = self.event_list[' Start time (s)'][i]
+					this_time = float(self.event_list[' Start time (s)'][i])
 
 					if previous_time > this_time:
 						directory_path = self.output_path + 'batch_' + str(directory_number) + '/'
