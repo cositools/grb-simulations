@@ -830,7 +830,6 @@ class trigger_algorithm_inputs():
 				directory_number = 0
 				previous_time = -1.
 				for i in range(len(self.event_list['Event name'])):
-					print(i, len(self.event_list['Event name']) - 1)
 
 					this_time = float(self.event_list[' Start time (s)'][i])
 
@@ -885,7 +884,10 @@ class trigger_algorithm_inputs():
 							for i in range(len(these_energies[key])):
 								batch_energies[key].append(these_energies[key][i])
 
+						print(i, len(self.event_list['Event name']) - 1, i == len(self.event_list['Event name']) - 1)
+
 						if i == len(self.event_list['Event name']) - 1:
+							print('okay')
 							directory_path = self.output_path + 'batch_' + str(directory_number) + '/'
 							os.mkdir(directory_path)
 							self.write_readme_dc3(directory_path, this_event_list)
