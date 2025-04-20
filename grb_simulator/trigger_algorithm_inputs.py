@@ -878,11 +878,11 @@ class trigger_algorithm_inputs():
 						print('Reading sim file: ' + filename)
 						these_times, these_energies = self.make_hit_dict(self.megalib.reader)
 						for key in these_times.keys():
-							for i in range(len(these_times[key])):
-								batch_times[key].append(these_times[key][i])
+							for item in these_times[key]:
+								batch_times[key].append(item)
 						for key in these_energies.keys():
-							for i in range(len(these_energies[key])):
-								batch_energies[key].append(these_energies[key][i])
+							for item in these_energies[key]:
+								batch_energies[key].append(item)
 
 						print(i, len(self.event_list['Event name']) - 1, i == len(self.event_list['Event name']) - 1)
 
