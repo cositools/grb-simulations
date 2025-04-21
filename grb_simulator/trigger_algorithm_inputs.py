@@ -887,7 +887,6 @@ class trigger_algorithm_inputs():
 								batch_energies[key].append(item)
 
 						if i == len(self.event_list['Event name']) - 1:
-							print('okay')
 							directory_path = self.output_path + 'batch_' + str(directory_number) + '/'
 							os.mkdir(directory_path)
 							self.write_readme_dc3(directory_path, this_event_list)
