@@ -848,6 +848,8 @@ class trigger_algorithm_inputs():
 							filename = file
 					if filename is None:
 						print('.sim file for ' + self.event_list['Event name'][i] + ' not found')
+						if previous_time > this_time or i == 0:
+							this_event_list= {'Event name': [], 'Start time (s)': [], 'Duration (s)': [], 'Photon flux (ph/cm^2/s)': [], 'Energy flux (erg/cm^2/s)': [], 'Zenith (degrees)': [], 'Azimuth (degrees)': []}
 						if i == len(self.event_list['Event name']) - 1:
 							directory_path = self.output_path + 'batch_' + str(directory_number) + '/'
 							os.mkdir(directory_path)
@@ -883,8 +885,6 @@ class trigger_algorithm_inputs():
 						for key in these_energies.keys():
 							for item in these_energies[key]:
 								batch_energies[key].append(item)
-
-						print(i, len(self.event_list['Event name']) - 1, i == len(self.event_list['Event name']) - 1)
 
 						if i == len(self.event_list['Event name']) - 1:
 							print('okay')
