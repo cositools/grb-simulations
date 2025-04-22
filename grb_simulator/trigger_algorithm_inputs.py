@@ -850,6 +850,11 @@ class trigger_algorithm_inputs():
 						print('.sim file for ' + self.event_list['Event name'][i] + ' not found')
 						if previous_time > this_time or i == 0:
 							this_event_list= {'Event name': [], 'Start time (s)': [], 'Duration (s)': [], 'Photon flux (ph/cm^2/s)': [], 'Energy flux (erg/cm^2/s)': [], 'Zenith (degrees)': [], 'Azimuth (degrees)': []}
+							batch_times = {}
+							batch_energies = {}
+							for key in self.detector_keys:
+								batch_times[key] = []
+								batch_energies[key] = []
 						if i == len(self.event_list['Event name']) - 1:
 							directory_path = self.output_path + 'batch_' + str(directory_number) + '/'
 							os.mkdir(directory_path)
