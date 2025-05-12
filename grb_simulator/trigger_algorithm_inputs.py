@@ -818,18 +818,11 @@ class trigger_algorithm_inputs():
 				for background_file in os.listdir(self.background_path):
 					if n_background_files == 0:
 						background_times, background_energies = self.read_background_csv(self.background_path + background_file)
-						break
 					else:
 						component_times, component_energies = self.read_background_csv(self.background_path + background_file)
 						for key in background_times.keys():
 							background_times[key].extend(component_times[key])
 							background_energies[key].extend(component_energies[key])
-							### DEBUG
-							print('Background')
-							for item in background_times[key]:
-								if item < 1000:
-									print(item, key, background_file)
-							###
 					n_background_files += 1
 				for key in background_times.keys():
 					background_times[key], background_energies[key] = (list(x) for x in zip(*sorted(zip(background_times[key], background_energies[key]))))
@@ -884,18 +877,6 @@ class trigger_algorithm_inputs():
 							this_event_list[key].append(value)
 						print('Reading sim file: ' + filename)
 						batch_times, batch_energies = self.make_hit_dict(self.megalib.reader)
-						### DEBUG
-						print('Source')
-						first_times = []
-						num_counts = []
-						for key in batch_times.keys():
-							for item in batch_times[key]:
-								if item < 1000:
-									print(item, key, filename)
-								first_times.append(np.min(batch_times[key]))
-							num_counts.append(len(batch_times[key]))
-						print(filename, np.min(first_times), num_counts)
-						###
 
 					else:
 
@@ -903,18 +884,6 @@ class trigger_algorithm_inputs():
 							this_event_list[key].append(value)
 						print('Reading sim file: ' + filename)
 						these_times, these_energies = self.make_hit_dict(self.megalib.reader)
-						### DEBUG
-						print('Source')
-						first_times = []
-						num_counts = []
-						for key in these_times.keys():
-							for item in these_times[key]:
-								if item < 1000:
-									print(item, key, filename)
-								first_times.append(np.min(these_times[key]))
-							num_counts.append(len(these_times[key]))
-						print(filename, np.min(first_times), num_counts)
-						###
 						for key in these_times.keys():
 							for item in these_times[key]:
 								batch_times[key].append(item)
