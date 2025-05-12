@@ -95,6 +95,7 @@ Parameters to be defined in the .yaml file:
     - source_files: path to directory housing source files used to simulate .sim files (e.g. 'MEGAlib_source_files/')
     - mass_model: path to geometry file, must match the geometry used to create simulations but must be altered to not veto BGO hits
     - background: for 'dc2' configuration, if background_type is 'random', path to directory housing background .sim files (e.g. 'MEGAlib_backgrounds/'), and if background_type is 'file', the path to the concatenated background file (e.g. 'MEGAlib_backgrounds/background.sim'). For 'dc3' configuration, path to directory housing background .csv files (e.g. 'MEGAlib_backgrounds/') or not included to not combine with background)        
+    - saa_intervals: path to file containing SAA time intervals if want to remove events that occur these times (optional)         
 - background:       
     - type: whether to randomly select background regions for each source ('random') or use same background file for all sources ('file') (only necessary for 'dc2' configuration)
     - number: number of background files for each component (only necessary if type is 'random')    

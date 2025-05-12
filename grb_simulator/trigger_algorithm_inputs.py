@@ -53,7 +53,18 @@ class trigger_algorithm_inputs():
 
 		elif self.config == 'dc3':
 
-			if 'background' in inputs['paths']:
+			if 'background' in inputs['paths'] and 'saa_intervals' in inputs['paths']:
+				[self.source_path, 
+		 	 	 self.background_path, 
+		 	 	 self.output_path,
+		 	 	 self.source_file_path, 
+		 	 	 self.mass_model_path,
+		 	 	 self.saa_interval_path] = define_paths([inputs['paths']['input'], inputs['paths']['background'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model'], inputs['paths']['saa_intervals']], 
+		 												[False, False, True, False, False, False])
+
+		 	 	___, self.saa_intervals = self.read_time_intervals(self.saa_interval_path)
+
+		 	elif 'background' in inputs['paths']:
 				[self.source_path, 
 		 	 	 self.background_path, 
 		 	 	 self.output_path,
@@ -84,6 +95,26 @@ class trigger_algorithm_inputs():
 			raise RuntimeError('Configuration must be dc2 or dc3')
 
 		self.megalib = load_megalib(self.mass_model_path)
+
+	def read_time_intervals(self, file_path):
+		"""
+		Read file with time intervals.
+
+		Parameters
+		----------
+		file_path : str
+			Path to file
+		"""
+
+		time_intervals = []
+
+		with open(file_path, 'r') as csvfile:
+			reader = csv.reader(csvfile)
+			columns = next(reader)
+			for row in reader:
+				time_intervals.append(tuple([float(row[0]), float(row[1])]))
+
+		return columns, time_intervals
 
 	def init_dc2_mass_model(self, mass_model_version):
 		"""
@@ -873,23 +904,46 @@ class trigger_algorithm_inputs():
 					if previous_time > this_time or i == 0:
 
 						this_event_list= {'Event name': [], 'Start time (s)': [], 'Duration (s)': [], 'Photon flux (ph/cm^2/s)': [], 'Energy flux (erg/cm^2/s)': [], 'Zenith (degrees)': [], 'Azimuth (degrees)': []}
-						for key, value in zip(this_event_list, event_list_values):
-							this_event_list[key].append(value)
-						print('Reading sim file: ' + filename)
-						batch_times, batch_energies = self.make_hit_dict(self.megalib.reader)
-
+						saa = False
+						if hasattr(self, 'saa_intervals'):
+							end_time = this_time + float(self.event_list[' Duration (s)'][i])
+							for interval in self.saa_intervals:
+								if (this_time >= interval[0] and this_time <= interval[1]) or (end_time >= interval[0] and end_time <= interval[1]):
+									print(filename + ' occurs during SAA passage and will not be included')
+									batch_times = {}
+									batch_energies = {}
+									for key in self.detector_keys:
+										batch_times[key] = []
+										batch_energies[key] = []
+									saa = True
+									break
+						if not saa:
+							for key, value in zip(this_event_list, event_list_values):
+								this_event_list[key].append(value)
+							print('Reading sim file: ' + filename)
+							batch_times, batch_energies = self.make_hit_dict(self.megalib.reader)
+				
 					else:
 
-						for key, value in zip(this_event_list, event_list_values):
-							this_event_list[key].append(value)
-						print('Reading sim file: ' + filename)
-						these_times, these_energies = self.make_hit_dict(self.megalib.reader)
-						for key in these_times.keys():
-							for item in these_times[key]:
-								batch_times[key].append(item)
-						for key in these_energies.keys():
-							for item in these_energies[key]:
-								batch_energies[key].append(item)
+						saa = False
+						if hasattr(self, 'saa_intervals'):
+							end_time = this_time + float(self.event_list[' Duration (s)'][i])
+							for interval in self.saa_intervals:
+								if (this_time >= interval[0] and this_time <= interval[1]) or (end_time >= interval[0] and end_time <= interval[1]):
+									print(filename + ' occurs during SAA passage and will not be included')
+									saa = True
+									break
+						if not saa:
+							for key, value in zip(this_event_list, event_list_values):
+								this_event_list[key].append(value)
+							print('Reading sim file: ' + filename)
+							these_times, these_energies = self.make_hit_dict(self.megalib.reader)
+							for key in these_times.keys():
+								for item in these_times[key]:
+									batch_times[key].append(item)
+							for key in these_energies.keys():
+								for item in these_energies[key]:
+									batch_energies[key].append(item)
 
 						if i == len(self.event_list['Event name']) - 1:
 							directory_path = self.output_path + 'batch_' + str(directory_number) + '/'
@@ -902,6 +956,7 @@ class trigger_algorithm_inputs():
 					previous_time = this_time
 
 			else:
+				
 				for file in os.listdir(self.source_path):
 					filename = os.fsdecode(file)
 					source_name = file.split('.')[0]
