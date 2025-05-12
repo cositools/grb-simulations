@@ -893,7 +893,7 @@ class trigger_algorithm_inputs():
 								if item < 1000:
 									print(item, key, filename)
 								first_times.append(np.min(batch_times[key]))
-								num_counts.append(len(batch_times[key]))
+							num_counts.append(len(batch_times[key]))
 						print(filename, np.min(first_times), num_counts)
 						###
 
@@ -912,7 +912,7 @@ class trigger_algorithm_inputs():
 								if item < 1000:
 									print(item, key, filename)
 								first_times.append(np.min(these_times[key]))
-								num_counts.append(len(these_times[key]))
+							num_counts.append(len(these_times[key]))
 						print(filename, np.min(first_times), num_counts)
 						###
 						for key in these_times.keys():
