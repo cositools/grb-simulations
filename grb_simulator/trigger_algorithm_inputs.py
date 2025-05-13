@@ -893,6 +893,7 @@ class trigger_algorithm_inputs():
 				for background_file in os.listdir(self.background_path):
 					if n_background_files == 0:
 						background_times, background_energies = self.read_background_csv(self.background_path + background_file)
+						break
 					else:
 						component_times, component_energies = self.read_background_csv(self.background_path + background_file)
 						for key in background_times.keys():
