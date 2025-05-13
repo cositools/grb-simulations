@@ -6,8 +6,10 @@ import pandas as pd
 import h5py
 import csv
 import numpy as np
+from scipy import integrate
 from .config import suppress_output, read_yaml, define_paths
 from .load_megalib import load_megalib
+from .model import model
 
 class trigger_algorithm_inputs():
 
@@ -53,7 +55,19 @@ class trigger_algorithm_inputs():
 
 		elif self.config == 'dc3':
 
-			if 'background' in inputs['paths'] and 'saa_intervals' in inputs['paths']:
+			if 'background' in inputs['paths'] and 'saa_intervals' in inputs['paths'] and 'source_inputs' in inputs['paths']:
+				[self.source_path, 
+		 	 	 self.background_path, 
+		 	 	 self.output_path,
+		 	 	 self.source_file_path, 
+		 	 	 self.mass_model_path,
+		 	 	 self.saa_interval_path,
+		 	 	 self.source_input_path] = define_paths([inputs['paths']['input'], inputs['paths']['background'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model'], inputs['paths']['saa_intervals'], inputs['paths']['source_inputs']], 
+		 												[False, False, True, False, False, False, False])
+
+		 	 	___, self.saa_intervals = self.read_time_intervals(self.saa_interval_path)
+
+			elif 'background' in inputs['paths'] and 'saa_intervals' in inputs['paths']:
 				[self.source_path, 
 		 	 	 self.background_path, 
 		 	 	 self.output_path,
@@ -770,7 +784,7 @@ class trigger_algorithm_inputs():
 
 		source_index = np.where(np.array(self.event_list['Event name'])==source_name)[0][0]
 
-		with open(self.output_path + source_name + '/' + 'README.md', 'w') as f:
+		with open(self.output_path + source_name + '/' + 'event_list.txt', 'w') as f:
 			f.write('zenith angle (deg): ' + self.event_list[' Azimuth (degrees)'] + '\n')
 			f.write('azimuth angle (deg): ' + self.event_list[' Zenith (degrees)'] + '\n')
 			f.write('energy flux (erg/cm^2/s): ' + self.event_list[' Energy flux (erg/cm^2/s)'] + '\n')
@@ -791,10 +805,40 @@ class trigger_algorithm_inputs():
 		"""
 
 		with open(directory_path + 'README.md', 'w') as f:
-			f.write('Event name, Start time (s), Duration (s), Photon flux (ph/cm^2/s), Energy flux (erg/cm^2/s), Zenith (degrees), Azimuth (degrees)\n')
-			for i in range(len(event_list['Event name'])):
-				f.write(event_list['Event name'][i] + ', ' + str(event_list['Start time (s)'][i]) + ', ' + str(event_list['Duration (s)'][i]) + ', ' + str(event_list['Photon flux (ph/cm^2/s)'][i]) + ', ' + 
-						str(event_list['Energy flux (erg/cm^2/s)'][i]) + ', ' + str(event_list['Zenith (degrees)'][i]) + ', ' + str(event_list['Azimuth (degrees)'][i]) + '\n')
+
+			if not hasattr(self, 'source_input_path'):
+
+				f.write('Event name, Start time (s), Duration (s), Photon flux (ph/cm^2/s), Energy flux (erg/cm^2/s), Zenith (degrees), Azimuth (degrees)\n')
+				for i in range(len(event_list['Event name'])):
+					f.write(event_list['Event name'][i] + ', ' + str(event_list['Start time (s)'][i]) + ', ' + str(event_list['Duration (s)'][i]) + ', ' + str(event_list['Photon flux (ph/cm^2/s)'][i]) + ', ' + 
+							str(event_list['Energy flux (erg/cm^2/s)'][i]) + ', ' + str(event_list['Zenith (degrees)'][i]) + ', ' + str(event_list['Azimuth (degrees)'][i]) + '\n')
+
+			else:
+
+				f.write('Event name, Start time (s), Duration (s), Photon flux (ph/cm^2/s) for 80-2000 keV, Photon flux (ph/cm^2/s) for 10-10000 keV, Energy flux (erg/cm^2/s) for 10-10000 keV, Zenith (degrees), Azimuth (degrees), Spectral model, Spectral parameters, GBM T90 (s)\n')
+				for i in range(len(event_list['Event name'])):
+
+					name = event_list['Event name'][i]
+					event_file = read_yaml(self.source_input_path + name + '/' + name + '.yaml')
+					spectral_model = spectrum_file['flnc_best_fitting_model']
+
+					if spectral_model == 'flnc_comp':
+						spectral_model = 'Comptonized'
+						parameters = [event_file['flnc_comp_index'], event_file['flnc_comp_epeak']]
+						parameters_file = parameters
+					elif spectral_model == 'flnc_band':
+						spectral_model = 'Band'
+						parameters = [event_file['flnc_band_alpha'], this_file['event_band_beta'], this_file['flnc_band_epeak'] / (this_file['flnc_band_alpha'] + 2)]
+						parameters_file = [event_file['flnc_band_alpha'], this_file['event_band_beta'], this_file['event_band_epeak']]
+					else:
+						raise RuntimeError(spectral_model + ' spectral model not supported')
+
+					this_model = model(spectral_model)
+					this_model.set_model(parameters)
+					bgo_flux = float(event_list['Photon flux (ph/cm^2/s)'][i]) / integrate.quad(this_model.function, 10, 10000)[0] * integrate.quad(this_model.function, 80, 2000)[0]
+
+					f.write(event_list['Event name'][i] + ', ' + str(event_list['Start time (s)'][i]) + ', ' + str(event_list['Duration (s)'][i]) + ', ' + f'{bgo_flux:.4f}' + ', ' + str(event_list['Photon flux (ph/cm^2/s)'][i]) + ', ' + 
+							str(event_list['Energy flux (erg/cm^2/s)'][i]) + ', ' + str(event_list['Zenith (degrees)'][i]) + ', ' + str(event_list['Azimuth (degrees)'][i]) + ', ' + spectral_model + ', ' + parameters_file + ', ' + str(event_file['t90']) + '\n')
 
 	def combine_multiple_events(self, source_times, source_energies, background_times, background_energies):
 		"""
@@ -956,7 +1000,7 @@ class trigger_algorithm_inputs():
 					previous_time = this_time
 
 			else:
-				
+
 				for file in os.listdir(self.source_path):
 					filename = os.fsdecode(file)
 					source_name = file.split('.')[0]
