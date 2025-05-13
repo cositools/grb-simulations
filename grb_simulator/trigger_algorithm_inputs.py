@@ -65,7 +65,7 @@ class trigger_algorithm_inputs():
 		 	 	 self.gbm_data_path] = define_paths([inputs['paths']['input'], inputs['paths']['background'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model'], inputs['paths']['saa_intervals'], inputs['paths']['gbm_data']], 
 		 												[False, False, True, False, False, False, False])
 
-		 	 	___, self.saa_intervals = self.read_time_intervals(self.saa_interval_path)
+		 		___, self.saa_intervals = self.read_time_intervals(self.saa_interval_path)
 
 			elif 'background' in inputs['paths'] and 'saa_intervals' in inputs['paths']:
 				[self.source_path, 
