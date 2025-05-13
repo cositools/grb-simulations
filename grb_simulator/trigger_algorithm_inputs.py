@@ -55,14 +55,14 @@ class trigger_algorithm_inputs():
 
 		elif self.config == 'dc3':
 
-			if 'background' in inputs['paths'] and 'saa_intervals' in inputs['paths'] and 'source_inputs' in inputs['paths']:
+			if 'background' in inputs['paths'] and 'saa_intervals' in inputs['paths'] and 'gbm_data' in inputs['paths']:
 				[self.source_path, 
 		 	 	 self.background_path, 
 		 	 	 self.output_path,
 		 	 	 self.source_file_path, 
 		 	 	 self.mass_model_path,
 		 	 	 self.saa_interval_path,
-		 	 	 self.source_input_path] = define_paths([inputs['paths']['input'], inputs['paths']['background'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model'], inputs['paths']['saa_intervals'], inputs['paths']['source_inputs']], 
+		 	 	 self.gbm_data_path] = define_paths([inputs['paths']['input'], inputs['paths']['background'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model'], inputs['paths']['saa_intervals'], inputs['paths']['gbm_data']], 
 		 												[False, False, True, False, False, False, False])
 
 		 	 	___, self.saa_intervals = self.read_time_intervals(self.saa_interval_path)
@@ -76,7 +76,7 @@ class trigger_algorithm_inputs():
 		 	 	 self.saa_interval_path] = define_paths([inputs['paths']['input'], inputs['paths']['background'], inputs['paths']['output'], inputs['paths']['source_files'], inputs['paths']['mass_model'], inputs['paths']['saa_intervals']], 
 		 												[False, False, True, False, False, False])
 
-		 	 	___, self.saa_intervals = self.read_time_intervals(self.saa_interval_path)
+		 		___, self.saa_intervals = self.read_time_intervals(self.saa_interval_path)
 
 		 	elif 'background' in inputs['paths']:
 				[self.source_path, 
@@ -804,9 +804,9 @@ class trigger_algorithm_inputs():
 			Event list for events in directory
 		"""
 
-		with open(directory_path + 'README.md', 'w') as f:
+		with open(directory_path + 'event_list.txt', 'w') as f:
 
-			if not hasattr(self, 'source_input_path'):
+			if not hasattr(self, 'gbm_data_path'):
 
 				f.write('Event name, Start time (s), Duration (s), Photon flux (ph/cm^2/s), Energy flux (erg/cm^2/s), Zenith (degrees), Azimuth (degrees)\n')
 				for i in range(len(event_list['Event name'])):
@@ -819,7 +819,7 @@ class trigger_algorithm_inputs():
 				for i in range(len(event_list['Event name'])):
 
 					name = event_list['Event name'][i]
-					event_file = read_yaml(self.source_input_path + name + '/' + name + '.yaml')
+					event_file = read_yaml(self.gbm_data_path + name + '/' + name + '.yaml')
 					spectral_model = spectrum_file['flnc_best_fitting_model']
 
 					if spectral_model == 'flnc_comp':
