@@ -893,6 +893,7 @@ class trigger_algorithm_inputs():
 				for background_file in os.listdir(self.background_path):
 					if n_background_files == 0:
 						background_times, background_energies = self.read_background_csv(self.background_path + background_file)
+						break
 					else:
 						component_times, component_energies = self.read_background_csv(self.background_path + background_file)
 						for key in background_times.keys():
@@ -988,6 +989,12 @@ class trigger_algorithm_inputs():
 							for key in these_energies.keys():
 								for item in these_energies[key]:
 									batch_energies[key].append(item)
+
+						## DEBUG
+						if self.event_list['Event name'][i] == 'bn081107321':
+							for key in these_times.keys():
+								print(len(these_times[key]))
+						## DEBUG
 
 						if i == len(self.event_list['Event name']) - 1:
 							directory_path = self.output_path + 'batch_' + str(directory_number) + '/'
