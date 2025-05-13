@@ -78,7 +78,7 @@ class trigger_algorithm_inputs():
 
 				___, self.saa_intervals = self.read_time_intervals(self.saa_interval_path)
 
-		 	elif 'background' in inputs['paths']:
+			elif 'background' in inputs['paths']:
 				[self.source_path, 
 		 	 	 self.background_path, 
 		 	 	 self.output_path,
