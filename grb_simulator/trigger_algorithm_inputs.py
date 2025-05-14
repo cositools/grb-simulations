@@ -902,7 +902,10 @@ class trigger_algorithm_inputs():
 				for key in background_times.keys():
 					background_times[key], background_energies[key] = (list(x) for x in zip(*sorted(zip(background_times[key], background_energies[key]))))
 
-				directory_number = 0
+				for key in times_sorted.keys():
+					self.write_hits(directory_path + key + '.hdf5', background_times[key], background_energies[key])
+
+				'''directory_number = 0
 				previous_time = -1.
 				for i in range(len(self.event_list['Event name'])):
 
@@ -997,7 +1000,7 @@ class trigger_algorithm_inputs():
 							for key in times_sorted.keys():
 								self.write_hits(directory_path + key + '.hdf5', times_sorted[key], energies_sorted[key])
 					
-					previous_time = this_time
+					previous_time = this_time'''
 
 			else:
 
