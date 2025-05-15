@@ -903,7 +903,7 @@ class trigger_algorithm_inputs():
 					background_times[key], background_energies[key] = (list(x) for x in zip(*sorted(zip(background_times[key], background_energies[key]))))
 
 				for key in background_times.keys():
-					self.write_hits(self.output_path + 'background/' + key + '.hdf5', background_times[key], background_energies[key])
+					self.write_hits(self.output_path + key + '.hdf5', background_times[key], background_energies[key])
 
 				'''directory_number = 0
 				previous_time = -1.
