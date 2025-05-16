@@ -179,8 +179,13 @@ class trigger_algorithm_inputs():
 
 		Parameters
 		----------
-		event_list : dict
+		event_list : str
 			Event list data
+
+		Returns
+		----------
+		data : dict
+			Dictionary containing event list
 		"""
 
 		with open(event_list, 'r', newline='', encoding='utf-8') as csvfile:
