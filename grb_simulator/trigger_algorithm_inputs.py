@@ -903,6 +903,7 @@ class trigger_algorithm_inputs():
 						for key in background_times.keys():
 							background_times[key].extend(component_times[key])
 							background_energies[key].extend(component_energies[key])
+							print(background_file, key, np.sum(component_times[key] == 1835487615.6873927))
 					n_background_files += 1
 				for key in background_times.keys():
 					background_times[key], background_energies[key] = (list(x) for x in zip(*sorted(zip(background_times[key], background_energies[key]))))

@@ -193,7 +193,6 @@ def plot_triggers(path, plot_path, bin_size=0.05, time_range=(1835487300., 18355
 	colors = ['red', 'green', 'blue', 'orange', 'purple', 'pink']
 
 	for file in os.listdir(path):
-		print(file)
 		if file.endswith('hdf5'):
 			time_array, energy_array = read_hdf5(path + file)
 			mask = (energy_array >= 80.) & (energy_array <= 2000.)
@@ -212,7 +211,6 @@ def plot_triggers(path, plot_path, bin_size=0.05, time_range=(1835487300., 18355
 						data[header[i]].append(value)
 
 	for i in range(len(data['Event name'])):
-		print(data['Event name'][i])
 		start_time = float(data['Start time (s)'][i])
 		end_time = start_time + float(data['Duration (s)'][i])
 		plot_range = [start_time - 30, start_time + 40]
