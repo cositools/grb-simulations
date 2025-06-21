@@ -1,0 +1,15 @@
+configuration: 'dc2'                                                                                                                             # DC2 or DC3 configuration
+paths:
+  input: '/path/to/sim/files/'                                                                                                                   # Path to directory housing source .sim files
+  output: '/path/to/output/files/'                                                                                                               # Path to directory to store output
+  source_files: '/path/to/source/files/'                                                                                                         # Path to directory housing source files used to simulate .sim files
+  mass_model: '/path/to/mass/model'                                                                                                              # Path to mass model
+  background: '/path/to/background/sim/files/'                                                                                                   # If 'background: type' is 'random', path to directory housing background .sim files. If 'background: type' is 'file', the path to the concatenated background file
+background:
+  type: 'random'                                                                                                                                 # Whether to randomly select background regions for each source ('random') or use same background file for all sources ('file') 
+  number: 20                                                                                                                                     # Number of background files for each component (not used if 'background: type' is 'file')
+  file_length: 1000                                                                                                                              # Length in s of each background file (not used if 'background: type' is 'file')
+  time: 200                                                                                                                                      # Amount of background in s to add to each source
+  components: ['PhotonicBackground', 'LeptonicBackground', 'HadronicBackground', 'HadronicBackgroundDecay', 'TrappedHadronicBackgroundDecay']    # Background components to include (not used if 'background: type' is 'file')
+  file_type: 'sequential'                                                                                                                        # Whether the background files begin one after another in time ('sequential') or if they begin at the same time ('simultaneous') (not used if 'background: type' is 'file')
+mass_model_version: 12                                                                                                                           # Version of mass model

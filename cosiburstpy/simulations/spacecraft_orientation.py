@@ -1,0 +1,209 @@
+import numpy as np
+import astropy.units as u
+from astropy.coordinates import SkyCoord
+
+class SpacecraftOrientation():
+
+	def __init__(self, times, pointings, altitudes, earth_zeniths, saa_livetime=None, exclude=None):
+		'''
+		Define orientation of spacecraft over time.
+
+		Parameters
+		----------
+		times : numpy.ndarray of astropy.units.quantity.Quantity
+			Times
+		pointings : numpy.ndarray of tuple of astropy.coordinates.sky_coordinate.SkyCoord
+			Spacecraft pointings
+		altitudes : numpy.ndarray of astropy.units.quantity.Quantity
+			Spacecraft altitudes
+		earth_zeniths : numpy.ndarray of astropy.coordinates.sky_coordinate.SkyCoord
+			Earth zeniths
+		saa_livetime : numpy.ndarray of astropy.units.quantity.Quantity, optional
+			SAA livetime
+		exclude : numpy.ndarray of bool, optional
+			Whether time should be excluded
+		'''
+
+		self.times = times
+		self.pointings = pointings
+
+		self.altitudes = altitudes
+		self.earth_zeniths = earth_zeniths
+
+		if saa_livetime:
+			self.saa_livetime = saa_livetime
+
+		if exclude:
+			self.exclude = exclude
+		else:
+			self.exclude = np.zeros(len(times), dtype=bool)
+
+	@classmethod
+	def from_file(cls, file):
+		'''
+		Read in orientation file.
+
+		Parameters
+		----------
+		file : pathlib.PosixPath
+			Path to .ori file
+
+		Returns
+		-------
+		orientation : cosiburstpy.spacecraft_orientation
+			Spacecraft orientation
+		'''
+
+		data = np.loadtxt(file, usecols=(1, 2, 3, 4, 5, 6, 7, 8), delimiter=' ', skiprows=1, comments=("#", "EN"))
+
+		times = data[:, 0] * u.s 
+		altitudes = data[:, 5] * u.km
+
+		pointings = []
+		earth_zeniths = []
+
+		for i in range(len(data)):
+
+			x_pointing = SkyCoord(data[:, 2][i]*u.deg, data[:, 1][i]*u.deg, frame='galactic')
+			z_pointing = SkyCoord(data[:, 4][i]*u.deg, data[:, 3][i]*u.deg, frame='galactic')
+			pointings.append((x_pointing, z_pointing))
+
+			earth_zenith = SkyCoord(data[:, 7][i]*u.deg, data[:, 6][i]*u.deg, frame='galactic')
+			earth_zeniths.append(earth_zenith)
+
+		pointings = np.array(pointings)
+		earth_zeniths = np.array(earth_zeniths)
+
+		orientation = cls(times, pointings, altitudes, earth_zeniths)
+
+		return orientation
+
+	def get_orientation_at_time(self, time):
+		'''
+		Get the spacecraft orientation at a given time.
+
+		Parameters
+		----------
+		time : astropy.units.quantity.Quantity
+			Time
+
+		Returns
+		-------
+		this_orientation : tuple
+			Spacecraft orientation at the given time in the form (time, pointing, altitude, earth_zenith, exclude)
+		'''
+
+		if not time in range(np.min(self.orientation[:, 0]), np.max(self.orientation[:, 0])):
+			raise RuntimeError(f'Provided time ({time}) is outside the bounds of the times in the orientation file ({np.min(self.orientation[:, 0])}, {np.max(self.orientation[:, 0])}).')
+
+		index = np.abs(self.orientation[:, 0] - time).argmin()
+
+		time = self.times[index]
+		pointing = self.pointings[index]
+		altitude = self.altitudes[index]
+		earth_zenith = self.earth_zeniths[index]
+		exclude = self.exclude[index]
+
+		this_orientation = (time, pointing, altitude, earth_zenith, exclude)
+
+		return this_orientation
+
+	def exclude(self, time_range):
+		'''
+		Exclude time range.
+
+		Parameters
+		----------
+		time_range : tuple of astropy.units.quantity.Quantity
+			Range of times to exclude
+		'''
+
+		for i, t in enumerate(self.times):
+			if t >= time_range[0] and t <= time_range[1]:
+				self.exclude[i] = True
+
+	@classmethod
+	def slice(cls, orientation, time_range):
+		'''
+		Slice time range.
+
+		Parameters
+		----------
+		orientation : cosiburstpy.megalib.spacecraft_orientation.SpacecraftOrientation
+			Original orientation
+		time_range : tuple of astropy.units.quantity.Quantity
+			Range of times to output
+
+		Returns
+		-------
+		sliced_orientation : cosiburstpy.megalib.spacecraft_orientation.SpacecraftOrientation
+			Sliced orientation
+		'''
+
+		times = np.array([])
+		pointings = np.array([])
+		altitudes = np.array([]) 
+		earth_zeniths = np.array([])
+		exclude = np.array([])
+
+		for i, t in enumerate(orientation.times):
+			if t >= time_range[0] and t <= time_range[1]:
+				times = np.append(times, t)
+				pointings = np.append(pointings, orientation.pointings[i])
+				altitudes = np.append(pointings, orientation.altitudes[i])
+				earth_zeniths = np.append(pointings, orientation.earth_zeniths[i])
+				exclude = np.append(pointings, orientation.exclude[i])
+
+		sliced_orientation = cls(times, pointings, altitudes, earth_zeniths, exclude)
+
+		return sliced_orientation
+
+	def edit_times(self, file, time):
+		'''
+		Update timestamps in file to begin at specified time.
+
+		Parameters
+		----------
+		file : pathlib.PosixPath
+			Path to .ori file
+		time : astropy.units.quantity.Quantity
+			New start time of orientation file
+		'''
+
+		start_time = np.min(self.times)
+		time_add = time - start_time
+
+		for i in range(len(self.times)):
+			self.times[i] += time_add
+
+		self.write_file(file)
+
+	def write_file(self, file):
+		'''
+		Write spacecraft orientation to .ori file.
+
+		Parameters
+		----------
+		file : pathlib.PosixPath
+			Path to .ori file
+		'''
+
+		with open(file, 'w') as f:
+
+			f.write('# Type OrientationsGalactic\n')
+			f.write('#\n')
+			f.write('#\n')
+
+			for i in range(len(self.times)):
+
+				if hasattr(self, 'saa_livetime'):
+
+					f.write(f'OG {self.times[i].to(u.s).value} {self.pointings[i][0].b.degree} {self.pointings[i][0].l.degree} {self.pointings[i][1].b.degree} {self.pointings[i][1].l.degree} \
+							{self.earth_zeniths[i].b.degree} {self.earth_zeniths[i].l.degree} {self.saa_livetime[i].to(u.s).value}\n')
+
+				else:
+
+					f.write(f'OG {self.times[i].to(u.s).value} {self.pointings[i][0].b.degree} {self.pointings[i][0].l.degree} {self.pointings[i][1].b.degree} {self.pointings[i][1].l.degree} \
+							{self.earth_zeniths[i].b.degree} {self.earth_zeniths[i].l.degree}\n')
+
+			f.write('# EN')

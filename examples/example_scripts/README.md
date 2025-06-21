@@ -1,0 +1,17 @@
+# GRB Simulation Scripts     
+- `download_gbm_data.py` downloads Fermi-GBM spectra and lightcurves given an input .yaml file (an example can be found in `example_yaml_files/`) and stores the data in a specified output directory. You must have [GBM Data Tools](https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gdt-docs/) installed in order to run this.   
+To run from the command line: `python download_gbm_data.py -y input-file.yaml`.    
+- `gbm_to_megalib.py` creates MEGAlib inputs (spectral .yaml files and lightcurve .dat files binned using Bayesian blocks) from GBM data given an input .yaml file (an example can be found in `example_yaml_files/`). Currently, this only produces MEGAlib input files for events with Band function or Comptonized best fit spectra, and all lightcurves are binned using Bayesian blocks. You must have [GBM Data Tools](https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gdt-docs/) installed in order to run this. This may not work properly on Windows.      
+To run from the command line: `python gbm_to_megalib.py -y input-file.yaml`.    
+- `source_file_generation.py` creates source file samples based an on an input .yaml file (an example can be found in `example_yaml_files/`). This draws lightcurves and spectra from the samples in `MEGAlib_source_inputs/` and create .source files in a specified directory. The .source files are created with the defined mass model path, fluxes, and incidence angles.          
+To run from the command line: `python source_file_generation.py -y input-file.yaml`.      
+- `run_cosima.py` runs cosima on all of the .source files in a specified directory and produces simulation (.sim) files. You must be on the main branch of MEGAlib to run cosima with version 12 of the mass model. This uses shell commands and may not work on all operating systems.      
+To run from the command line: `python run_cosima.py -y input-file.yaml`.  
+- `run_revan.py` runs revan on all of the .sim files in a specified directory and produces reconstructed simulation (.tra) files. You must be on the dee2022 branch of MEGAlib to run revan with version 12 of the mass model. This uses shell commands and may not work on all operating systems.    
+To run from the command line: `python run_revan.py -y input-file.yaml`.    
+- `run_mimrec.py` runs mimrec on all of the .tra files in a specified directory and produces reconstructed simulation (.tra) files with event selections. You must be on the dee2022 branch of MEGAlib to run mimrec with version 12 of the mass model. This uses shell commands and may not work on all operating systems.     
+To run from the command line: `python run_mimrec.py -y input-file.yaml`.    
+- `trigger_algorithm_list_generation.py` creates event lists with the time and energy of each hit in the BGO and GeDs based on an input .yaml file (an example can be found in `example_yaml_files/`). This draws source and background simulations (.sim files) from specified input directories and creates trigger algroithm files in a specified output directory. The mass model used must be altered to not veto events in the germanium detectors that are coincident with BGO hits.          
+To run from the command line: `python trigger_algorithm_list_generation.py -y input-file.yaml`.       
+
+`example_yaml_files/` contains sample .yaml files needed to run these scripts. See the README file in `example_yaml_files/` for more details.   

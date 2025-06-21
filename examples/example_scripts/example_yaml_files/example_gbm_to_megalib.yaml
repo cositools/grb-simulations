@@ -1,0 +1,11 @@
+paths:
+  input: '/path/to/gbm/data/'                                                       # Path to directory housing downloaded GBM data
+  output: '/path/to/source/inputs/'                                                 # Path to directory to store source inputs
+  plots: '/path/to/plots/'                                                          # Path to directory to store lightcurve plots
+time:
+  source_range: [-2.0, 4.0]                                                         # Time range of source lightcurve (s)
+  background_range: [-15.0, 17.0]                                                   # Time range to use to fit background (s)
+energy:
+  nai_range: [100, 10000]                                                           # Energy range of GBM's NaI detectors used for lightcurve
+  bgo_range: [100, 10000]                                                           # Energy range of GBM's BGO detectors used for lightcurve
+  cosi_range: [100, 10000]                                                          # Energy range for MEGAlib simulations

@@ -1,0 +1,6 @@
+paths:
+  sim_files: '/path/to/sim/files/'                             # Path to directory housing .sim files
+  tra_files: '/path/to/tra/files/'                             # Path to directory to store .tra files
+  mass_model: '/path/to/mass/model'                            # Path to mass model
+revan:
+  config: '/path/to/config/file'                               # Path to revan configuration file

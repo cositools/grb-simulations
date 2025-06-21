@@ -1,0 +1,3 @@
+paths:
+  source_files: '/path/to/source/files/'             # Path to directory housing .source files
+  sim_files: '/path/to/sim/files/'                   # Path to directory to store .sim files
