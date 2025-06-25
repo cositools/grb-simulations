@@ -129,7 +129,7 @@ class ACSData():
 		times = {'b1': [], 'b2': [], 'x1': [], 'x2': [], 'y1': [], 'y2': []}
 		energies = {'b1': [], 'b2': [], 'x1': [], 'x2': [], 'y1': [], 'y2': []}
 
-		data = pd.read_csv(path, compression='gzip')
+		data = pd.read_csv(file, compression='gzip')
 		
 		for i in range(len(data['timestamp[s]'])):
 
