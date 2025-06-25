@@ -49,7 +49,7 @@ class ACSData():
 
 			acs_data = cls.from_hdf5_file(file)
 
-		elif file.suffix == '.sim':
+		elif file.suffix == '.sim' or ''.join(file.suffixes) == '.sim.gz':
 
 			acs_data = cls.from_sim_file(file, mass_model)
 
