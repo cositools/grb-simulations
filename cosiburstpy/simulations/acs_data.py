@@ -166,7 +166,7 @@ class ACSData():
 			elif data['bgo_y2[keV]'][i] != 0.0:
 
 				times['y2'].append(float(data['timestamp[s]'][i]) * u.s)
-				energies['oy2'].append(float(data['bgo_y2[keV]'][i]) * u.keV)
+				energies['y2'].append(float(data['bgo_y2[keV]'][i]) * u.keV)
 
 		acs_data = cls({key: list(zip(times[key], energies[key])) for key in times})
 
