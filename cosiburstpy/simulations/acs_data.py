@@ -52,7 +52,7 @@ class ACSData():
 
 			acs_data = cls.from_sim_file(file, mass_model)
 
-		elif file.suffix == '.csv.gz':
+		elif ''.join(file.suffixes) == '.csv.gz':
 
 			acs_data = cls.from_csv_file(file)
 
@@ -222,13 +222,15 @@ class ACSData():
 
 		data = cls.from_file(input_file, mass_model=mass_model)
 
-		if (input_file.suffix == '.sim' or input_file.suffix == '.csv.gz') and not output_file.exists():
+		if (input_file.suffix == '.sim' or ''.join(input_file.suffixes) == '.csv.gz') and not output_file.exists():
 
 			data.write_file(output_file)
 
 		elif input_file.suffix == '.hdf5' and not output_file.exists():
 
 			shutil.copy(input_file, output_file)
+
+		return data
 
 	def write_file(self, file):
 		'''

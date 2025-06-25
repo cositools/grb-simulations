@@ -2,14 +2,4 @@ from .utility import write_readme, parse_args, read_yaml, write_yaml, read_csv, 
 from .event import Event, Lightcurve, SourceFile, Spectrum
 from .simulations import ACSData, EventTable, SpacecraftOrientation
 from .megalib import simulate, reconstruct, extract
-
-try:
-
-	from .gbm import BayesianBlocks, DataDownload, DefineSpectrum
-
-except:
-
-	import logging
-	logger = logging.getLogger(__name__)
-
-	logger.info('GBM Data Tools must be installed to use gbm module.')
+from .gbm import BayesianBlocks, DataDownload, DefineSpectrum

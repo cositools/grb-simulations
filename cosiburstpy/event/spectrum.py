@@ -340,7 +340,7 @@ class Spectrum():
 			if isinstance(self.parameters[key], u.quantity.Quantity):
 				spectrum[key] = float(self.parameters[key].value)
 			else:
-				spectrum[key] = self.spectrum.parameters[key]
+				spectrum[key] = self.parameters[key]
 
 		write_yaml(file, spectrum)
 

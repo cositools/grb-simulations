@@ -396,6 +396,8 @@ class BayesianBlocks():
 		times = times[first_bin_with_counts:]
 		rates = rates[first_bin_with_counts:]
 
+		times.pop(len(times)-1)
+
 		end = False
 		for i, rate in reversed(list(enumerate(rates))):
 			if not end:
@@ -405,8 +407,6 @@ class BayesianBlocks():
 				else:
 					end = True
 					break
-
-		rates.append(rates[-1])
 
 		times *= u.s
 		rates *= u.s**-1

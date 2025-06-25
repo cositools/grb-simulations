@@ -144,12 +144,25 @@ class SpacecraftOrientation():
 		exclude = []
 
 		for i, t in enumerate(orientation.times):
+
 			if t >= time_range[0] and t <= time_range[1]:
+
 				times.append(t)
 				pointings.append(orientation.pointings[i])
 				altitudes.append(orientation.altitudes[i])
 				earth_zeniths.append(orientation.earth_zeniths[i])
 				exclude.append(orientation.exclude[i])
+
+		if len(times) == 0 and (time_range[1] - time_range[0]) <= 1. * u.s:
+
+			closest_time = min(orientation.times, key=lambda x: abs(x - time_range[0]))
+			index = np.where(orientation.times == closest_time)[0][0]
+
+			times.append(closest_time)
+			pointings.append(orientation.pointings[index])
+			altitudes.append(orientation.altitudes[index])
+			earth_zeniths.append(orientation.earth_zeniths[index])
+			exclude.append(orientation.exclude[index])
 
 		sliced_orientation = cls(times, pointings, altitudes, earth_zeniths, exclude)
 
