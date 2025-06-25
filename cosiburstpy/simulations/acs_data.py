@@ -2,7 +2,7 @@ import shutil
 import pandas as pd
 import astropy.units as u
 import logging
-from cosiburstpy.utility.utility import read_hdf5, SuppressOutput
+from cosiburstpy.utility.utility import read_hdf5, write_hdf5, SuppressOutput
 
 logger = logging.getLogger(__name__)
 
