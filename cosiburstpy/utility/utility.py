@@ -144,7 +144,7 @@ def write_hdf5(file, data, file_attributes=None, dataset_attributes=None):
 
 		if file_attributes:
 
-			for key in file_attributes[key]:
+			for key in file_attributes:
 				f.attrs[key] = file_attributes[key]
 
 		for key in data:
