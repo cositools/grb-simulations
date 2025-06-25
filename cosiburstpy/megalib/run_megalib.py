@@ -46,7 +46,7 @@ def run_cosima(file, output_dir, zipped=True, overwrite=False):
 
 		new_files = set(file.parent.glob(f'{name}*.sim.gz')) - original_files
 		for this_file in new_files:
-			shutil.move(this_file, output_dir / name + '.sim.gz')
+			shutil.move(this_file, output_dir / f'{name}.sim.gz')
 
 	else:
 
@@ -105,7 +105,7 @@ def revan(file, output_dir, mass_model, config_file, overwrite=False):
 
 	new_files = set(file.parent.glob(f'{name}*.tra.gz')) - original_files
 	for this_file in new_files:
-		shutil.move(this_file, output_dir / name + '.tra.gz')
+		shutil.move(this_file, output_dir / f'{name}.tra.gz')
 
 	if os.path.exists(file.parent / f'{name}.log'):
 		os.remove(file.parent / f'{name}.log')
@@ -155,7 +155,7 @@ def mimrec(file, output_dir, mass_model, config_file, overwrite=False):
 
 	new_files = set(file.parent.glob(f'{name}*.tra')) - original_files
 	for this_file in new_files:
-		shutil.move(this_file, output_dir / name + '.extracted.tra')
+		shutil.move(this_file, output_dir / f'{name}.extracted.tra')
 
 	if os.path.exists(file.parent / f'{name}.log'):
 		os.remove(file.parent / f'{name}.log')
