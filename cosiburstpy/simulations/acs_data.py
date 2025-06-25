@@ -79,7 +79,9 @@ class ACSData():
 			ACS data
 		'''
 
-		data = {key: [tuple(value * unit for value, unit in zip(hit, (u.s, u.kev))) for hit in hits] for key, hits in read_hdf5(file).items()}
+		logger.info(f'Reading {file}')
+
+		data = {key: [tuple(value * unit for value, unit in zip(hit, (u.s, u.keV))) for hit in hits] for key, hits in read_hdf5(file).items()}
 
 		acs_data = cls(data)
 
@@ -102,6 +104,8 @@ class ACSData():
 		acs_data : cosiburstpy.acs_data.ACSData
 			ACS data
 		'''
+
+		logger.info(f'Reading {file}')
 
 		from cosiburstpy.megalib.read_sim_file import read_sim_file
 
@@ -136,33 +140,33 @@ class ACSData():
 
 			if data['bgo_bottom_1[keV]'][i] != 0.0:
 
-				times['b1'].append(float(data['timestamp[s]'][i])) * u.s
-				energies['b1'].append(float(data['bgo_bottom_1[keV]'][i])) * u.kev
+				times['b1'].append(float(data['timestamp[s]'][i]) * u.s)
+				energies['b1'].append(float(data['bgo_bottom_1[keV]'][i]) * u.keV)
 
 			elif data['bgo_bottom_2[keV]'][i] != 0.0:
 
-				times['b2'].append(float(data['timestamp[s]'][i])) * u.s
-				energies['b2'].append(float(data['bgo_bottom_2[keV]'][i])) * u.kev
+				times['b2'].append(float(data['timestamp[s]'][i]) * u.s)
+				energies['b2'].append(float(data['bgo_bottom_2[keV]'][i]) * u.keV)
 
 			elif data['bgo_x1[keV]'][i] != 0.0:
 
-				times['x1'].append(float(data['timestamp[s]'][i])) * u.s
-				energies['x1'].append(float(data['bgo_x1[keV]'][i])) * u.kev
+				times['x1'].append(float(data['timestamp[s]'][i]) * u.s)
+				energies['x1'].append(float(data['bgo_x1[keV]'][i]) * u.keV)
 
 			elif data['bgo_x2[keV]'][i] != 0.0:
 
-				times['x2'].append(float(data['timestamp[s]'][i])) * u.s
-				energies['x2'].append(float(data['bgo_x2[keV]'][i])) * u.kev
+				times['x2'].append(float(data['timestamp[s]'][i]) * u.s)
+				energies['x2'].append(float(data['bgo_x2[keV]'][i]) * u.keV)
 
 			elif data['bgo_y1[keV]'][i] != 0.0:
 
-				times['y1'].append(float(data['timestamp[s]'][i])) * u.s
-				energies['y1'].append(float(data['bgo_y1[keV]'][i])) * u.kev
+				times['y1'].append(float(data['timestamp[s]'][i]) * u.s)
+				energies['y1'].append(float(data['bgo_y1[keV]'][i]) * u.keV)
 
 			elif data['bgo_y2[keV]'][i] != 0.0:
 
-				times['y2'].append(float(data['timestamp[s]'][i])) * u.s
-				energies['oy2'].append(float(data['bgo_y2[keV]'][i])) * u.kev
+				times['y2'].append(float(data['timestamp[s]'][i]) * u.s)
+				energies['oy2'].append(float(data['bgo_y2[keV]'][i]) * u.keV)
 
 		acs_data = cls({key: list(zip(times[key], energies[key])) for key in times})
 
@@ -246,7 +250,7 @@ class ACSData():
 		acs_data = {'b1': sorted(self.b1, key=lambda x: x[0].to(u.s).value), 'b2': sorted(self.b2, key=lambda x: x[0].to(u.s).value), 'x1': sorted(self.x1, key=lambda x: x[0].to(u.s).value), 
 					'x2': sorted(self.x2, key=lambda x: x[0].to(u.s).value), 'y1': sorted(self.y1, key=lambda x: x[0].to(u.s).value), 'y2': sorted(self.y2, key=lambda x: x[0].to(u.s).value)}
 
-		data = {panel: [tuple(value.to(unit).value for value, unit in zip(hit, (u.s, u.kev))) for hit in hits] for panel, hits in acs_data.items()}
+		data = {panel: [tuple(value.to(unit).value for value, unit in zip(hit, (u.s, u.keV))) for hit in hits] for panel, hits in acs_data.items()}
 
 		write_hdf5(file, data, file_attributes={'columns': ['time (s)', 'energy (keV)']})
 
