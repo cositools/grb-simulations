@@ -1,5 +1,6 @@
 import shutil
 import pandas as pd
+import astropy.units as u
 import logging
 from cosiburstpy.utility.utility import read_hdf5, SuppressOutput
 
