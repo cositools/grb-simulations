@@ -1,5 +1,5 @@
 import numpy as np
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import SkyCoord, Angle
 import astropy.units as u
 from scoords import Attitude, SpacecraftFrame
 
@@ -69,7 +69,7 @@ def check_if_earth_occulted(source_position, earth_zenith, altitude):
 	r_earth = 6378. * u.km
 
 	source_angle = source_position.separation(earth_zenith)
-	max_angle = Angle(np.pi - np.arcsin(r_earth / (r_earth + altitude)) * u.rad)
+	max_angle = Angle(np.pi * u.rad - np.arcsin(r_earth / (r_earth + altitude)))
 
 	if source_angle.wrap_at(180*u.deg).deg >= max_angle.wrap_at(180*u.deg).deg:
 		occulted = True

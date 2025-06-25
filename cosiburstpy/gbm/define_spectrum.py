@@ -60,17 +60,4 @@ class DefineSpectrum():
 
 		logger.info(f'Creating spectrum for {self.name}.')
 
-		file.parent.mkdir(parents=True, exist_ok=True)
-
-		spectrum = {}
-
-		spectrum['type'] = self.spectrum.model
-
-		for key in self.spectrum.parameters:
-
-			if isinstance(self.spectrum.parameters[key], u.quantity.Quantity):
-				spectrum[key] = float(self.spectrum.parameters[key].value)
-			else:
-				spectrum[key] = self.spectrum.parameters[key]
-
-		write_yaml(file, spectrum)
+		self.spectrum.write_file(file)

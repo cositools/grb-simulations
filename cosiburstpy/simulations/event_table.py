@@ -38,7 +38,7 @@ class EventTable():
 
 		return event_list
 
-	def write_file(self, file, delimeter='\t'):
+	def write_file(self, file, delimiter='\t'):
 		'''
 		Create event table file.
 
@@ -47,10 +47,10 @@ class EventTable():
 		file : pathlib.PosixPath
 			Path to event table file
 		delimeter : str, optional
-			Delimeter for file
+			Delimiter for file
 		'''
 
-		write_csv(file, self.data, delimeter=delimeter)
+		write_csv(file, self.data, delimiter=delimiter)
 
 	def add_columns(self, file, data, delimeter='\t'):
 		'''

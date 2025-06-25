@@ -1,0 +1,18 @@
+paths:
+  input: '/Users/eneights/work/COSI/grb-simulations/data/examples/source_models'
+  output: '/Users/eneights/work/COSI/grb-simulations/data/examples/megalib_inputs'
+  mass_model: 'COSISMEX.sim.geo.setup'
+  orientation: '/Users/eneights/work/COSI/grb-simulations/data/old/auxiliary/dc3_1day.ori'
+  exclusion_times: ['rocking_times.txt', 'saa_times.txt']
+  gbm_data: '/Users/eneights/work/COSI/grb-simulations/data/examples/gbm_data/data'
+events:
+  spectral_models: ['Band', 'Comptonized']
+  time_separation: [250., 350.]
+  energy: [10., 10000.]
+  peak_flux: [1e-6, 1e-5]
+  zenith: [0., 180.]
+  azimuth: [0., 360.]
+  min_peak_flux: 5e-6
+source_files:
+  save_acs_hits: True
+  earth_occultation: True

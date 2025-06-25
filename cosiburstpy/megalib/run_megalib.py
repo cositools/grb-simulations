@@ -24,10 +24,12 @@ def run_cosima(file, output_dir, zipped=True, overwrite=False):
 	name = file.stem
 	source_file = file.name
 
+	cwd = os.getcwd()
+
 	if not overwrite:
 
-		unzipped_sim_path = output_dir / name + '.sim'
-		zipped_sim_path = output_dir / name + '.sim.gz'
+		unzipped_sim_path = output_dir / f'{name}.sim'
+		zipped_sim_path = output_dir / f'{name}.sim.gz'
 
 		if unzipped_sim_path.exists() or zipped_sim_path.exists():
 
@@ -55,11 +57,13 @@ def run_cosima(file, output_dir, zipped=True, overwrite=False):
 		for this_file in new_files:
 			shutil.move(this_file, output_dir / name + '.sim')
 
-	if os.path.exists(file.parent / name + '.log'):
-		os.remove(file.parent / name + '.log')
+	if os.path.exists(file.parent / f'{name}.log'):
+		os.remove(file.parent / f'{name}.log')
 
 	if (file.parent / 'absorptions').exists() and (file.parent / 'absorptions').is_dir():
 		shutil.rmtree(file.parent / 'absorptions')
+
+	os.chdir(cwd)
 
 def revan(file, output_dir, mass_model, config_file, overwrite=False):
 	'''
@@ -82,9 +86,11 @@ def revan(file, output_dir, mass_model, config_file, overwrite=False):
 	name = file.stem
 	sim_file = file.name
 
+	cwd = os.getcwd()
+
 	if not overwrite:
 
-		tra_path = output_dir / name + '.tra.gz'
+		tra_path = output_dir / f'{name}.tra.gz'
 
 		if tra_path.exists():
 
@@ -101,11 +107,13 @@ def revan(file, output_dir, mass_model, config_file, overwrite=False):
 	for this_file in new_files:
 		shutil.move(this_file, output_dir / name + '.tra.gz')
 
-	if os.path.exists(file.parent / name + '.log'):
-		os.remove(file.parent / name + '.log')
+	if os.path.exists(file.parent / f'{name}.log'):
+		os.remove(file.parent / f'{name}.log')
 
 	if (file.parent / 'absorptions').exists() and (file.parent / 'absorptions').is_dir():
 		shutil.rmtree(file.parent / 'absorptions')
+
+	os.chdir(cwd)
 
 def mimrec(file, output_dir, mass_model, config_file, overwrite=False):
 	'''
@@ -128,9 +136,11 @@ def mimrec(file, output_dir, mass_model, config_file, overwrite=False):
 	name = file.stem
 	tra_file = file.name
 
+	cwd = os.getcwd()
+
 	if not overwrite:
 
-		extracted_path = output_dir / name + '.extracted.tra'
+		extracted_path = output_dir / f'{name}.extracted.tra'
 
 		if extracted_path.exists():
 
@@ -147,11 +157,13 @@ def mimrec(file, output_dir, mass_model, config_file, overwrite=False):
 	for this_file in new_files:
 		shutil.move(this_file, output_dir / name + '.extracted.tra')
 
-	if os.path.exists(file.parent / name + '.log'):
-		os.remove(file.parent / name + '.log')
+	if os.path.exists(file.parent / f'{name}.log'):
+		os.remove(file.parent / f'{name}.log')
 
 	if (file.parent / 'absorptions').exists() and (file.parent / 'absorptions').is_dir():
 		shutil.rmtree(file.parent / 'absorptions')
+
+	os.chdir(cwd)
 
 def simulate(source_dir, output_dir, zipped=True, overwrite=False):
 	'''

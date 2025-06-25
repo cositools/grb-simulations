@@ -1,6 +1,7 @@
 from scipy import integrate
 import astropy.units as u
 from .spectral_models import mono, band, comp, pl, bpl, sbpl
+from cosiburstpy.utility.utility import read_yaml, write_yaml
 
 class Spectrum():
 
@@ -35,7 +36,7 @@ class Spectrum():
 
 		if self.model == 'Mono':
 
-			self.parameter_list = [self.parameters['energy']]
+			self.parameter_list = [float(f"{self.parameters['energy'].to(u.keV).value:.2f}")]
 			self.function = lambda e: mono(e, self.parameters['energy'])
 
 		elif self.model == 'Band':
@@ -46,32 +47,59 @@ class Spectrum():
 			if not 'epeak' in self.parameters:
 				self.parameters['epeak'] = self.parameters['ebreak'] * (parameters['alpha'] + 2)
 
-			self.parameter_list = [self.parameters['alpha'], self.parameters['beta'], self.parameters['epeak']]
+			self.parameter_list = [float(f"{self.parameters['alpha']:.2f}"), float(f"{self.parameters['beta']:.2f}"), float(f"{self.parameters['epeak'].to(u.keV).value:.2f}")]
 			self.function = lambda e: band(e, self.parameters['alpha'], self.parameters['beta'], self.parameters['ebreak'])
 
 		elif self.model == 'Comptonized':
 
-			self.parameter_list = [self.parameters['index'], self.parameters['epeak']]
+			self.parameter_list = [float(f"{self.parameters['index']:.2f}"), float(f"{self.parameters['epeak'].to(u.keV).value:.2f}")]
 			self.function = lambda e: comp(e, self.parameters['index'], self.parameters['epeak'])
 
 		elif self.model == 'PowerLaw':
 
-			self.parameter_list = [self.parameters['index']]
+			self.parameter_list = [float(f"{self.parameters['index']:.2f}")]
 			self.function = lambda e: pl(e, self.parameters['index'])
 
 		elif self.model == 'BrokenPowerLaw':
 
-			self.parameter_list = [self.parameters['ebreak'], self.parameters['index_lo'], self.parameters['index_hi'], self.parameters['emax']]
+			self.parameter_list = [float(f"{self.parameters['ebreak'].to(u.keV).value:.2f}"), float(f"{self.parameters['index_lo']:.2f}"), float(f"{self.parameters['index_hi']:.2f}"), float(f"{self.parameters['emax'].to(u.keV).value:.2f}")]
 			self.function = lambda e: bpl(e, self.parameters['ebreak'], self.parameters['index_lo'], self.parameters['index_hi'], self.parameters['emax'])
 
 		elif self.model == 'SmoothlyBrokenPowerLaw':
 
-			self.parameter_list = [self.parameters['ebreak'], self.parameters['index_lo'], self.parameters['index_hi'], self.parameters['bscale']]
+			self.parameter_list = [float(f"{self.parameters['ebreak'].to(u.keV).value:.2f}"), float(f"{self.parameters['index_lo']:.2f}"), float(f"{self.parameters['index_hi']:.2f}"), float(f"{self.parameters['bscale']:.2f}")]
 			self.function = lambda e: sbpl(e, self.parameters['ebreak'], self.parameters['index_lo'], self.parameters['index_hi'], self.parameters['bscale'])
 
 		else:
 
 			raise RuntimeError("Spectral model must be 'Mono', 'PowerLaw', 'BrokenPowerLaw', 'Band', 'Comptonized', or 'SmoothlyBrokenPowerLaw'.")
+
+	@classmethod
+	def from_file(cls, file):
+		'''
+		Read in spectrum file.
+
+		Parameters
+		----------
+		file : pathlib.PosixPath
+			Path to .yaml file
+
+		Returns
+		-------
+		spectrum : cosiburstpy.event.spectrum.Spectrum
+			Spectrum
+		'''
+
+		data = read_yaml(file)
+		spectral_model = data.pop('type')
+
+		for key in data:
+			if key in ['energy', 'epeak', 'ebreak', 'emax']:
+				data[key] *= u.keV
+
+		spectrum = Spectrum(spectral_model, data)
+
+		return spectrum
 
 	def integrate_photon_spectrum(self, energy_range):
 		'''
@@ -90,14 +118,15 @@ class Spectrum():
 
 		if self.model == 'Mono':
 
-			if self.parameters['energy'] >= energy_range[0] and self.parameters['energy'] <= energy_range[1]:
+			if energy_range[0] <= self.parameters['energy'] <= energy_range[1]:
 				integral = 1. * u.dimensionless_unscaled
 			else:
 				integral = 0. * u.dimensionless_unscaled
 
 		else:
 
-			integral = integrate.quad(self.function, energy_range[0], energy_range[1])[0].to(u.dimensionless_unscaled)
+			function = lambda e: self.function(e * u.keV).to(u.keV**-1).value
+			integral = integrate.quad(function, energy_range[0].to(u.keV).value, energy_range[1].to(u.keV).value)[0] * u.dimensionless_unscaled
 
 		return integral
 
@@ -118,14 +147,15 @@ class Spectrum():
 
 		if self.model == 'Mono':
 
-			if self.parameters['energy'] >= energy_range[0] and self.parameters['energy'] <= energy_range[1]:
+			if energy_range[0] <= self.parameters['energy'] <= energy_range[1]:
 				integral = self.parameters['energy'].to(u.erg)
 			else:
 				integral = 0. * u.erg
 
 		else:
 
-			integral = integrate.quad(lambda e: e * self.function(e), energy_range[0], energy_range[1])[0].to(u.erg)
+			function = lambda e: (e * u.keV * self.function(e * u.keV)).to(u.dimensionless_unscaled).value
+			integral = integrate.quad(function, energy_range[0].to(u.keV).value, energy_range[1].to(u.keV).value)[0] * u.keV
 
 		return integral
 
@@ -245,7 +275,7 @@ class Spectrum():
 		old_energy_integral = self.integrate_energy_spectrum(old_energy_range)
 		new_energy_integral = self.integrate_energy_spectrum(new_energy_range)
 
-		new_photon_flux = old_energy_flux * new_energy_integral / old_energy_integral
+		new_energy_flux = old_energy_flux * new_energy_integral / old_energy_integral
 
 		return new_energy_flux
 
@@ -266,26 +296,51 @@ class Spectrum():
 
 		if self.model == 'Mono':
 
-			spectrum_text = f"Mono {self.parameters['energy'].to(u.kev).value:.2f}"
+			spectrum_text = f"Mono {self.parameters['energy'].to(u.keV).value:.2f}"
 
 		elif self.model == 'Band':
 
-			spectrum_text = f"Band {energy_range[0].to(u.kev).value:.2f} {energy_range[1].to(u.kev).value:.2f} {self.parameters['alpha']:.2f} {self.parameters['beta']:.2f} {self.parameters['ebreak'].to(u.kev).value:.2f}"
+			spectrum_text = f"Band {energy_range[0].to(u.keV).value:.2f} {energy_range[1].to(u.keV).value:.2f} {self.parameters['alpha']:.2f} {self.parameters['beta']:.2f} {self.parameters['ebreak'].to(u.keV).value:.2f}"
 
 		elif self.model == 'Comptonized':
 
-			spectrum_text = f"Comptonized {energy_range[0].to(u.kev).value:.2f} {energy_range[1].to(u.kev).value:.2f} {self.parameters['index']:.2f} {self.parameters['epeak'].to(u.kev).value:.2f}"
+			spectrum_text = f"Comptonized {energy_range[0].to(u.keV).value:.2f} {energy_range[1].to(u.keV).value:.2f} {self.parameters['index']:.2f} {self.parameters['epeak'].to(u.keV).value:.2f}"
 
 		elif self.model == 'PowerLaw':
 
-			spectrum_text = f"PowerLaw {energy_range[0].to(u.kev).value:.2f} {energy_range[1].to(u.kev).value:.2f} {self.parameters['index']:.2f}"
+			spectrum_text = f"PowerLaw {energy_range[0].to(u.keV).value:.2f} {energy_range[1].to(u.keV).value:.2f} {self.parameters['index']:.2f}"
 
 		elif self.model == 'BrokenPowerLaw':
 
-			spectrum_text = f"BrokenPowerLaw {energy_range[0].to(u.kev).value:.2f} {energy_range[1].to(u.kev).value:.2f} {self.parameters['ebreak'].to(u.kev).value:.2f} {self.parameters['index_lo']:.2f} {self.parameters['index_hi']:.2f}"
+			spectrum_text = f"BrokenPowerLaw {energy_range[0].to(u.keV).value:.2f} {energy_range[1].to(u.keV).value:.2f} {self.parameters['ebreak'].to(u.keV).value:.2f} {self.parameters['index_lo']:.2f} {self.parameters['index_hi']:.2f}"
 
 		else:
 
 			raise RuntimeError("Spectral model must be 'Mono', 'PowerLaw', 'BrokenPowerLaw', 'Band', or 'Comptonized'.")
 
 		return spectrum_text
+
+	def write_file(self, file):
+		'''
+		Write spectrum to .yaml file.
+
+		Parameters
+		----------
+		file : pathlib.PosixPath
+			Path to .yaml file to save spectrum
+		'''
+
+		file.parent.mkdir(parents=True, exist_ok=True)
+
+		spectrum = {}
+		spectrum['type'] = self.model
+
+		for key in self.parameters:
+
+			if isinstance(self.parameters[key], u.quantity.Quantity):
+				spectrum[key] = float(self.parameters[key].value)
+			else:
+				spectrum[key] = self.spectrum.parameters[key]
+
+		write_yaml(file, spectrum)
+

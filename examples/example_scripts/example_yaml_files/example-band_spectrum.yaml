@@ -1,6 +1,0 @@
-type: 'Band'          # Spectrum type ('Band', 'Comptonized', 'PowerLaw', 'BrokenPowerLaw', 'Mono')
-energy_min: 100.0     # Minimum energy in keV
-energy_max: 10000.0   # Maximum energy in keV
-alpha: -0.360         # Alpha (spectral index)
-beta: -11.921         # Beta (spectral index)
-ebreak: 288.016       # Break energy in keV (E0)

@@ -5,6 +5,7 @@ import h5py
 import csv
 from datetime import date
 import logging
+from cosiburstpy._version import version
 
 logger = logging.getLogger(__name__)
 
@@ -172,19 +173,22 @@ def write_readme(file, inputs_path=None, input_parameters=None):
 
 	with open(file, 'w') as f:
 
-		f.write(f'The code to generate the content of this directory was run on {date.today()}.\n')
+		f.write(f'This output was generated on {date.today()} using cosipyburst version {version}')
 
 		if inputs_path:
-			f.write(f'The content of this directory was produced by running the files in {inputs_path}.\n')
+			f.write(f' by running the files located in {inputs_path}.  \n')
+
+		else:
+			f.write(f'.  ')
 
 		if input_parameters:
 
-			f.write(f'Parameters used to generate content of this directory:\n')
+			f.write(f'\n\nParameters used:  \n')
 
 			for key in input_parameters:
-				f.write(f'{key}: {input_parameters[key]}\n')
+				f.write(f'{key}: {input_parameters[key]}  \n')
 
-def read_csv(file, encoding='utf-8', delimeter=None):
+def read_csv(file, delimiter=None, ignore_spaces=True, encoding='utf-8'):
 	'''
 	Read .csv file.
 
@@ -192,10 +196,12 @@ def read_csv(file, encoding='utf-8', delimeter=None):
 	----------
 	file : pathlib.PosixPath
 		Path to .csv file 
-	encoding : str
+	delimiter : str, optional
+		Delimiter for .csv file
+	skipinitialspace ; bool, optional
+		Whether to ignore spaces after delimiter
+	encoding : str, optional
 		Encoding of .csv file
-	delimeter : str, optional
-		Delimeter for .csv file
 
 	Returns
 	-------
@@ -209,7 +215,12 @@ def read_csv(file, encoding='utf-8', delimeter=None):
 
 	with open(file, 'r', newline='', encoding=encoding) as f:
 
-		reader = csv.reader(f, delimeter=delimeter)
+		if delimiter:
+			reader = csv.reader(f, delimiter=delimiter, skipinitialspace=ignore_spaces)
+
+		else:
+			reader = csv.reader(f, skipinitialspace=ignore_spaces)
+
 		header = next(reader)
 
 		for column in header:
@@ -221,7 +232,7 @@ def read_csv(file, encoding='utf-8', delimeter=None):
 
 	return data
 
-def write_csv(file, data, delimeter='\t'):
+def write_csv(file, data, delimiter='\t'):
 	'''
 	Write .csv file.
 
@@ -231,17 +242,17 @@ def write_csv(file, data, delimeter='\t'):
 		Path to .csv file
 	data : dict
 		Contents of .csv file
-	delimeter : str, optional
-		Delimeter for .csv file
+	delimiter : str, optional
+		Delimiter for .csv file
 	'''
 
 	logger.info(f'Writing file: {file}')
 
 	with open(file, 'w', newline='') as f:
 
-		w = csv.writer(f, delimeter=delimeter)
+		w = csv.writer(f, delimiter=delimiter)
 		w.writerow(data.keys())
-		w.writerows(zip(data.values()))
+		w.writerows(zip(*data.values()))
 
 def make_dict(keys, contents):
 	'''

@@ -65,6 +65,8 @@ class Lightcurve():
 
 		self.write_file(file)
 
+		self.peak = (self.peak[0] + time_add, self.peak[1] + time_add)
+
 	def write_file(self, file):
 		'''
 		Write lightcurve to .dat file.
@@ -74,6 +76,8 @@ class Lightcurve():
 		file : pathlib.PosixPath
 			Path to .dat file
 		'''
+
+		(file.parent).mkdir(parents=True, exist_ok=True)
 
 		with open(file, 'w') as f:
 
