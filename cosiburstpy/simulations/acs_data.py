@@ -81,7 +81,8 @@ class ACSData():
 
 		logger.info(f'Reading {file}')
 
-		data = {key: [tuple(value * unit for value, unit in zip(hit, (u.s, u.keV))) for hit in hits] for key, hits in read_hdf5(file).items()}
+		data, file_attributes, dataset_attributes = read_hdf5(file)
+		data = {key: [tuple(value * unit for value, unit in zip(hit, (u.s, u.keV))) for hit in hits] for key, hits in data.items()}
 
 		acs_data = cls(data)
 
