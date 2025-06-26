@@ -199,11 +199,15 @@ class ACSData():
 
 			component_data = cls.from_file(file, mass_model)
 
-			for panel, hits in component_data.items():
-				data[panel].extend(hits)
+			data['b1'].extend(component_data.b1)
+			data['b2'].extend(component_data.b2)
+			data['x1'].extend(component_data.x1)
+			data['x2'].extend(component_data.x2)
+			data['y1'].extend(component_data.y1)
+			data['y2'].extend(component_data.y2)
 
 		for panel in data:
-			data[key].sort(key=lambda x: x[0].to(u.s).value)
+			data[panel].sort(key=lambda x: x[0].to(u.s).value)
 
 		acs_data = cls(data)
 
