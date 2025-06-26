@@ -118,7 +118,7 @@ class SourceFile():
 			f.write(f'{self.name}.Spectrum         {self.spectrum}\n')
 
 			f.write('\n# Average photon flux in photon/cm2/s\n')
-			f.write(f'{self.name}.Flux             {self.flux:.3f}\n')
+			f.write(f'{self.name}.Flux             {self.flux:.5f}\n')
 
 			if hasattr(self, 'polarization'):
 				f.write('\n# Polarization \n')
