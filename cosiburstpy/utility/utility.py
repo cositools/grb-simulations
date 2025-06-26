@@ -176,17 +176,17 @@ def write_readme(file, inputs_path=None, input_parameters=None):
 		f.write(f'This output was generated on {date.today()} using cosipyburst version {version}')
 
 		if inputs_path:
-			f.write(f' by running the files located in {inputs_path}.  \n')
+			f.write(f' by running the files located in {inputs_path}.')
 
 		else:
-			f.write(f'.  ')
+			f.write(f'.')
 
 		if input_parameters:
 
-			f.write(f'\n\nParameters used:  \n')
+			f.write(f'\nParameters used:')
 
 			for key in input_parameters:
-				f.write(f'{key}: {input_parameters[key]}  \n')
+				f.write(f'\n{key}: {input_parameters[key]}')
 
 def read_csv(file, delimiter=None, ignore_spaces=True, encoding='utf-8'):
 	'''
