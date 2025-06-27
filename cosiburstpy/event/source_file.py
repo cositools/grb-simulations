@@ -1,6 +1,5 @@
 import astropy.units as u
 import logging
-from .position import galactic_from_local_position, local_from_galactic_position
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +33,7 @@ class SourceFile():
 			if orientation:
 				self.polarization = event.polarization
 			else:
-				raise RuntimeError('Polarization is not supported in spacecraft frame.')
+				raise RuntimeError("Polarization is not supported in spacecraft frame.")
 
 		position = event.position
 		self.occulted = event.occulted
@@ -44,7 +43,7 @@ class SourceFile():
 			self.orientation = str(orientation)
 
 			if position.frame.name == 'spacecraftframe':
-				position = galactic_from_local_position(position, event.orientation.pointings[0])
+				position = position.transform_to('galactic')
 			
 			self.l = position.l.degree
 			self.b = position.b.degree
@@ -52,7 +51,7 @@ class SourceFile():
 		else:
 
 			if position.frame.name != 'spacecraftframe':
-				position = local_from_galactic_position(position, event.orientation.pointings[0])
+				position = position.transform_to(SpacecraftFrame(attitude=event.orientation.attitudes[0]))
 
 			self.z = 90. - position.lat.degree
 			self.a = position.lon.degree

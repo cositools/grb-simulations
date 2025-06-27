@@ -20,7 +20,6 @@ class DefineSpectrum():
 		'''
 
 		self.name = name
-
 		self.source_data = read_yaml(gbm_file)
 
 		if self.source_data['flnc_best_fitting_model'] == 'flnc_band':
@@ -45,7 +44,7 @@ class DefineSpectrum():
 
 		else:
 
-			logger.warning(f'No spectral fit available for {self.name}.')
+			logger.warning(f"No spectral fit available for {self.name}.")
 			self.spectrum = None
 
 	def save_spectrum(self, file):
@@ -57,7 +56,5 @@ class DefineSpectrum():
 		file : pathlib.PosixPath
 			Path to .yaml file to save spectrum
 		'''
-
-		logger.info(f'Creating spectrum for {self.name}.')
 
 		self.spectrum.write_file(file)

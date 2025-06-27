@@ -1,20 +1,20 @@
 from scipy import integrate
 import astropy.units as u
-from .spectral_models import mono, band, comp, pl, bpl, sbpl
 from cosiburstpy.utility.utility import read_yaml, write_yaml
+from .spectral_models import mono, band, comp, pl, bpl, sbpl
 
 class Spectrum():
 
-	def __init__(self, model, parameters=None):
+	def __init__(self, model, parameters):
 		'''
-		Define spectral models.
+		Define spectral model.
 
 		Parameters
 		----------
 		model : str
 			Name of model (either 'Mono', 'Band', 'Comptonized', 'PowerLaw', 'BrokenPowerLaw', or 'SmoothlyBrokenPowerLaw')
-		parameters : dict, optional
-			Model parameters and values
+		parameters : dict of astropy.units.quantity.Quantity
+			Values of model parameters where keys are parameter names and values are parameter values
 		'''
 
 		self.model = model 
@@ -28,8 +28,8 @@ class Spectrum():
 
 		Parameters
 		----------
-		parameters : dict
-			Model parameters and values
+		parameters : dict of astropy.units.quantity.Quantity, optional
+			Values of model parameters where keys are parameter names and values are parameter values
 		'''
 
 		self.parameters = parameters
@@ -107,7 +107,7 @@ class Spectrum():
 
 		Parameters
 		----------
-		energy_range : tuple of astropy.units.quantity.Quantity
+		energy_range : 2-tuple of astropy.units.quantity.Quantity
 			Energy range
 
 		Returns
@@ -136,7 +136,7 @@ class Spectrum():
 
 		Parameters
 		----------
-		energy_range : tuple of astropy.units.quantity.Quantity
+		energy_range : 2-tuple of astropy.units.quantity.Quantity
 			Energy range
 
 		Returns
@@ -167,7 +167,7 @@ class Spectrum():
 		----------
 		energy_flux : astropy.units.quantity.Quantity
 			Energy flux
-		energy_range : tuple of astropy.units.quantity.Quantity
+		energy_range : 2-tuple of astropy.units.quantity.Quantity
 			Energy range
 
 		Returns
@@ -189,7 +189,7 @@ class Spectrum():
 
 		else:
 
-			raise RuntimeError('Integral of energy spectrum is 0.')
+			raise RuntimeError("Integral of energy spectrum is 0.")
 
 		return photon_flux
 
@@ -201,7 +201,7 @@ class Spectrum():
 		----------
 		photon_flux : astropy.units.quantity.Quantity
 			Photon flux
-		energy_range : tuple of astropy.units.quantity.Quantity
+		energy_range : 2-tuple of astropy.units.quantity.Quantity
 			Energy range
 
 		Returns
@@ -223,7 +223,7 @@ class Spectrum():
 
 		else:
 
-			raise RuntimeError('Integral of photon spectrum is 0.')
+			raise RuntimeError("Integral of photon spectrum is 0.")
 
 		return energy_flux
 
@@ -235,9 +235,9 @@ class Spectrum():
 		----------
 		old_photon_flux : astropy.units.quantity.Quantity
 			Photon flux
-		old_energy_range : tuple of astropy.units.quantity.Quantity
+		old_energy_range : 2-tuple of astropy.units.quantity.Quantity
 			Energy range of input flux
-		new_energy_range : tuple of astropy.units.quantity.Quantity
+		new_energy_range : 2-tuple of astropy.units.quantity.Quantity
 			Energy range of output flux
 
 		Returns
@@ -261,9 +261,9 @@ class Spectrum():
 		----------
 		old_energy_flux : astropy.units.quantity.Quantity
 			Energy flux
-		old_energy_range : tuple of astropy.units.quantity.Quantity
+		old_energy_range : 2-tuple of astropy.units.quantity.Quantity
 			Energy range of input flux
-		new_energy_range : tuple of astropy.units.quantity.Quantity
+		new_energy_range : 2-tuple of astropy.units.quantity.Quantity
 			Energy range of output flux
 
 		Returns
@@ -285,7 +285,7 @@ class Spectrum():
 
 		Parameters
 		----------
-		energy_range : tuple of astropy.units.quantity.Quantity
+		energy_range : 2-tuple of astropy.units.quantity.Quantity, optional
 			Energy range of simulation
 
 		Returns
@@ -293,6 +293,9 @@ class Spectrum():
 		spectrum_text : str
 			Text to define spectrum in .source file
 		'''
+
+		if not energy_range and self.model != 'Mono':
+			raise RuntimeError("Energy range must be provided if spectral model is not 'Mono'.")
 
 		if self.model == 'Mono':
 
@@ -343,4 +346,3 @@ class Spectrum():
 				spectrum[key] = self.parameters[key]
 
 		write_yaml(file, spectrum)
-

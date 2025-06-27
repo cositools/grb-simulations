@@ -16,7 +16,7 @@ def parse_args(arg_list):
 	Parameters
 	----------
 	arg_list : list of str
-		2D list with each row corresponding to an argument and three columns (-flag, --name, help description) 
+		2D list with each row corresponding to an argument and three columns
 
 	Returns
 	-------
@@ -48,7 +48,7 @@ def read_yaml(file):
 		Contents of .yaml file
 	'''
 
-	logger.info(f'Reading file: {file}')
+	logger.info(f"Reading file: {file}")
 
 	with open(file, 'r') as f:
 		data = yaml.safe_load(f)
@@ -67,7 +67,7 @@ def write_yaml(file, data):
 		Contents of .yaml file
 	'''
 
-	logger.info(f'Writing file: {file}')
+	logger.info(f"Writing file: {file}")
 
 	with open(file, 'w') as f:
 		yaml.dump(data, f, sort_keys=False)
@@ -91,7 +91,7 @@ def read_hdf5(file):
 		Attributes of datasets in .hdf5 file
 	'''
 
-	logger.info(f'Reading file: {file}')
+	logger.info(f"Reading file: {file}")
 
 	data = {}
 	file_attributes = {}
@@ -138,7 +138,7 @@ def write_hdf5(file, data, file_attributes=None, dataset_attributes=None):
 		Attributes of datasets in .hdf5 file
 	'''
 
-	logger.info(f'Writing file: {file}')
+	logger.info(f"Writing file: {file}")
 
 	with h5py.File(file, 'w') as f:
 
@@ -169,7 +169,7 @@ def write_readme(file, inputs_path=None, input_parameters=None):
 		Input parameters
 	'''
 
-	logger.info(f'Writing file: {file}')
+	logger.info(f"Writing file: {file}")
 
 	with open(file, 'w') as f:
 
@@ -209,7 +209,7 @@ def read_csv(file, delimiter=None, ignore_spaces=True, encoding='utf-8'):
 		Contents of .csv file
 	'''
 
-	logger.info(f'Reading file: {file}')
+	logger.info(f"Reading file: {file}")
 
 	data = {}
 
@@ -246,7 +246,7 @@ def write_csv(file, data, delimiter='\t'):
 		Delimiter for .csv file
 	'''
 
-	logger.info(f'Writing file: {file}')
+	logger.info(f"Writing file: {file}")
 
 	with open(file, 'w', newline='') as f:
 
@@ -311,6 +311,8 @@ def search_and_replace(input_file, output_file, search, replace):
 		input_data = f.read()
 	
 	output_data = input_data.replace(search, replace)
+
+	logger.info(f'Writing file: {output_file}')
 
 	with open(output_file, 'w') as f:
 		f.write(output_data)

@@ -14,6 +14,10 @@ class DataDownload():
 		----------
 		output_dir : pathlib.PosixPath
 			Path to directory to save output files
+		columns : list of str
+			Columns from burst catalog to download
+		filters : dict, optional
+			Criteria to filter bursts, where keys are columns and values are filter criteria
 		'''
 
 		self.output = output_dir
@@ -48,8 +52,8 @@ class DataDownload():
 		for i, event in enumerate(event_list):
 
 			name = event[self.download.index('trigger_name')]
-			logger.info(f'Downloading burst catalog data for {name} ({i+1}/{len(event_list)})')
 
+			logger.info(f"Downloading burst catalog data for {name} ({i+1}/{len(event_list)})")
 			(self.output / name).mkdir(parents=True, exist_ok=True)
 
 			event_data = make_dict(self.download, event)
@@ -69,8 +73,8 @@ class DataDownload():
 		for i, event in enumerate(event_list):
 
 			name = event[self.download.index('trigger_name')]
-			logger.info(f'Downloading TTE data for {name} ({i+1}/{len(event_list)})')
 
+			logger.info(f"Downloading TTE data for {name} ({i+1}/{len(event_list)})")
 			(self.output / name).mkdir(parents=True, exist_ok=True)
 
 			detectors = event[self.download.index('bcat_detector_mask')]

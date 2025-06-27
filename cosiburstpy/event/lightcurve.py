@@ -1,5 +1,8 @@
 import numpy as np
 import astropy.units as u
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Lightcurve():
 
@@ -9,16 +12,17 @@ class Lightcurve():
 
 		Parameters
 		----------
-		times : numpy.ndarray of astropy.units.quantity.Quantity
+		times : numpy.ndarray of astropy.units.quantity.Quantity, shape (N,)
 			Times
-		amplitudes : numpy.ndarray of astropy.units.quantity.Quantity
-			Lightcurve shape
+		amplitudes : numpy.ndarray of astropy.units.quantity.Quantity, shape (N,)
+			Lightcurve shape in units equivalent to counts/s
 		'''
 
 		self.bin_edges = times
 		self.shape = amplitudes[:-1]
 
 		self.peak = (self.bin_edges[np.where(self.shape == np.max(self.shape))[0][0]], self.bin_edges[np.where(self.shape == np.max(self.shape))[0][-1]+1])
+		self.peak_duration = self.peak[1] - self.peak[0]
 
 	@classmethod
 	def from_file(cls, file):
@@ -47,7 +51,7 @@ class Lightcurve():
 
 	def edit_times(self, file, time):
 		'''
-		Update timestamps in file to begin at specified time.
+		Update timestamps to begin at specified time, and write to file.
 
 		Parameters
 		----------
@@ -63,9 +67,10 @@ class Lightcurve():
 		for i in range(len(self.bin_edges)):
 			self.bin_edges[i] += time_add
 
-		self.write_file(file)
-
 		self.peak = (self.peak[0] + time_add, self.peak[1] + time_add)
+		self.peak_duration = self.peak[1] - self.peak[0]
+
+		self.write_file(file)
 
 	def write_file(self, file):
 		'''
@@ -76,6 +81,8 @@ class Lightcurve():
 		file : pathlib.PosixPath
 			Path to .dat file
 		'''
+
+		logger.info(f"Writing file: {file}")
 
 		(file.parent).mkdir(parents=True, exist_ok=True)
 
@@ -93,7 +100,7 @@ class Lightcurve():
 	@property
 	def peak_ratio(self):
 		'''
-		Ratio of peak amplitude to average of lightcurve.
+		Ratio of peak amplitude to average amplitude of lightcurve.
 
 		Returns
 		-------

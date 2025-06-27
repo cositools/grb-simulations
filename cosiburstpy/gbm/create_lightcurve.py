@@ -26,13 +26,13 @@ class BayesianBlocks():
 			Name of source
 		data_path : pathlib.PosixPath
 			Path to directory containing GBM file and TTE data
-		source_time_range : tuple of astropy.units.quantity.Quantity
+		source_time_range : 2-tuple of astropy.units.quantity.Quantity
 			Time range to consider for source
-		background_time_range : tuple of astropy.units.quantity.Quantity
+		background_time_range : 2-tuple of astropy.units.quantity.Quantity
 			Time range to fit background
-		nai_energy_range : tuple of astropy.units.quantity.Quantity
+		nai_energy_range : 2-tuple of astropy.units.quantity.Quantity
 			Energy range to include for NaI detectors
-		bgo_energy_range : tuple of astropy.units.quantity.Quantity
+		bgo_energy_range : 2-tuple of astropy.units.quantity.Quantity
 			Energy range to include for BGO detectors
 		'''
 
@@ -46,37 +46,16 @@ class BayesianBlocks():
 		self.nai_paths = glob.glob(str(data_path / '*tte_n*.fit'))
 		self.bgo_paths = glob.glob(str(data_path / '*tte_b*.fit'))
 
-		self.bin_sizes = self.lightcurve_binning()
+		if self.duration <= 0.1 * u.s:
+			self.bin_sizes = (0.005 * u.s, 0.002 * u.s)
+		else:
+			self.bin_sizes = (0.01 * u.s, 0.005 * u.s)
 
 		self.source_time_range = source_time_range
 		self.background_time_range = background_time_range
 
 		self.nai_energy_range = nai_energy_range
 		self.bgo_energy_range = bgo_energy_range
-
-	def lightcurve_binning(self):
-		'''
-		Time bin sizes based on event duration.
-
-		Returns
-		-------
-		bin_sizes : tuple of astropy.units.quantity.Quantity
-			Time bin sizes in the form (lightcurve bin size, plotting bin size) (s)
-		'''
-
-		if self.duration <= 0.1 * u.s: 
-
-			bin_size = 0.005 * u.s 
-			bin_size_plot = 0.002 * u.s
-
-		else:
-
-			bin_size = 0.01 * u.s 
-			bin_size_plot = 0.005 * u.s
-
-		bin_sizes = (bin_size, bin_size_plot)
-
-		return bin_sizes
 
 	def read_tte(self):
 		'''
@@ -132,7 +111,7 @@ class BayesianBlocks():
 		----------
 		tte : list of gbm.data.phaii.TTE
 			TTE data from each detector
-		p0 : float
+		p0 : float, optional
 			False alarm probability to compute prior
 		spike_tolerance : float, optional
 			Minimum size of first and last bins to include to avoid spikes (s)
@@ -179,7 +158,7 @@ class BayesianBlocks():
 			bin_sizes.append(bins_bayesian[i+1] - bins_bayesian[i])
 
 		if min(bin_sizes) > 1.25 * self.duration.to(u.s).value or len(bin_sizes) == 1:
-			raise RuntimeError(f'{self.name} not found using Bayesian blocks.')
+			raise RuntimeError(f"{self.name} not found using Bayesian blocks.")
 
 		count_rates = []
 
@@ -241,9 +220,9 @@ class BayesianBlocks():
 
 		Parameters
 		----------
-		count_rates : np.ndarray
+		count_rates : np.ndarray, shape(N,)
 			Count rate in each Bayesian block bin (counts/s)
-		bins_bayesian : np.ndarray
+		bins_bayesian : np.ndarray, shape(N,)
 			Bayesian block bin edges (s)
 		background_rates : gbm.background.background.BackgroundRates
 			Background rates in NaI and BGO detectors
@@ -257,7 +236,6 @@ class BayesianBlocks():
 		bayesian_rates, bayesian_bins = np.histogram(bins_bayesian[:-1], bins_bayesian, weights=count_rates)
 
 		background_data = []
-
 		for i in range(len(bayesian_rates)):
 
 			index_start = np.inf
@@ -280,24 +258,21 @@ class BayesianBlocks():
 						index_end = j
 
 			if index_start == np.inf or index_end == np.inf or index_end - index_start == 0:
-				raise RuntimeError(f'Background corresponding to Bayesian block bin {i} not found.')
+				raise RuntimeError(f"Background corresponding to Bayesian block bin {i} not found.")
 
 			background_rate = 0
-
 			for j in range(index_start, index_end):
 				background_rate += background_rates.rates[j]
-
 			background_rate /= (index_end - index_start)
 
 			background_data.append(background_rate)
 
 		source_rates = bayesian_rates - np.array(background_data)
-
 		source_rates[source_rates < 0] = 0.
 
 		return source_rates
 
-	def plot_lightcurve(self, lightcurve_plot, background_rates, bins_bayesian, count_rates, source_rates, plot_path):
+	def plot_lightcurve(self, lightcurve_plot, background_rates, bins_bayesian, count_rates, source_rates, plot_path=None, show=False):
 		'''
 		Plot lightcurve.
 
@@ -307,14 +282,16 @@ class BayesianBlocks():
 			Lightcurve for plotting
 		background_rates : gbm.background.background.BackgroundRates
 			Background rates in NaI and BGO detectors
-		bins_bayesian : np.ndarray
+		bins_bayesian : np.ndarray, shape(N,)
 			Bayesian block bin edges (s)
-		count_rates : np.ndarray
+		count_rates : np.ndarray, shape(N,)
 			Count rate in each Bayesian block bin (counts/s)
-		source_rates : np.ndarray
+		source_rates : np.ndarray, shape(N,)
 			Count rate of source in each Bayesian block bin (counts/s)
-		plot_path : str, optional
+		plot_path : pathlib.PosixPath, optional
 			Path to directory to save plots
+		show : bool, optional
+			Whether to show plots
 		'''
 
 		plot_path.mkdir(parents=True, exist_ok=True)
@@ -333,8 +310,14 @@ class BayesianBlocks():
 
 		plt.title(self.name)
 		plt.xlim(self.source_time_range[0].to(u.s).value, self.source_time_range[1].to(u.s).value)
-		plt.savefig(plot_path / f'{self.name}.png')
-		plt.clf()
+
+		if show:
+			plt.show()
+
+		if plot_path:
+			plt.savefig(plot_path / f'{self.name}.png')
+		
+		plt.close()
 
 		bin_centers = []
 		bin_widths = []
@@ -347,8 +330,14 @@ class BayesianBlocks():
 
 		plt.title(self.name)
 		plt.xlim(self.source_time_range[0].to(u.s).value, self.source_time_range[1].to(u.s).value)
-		plt.savefig(plot_path / f'{self.name}_background_subtracted.png')
-		plt.clf()
+
+		if show:
+			plt.show()
+
+		if plot_path:
+			plt.savefig(plot_path / f'{self.name}_background_subtracted.png')
+
+		plt.close()
 
 	def rebin_lightcurve(self, bins_bayesian, source_rates, nbins):
 		'''
@@ -356,9 +345,9 @@ class BayesianBlocks():
 
 		Parameters
 		----------
-		bins_bayesian : np.ndarray
+		bins_bayesian : np.ndarray, shape(N,)
 			Bayesian block bin edges (s)
-		source_rates : np.ndarray
+		source_rates : np.ndarray, shape(N,)
 			Count rate of source in each Bayesian block bin (counts/s)
 		nbins : int
 			Number of bins for MEGAlib lightcurve
@@ -370,8 +359,8 @@ class BayesianBlocks():
 		'''
 
 		times = list(np.linspace(bins_bayesian[0], bins_bayesian[-1], nbins))
+		
 		rates = []
-
 		for i in range(len(times) - 1):
 
 			index = np.inf
@@ -388,7 +377,6 @@ class BayesianBlocks():
 			rates.append(source_rates[index])
 
 		first_bin_with_counts = np.inf
-
 		for i in range(len(rates)):
 			if first_bin_with_counts > i and rates[i] > 0:
 				first_bin_with_counts = i
@@ -401,9 +389,11 @@ class BayesianBlocks():
 		end = False
 		for i, rate in reversed(list(enumerate(rates))):
 			if not end:
+
 				if rate == 0:
 					times.pop(i)
 					rates.pop(i)
+
 				else:
 					end = True
 					break
@@ -429,27 +419,22 @@ class BayesianBlocks():
 		----------
 		file : pathlib.PosixPath
 			Path to .dat file to save lightcurve
-		plot : bool, optional
-			Whether to save plots
-		plot_path : str, optional
+		plot_path : pathlib.PosixPath, optional
 			Path to directory to save plots
 		'''
 
 		file.parent.mkdir(parents=True, exist_ok=True)
-
-		logger.info(f'Creating lightcurve for {self.name}.')
+		logger.info(f"Creating lightcurve for {self.name}.")
 
 		source_tte, background_tte_nai, background_tte_bgo = self.read_tte()
 
 		try:
 
 			count_rates, bins_bayesian, lightcurve_plot, nbins = self.bin_tte(source_tte)
-		
 			background_rates = self.fit_background(background_tte_nai, background_tte_bgo)
-
 			source_rates = self.subtract_background(count_rates, bins_bayesian, background_rates)
 
-			if plot:
+			if plot_path:
 				self.plot_lightcurve(lightcurve_plot, background_rates, bins_bayesian, count_rates, source_rates, plot_path)
 
 			lightcurve = self.rebin_lightcurve(bins_bayesian, source_rates, nbins)
@@ -457,4 +442,4 @@ class BayesianBlocks():
 
 		except:
 
-			logger.warning(f'Error creating lightcurve for {self.name}.')
+			logger.warning(f"Error creating lightcurve for {self.name}.")

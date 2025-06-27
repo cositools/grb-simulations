@@ -9,7 +9,7 @@ class EventTable():
 		Parameters
 		----------
 		data : dict
-			Event table data where keys are column names and entries are lists of values
+			Event table data where keys are column names and values are lists of values for each column
 		'''
 
 		self.data = data

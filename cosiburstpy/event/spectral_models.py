@@ -23,6 +23,8 @@ def mono(e, energy):
 	else:
 		amplitude = 0. / e.unit
 
+	amplitude = amplitude.decompose()
+
 	return amplitude
 
 def band(e, alpha, beta, ebreak, piv=100.*u.keV):
@@ -52,6 +54,8 @@ def band(e, alpha, beta, ebreak, piv=100.*u.keV):
 		amplitude = (e / piv)**alpha * np.exp(-e / ebreak) / e.unit
 	else:
 		amplitude = (e / piv)**beta * np.exp(beta - alpha) * ((alpha - beta) * ebreak / piv)**(alpha - beta) / e.unit
+
+	amplitude = amplitude.decompose()
 	
 	return amplitude
 
@@ -77,6 +81,7 @@ def comp(e, index, epeak, piv=100.*u.keV):
 	'''
 
 	amplitude = (e / piv)**index * np.exp(-(index + 2) * e / epeak) / e.unit
+	amplitude = amplitude.decompose()
 
 	return amplitude
 
@@ -100,6 +105,7 @@ def pl(e, index, piv=100.*u.keV):
 	'''
 
 	amplitude = (e / piv)**(-index) / e.unit
+	amplitude = amplitude.decompose()
 
 	return amplitude
 
@@ -132,6 +138,8 @@ def bpl(e, ebreak, index_lo, index_hi, e_max, piv=100.*u.keV):
 		amplitude = (e / piv)**(-index_lo) / e.unit
 	else:
 		amplitude = (e / piv)**(-index_hi) * emax**(index_hi - index_lo) / e.unit
+
+	amplitude = amplitude.decompose()
 
 	return amplitude
 
@@ -170,5 +178,6 @@ def sbpl(e, ebreak, index_lo, index_hi, bscale, piv=100.*u.keV):
 	a_piv = m * bscale * np.log((np.exp(q_piv) + np.exp(-q_piv)) / 2)
 
 	amplitude = (e / piv)**b * 10**(a - a_piv)
+	amplitude = amplitude.decompose()
 
 	return amplitude

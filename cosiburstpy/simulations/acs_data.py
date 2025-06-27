@@ -16,8 +16,8 @@ class ACSData():
 
 		Parameters
 		----------
-		data : dict
-			ACS data where keys are ACS panel names and entries are lists of tuples of time and energy
+		data : dict of list of 2-tuple of astropy.units.Quantity
+			ACS data where keys are ACS panel names and values are lists of tuples of time and energy
 		'''
 
 		self.b1 = data['b1']
@@ -61,7 +61,7 @@ class ACSData():
 
 		else:
 
-			raise RuntimeError(f'{file.suffix} files are not supported for ACS data.')
+			raise RuntimeError(f"{file.suffix} files are not supported for ACS data.")
 
 		return acs_data
 
@@ -81,8 +81,6 @@ class ACSData():
 			ACS data
 		'''
 
-		logger.info(f'Reading {file}')
-
 		data, file_attributes, dataset_attributes = read_hdf5(file)
 		data = {key: [tuple(value * unit for value, unit in zip(hit, (u.s, u.keV))) for hit in hits] for key, hits in data.items()}
 
@@ -93,22 +91,20 @@ class ACSData():
 	@classmethod
 	def from_sim_file(cls, file, mass_model):
 		'''
-		Extract ACS hits from .sim or .sim.gz file. Modified from Savitri's code to create ACS data .csv files with the Data Challenge 3 mass model.
+		Extract ACS hits from .sim or .sim.gz file.
 
 		Parameters
 		----------
 		file : pathlib.PosixPath
 			Path to ACS data .sim or .sim.gz file
 		mass_model : pathlib.PosixPath
-			Path to analysis mass model
+			Path to Data Challenge 3 analysis mass model
 	
 		Returns
 		-------
 		acs_data : cosiburstpy.acs_data.ACSData
 			ACS data
 		'''
-
-		logger.info(f'Reading {file}')
 
 		from cosiburstpy.megalib.read_sim_file import read_sim_file
 
@@ -132,7 +128,7 @@ class ACSData():
 			ACS data
 		'''
 
-		logger.info(f'Reading {file}')
+		logger.info(f"Reading file: {file}")
 
 		times = {'b1': [], 'b2': [], 'x1': [], 'x2': [], 'y1': [], 'y2': []}
 		energies = {'b1': [], 'b2': [], 'x1': [], 'x2': [], 'y1': [], 'y2': []}
@@ -193,7 +189,7 @@ class ACSData():
 			Combined ACS data
 		'''
 
-		logger.info('Combining ACS data files')
+		logger.info("Combining ACS data files")
 
 		data = {'b1': [], 'b2': [], 'x1': [], 'x2': [], 'y1': [], 'y2': []}
 
@@ -230,7 +226,7 @@ class ACSData():
 			Path to analysis mass model if reading .sim or .sim.gz file
 		'''
 
-		logger.info(f'Converting {input_file} to .hdf5')
+		logger.info(f"Converting {input_file} to .hdf5")
 
 		data = cls.from_file(input_file, mass_model=mass_model)
 
@@ -261,7 +257,7 @@ class ACSData():
 
 		write_hdf5(file, data, file_attributes={'columns': ['time (s)', 'energy (keV)']})
 
-	def plot(self, time_range, energy_range=(80.*u.keV, 2000*u.keV), bin_size=0.05*u.s, file=None, show=False, colors={'b1': 'red', 'b2': 'green', 'x1': 'blue', 'x1': 'orange', 'y1': 'purple', 'y1': 'pink'}, event_time_range=None, title=None):
+	def plot(self, time_range, energy_range=(80.*u.keV, 2000*u.keV), bin_size=0.05*u.s, file=None, show=False, colors={'b1': 'red', 'b2': 'green', 'x1': 'blue', 'x1': 'orange', 'y1': 'purple', 'y1': 'pink'}, event_time_range=None, title=None, dpi=350):
 		'''
 		Plot ACS data file.
 
@@ -283,6 +279,8 @@ class ACSData():
 			Time range to highlight on plot
 		title : str, optional
 			Title of plot
+		dpi : int, optional
+			Figure resolution
 		'''
 
 		nbins = int(np.ceil((time_range[1] - time_range[0]).to_value(u.s) / bin_size.to_value(u.s)))
@@ -309,8 +307,8 @@ class ACSData():
 
 		plt.legend()
 
-		plt.xlabel('Time (s)')
-		plt.ylabel(f'Counts per {bin_size} s bin')
+		plt.xlabel("Time (s)")
+		plt.ylabel(f"Counts per {bin_size} s bin")
 
 		if event_time_range:
 			plt.axvspan(event_time_range[0].to_value(u.s), event_time_range[1].to_value(u.s), facecolor='gray', alpha=0.5)
@@ -319,7 +317,7 @@ class ACSData():
 			plt.title(title)
 
 		if file:
-			plt.savefig(file)
+			plt.savefig(file, dpi=dpi)
 
 		if show:
 			plt.show()

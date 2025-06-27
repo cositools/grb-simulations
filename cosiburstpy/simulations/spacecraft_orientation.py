@@ -1,6 +1,7 @@
 import numpy as np
 import astropy.units as u
 from astropy.coordinates import SkyCoord
+from scoords import Attitude
 
 class SpacecraftOrientation():
 
@@ -12,7 +13,7 @@ class SpacecraftOrientation():
 		----------
 		times : list of astropy.units.quantity.Quantity
 			Times
-		pointings : list of tuple of astropy.coordinates.sky_coordinate.SkyCoord
+		pointings : list of 2-tuple of astropy.coordinates.sky_coordinate.SkyCoord
 			Spacecraft pointings
 		altitudes : list of astropy.units.quantity.Quantity
 			Spacecraft altitudes
@@ -26,6 +27,10 @@ class SpacecraftOrientation():
 
 		self.times = u.Quantity(times)
 		self.pointings = pointings
+
+		self.attitudes = []
+		for pointing in pointings:
+			self.attitudes.append(Attitude.from_axes(x=pointing[0], z=pointing[1], frame='galactic'))
 
 		self.altitudes = u.Quantity(altitudes)
 		self.earth_zeniths = earth_zeniths
@@ -75,36 +80,6 @@ class SpacecraftOrientation():
 
 		return orientation
 
-	def get_orientation_at_time(self, time):
-		'''
-		Get the spacecraft orientation at a given time.
-
-		Parameters
-		----------
-		time : astropy.units.quantity.Quantity
-			Time
-
-		Returns
-		-------
-		this_orientation : tuple
-			Spacecraft orientation at the given time in the form (time, pointing, altitude, earth_zenith, exclude)
-		'''
-
-		if not np.min(self.times) <= time <= np.max(self.times):
-			raise RuntimeError(f'Provided time ({time}) is outside the bounds of the times in the orientation file ({np.min(self.times)}, {np.max(self.times)}).')
-
-		index = np.abs(self.times - time).argmin()
-
-		time = self.times[index]
-		pointing = self.pointings[index]
-		altitude = self.altitudes[index]
-		earth_zenith = self.earth_zeniths[index]
-		exclude = self.exclude[index]
-
-		this_orientation = (time, pointing, altitude, earth_zenith, exclude)
-
-		return this_orientation
-
 	def exclude_times(self, time_range):
 		'''
 		Exclude time range.
@@ -128,8 +103,8 @@ class SpacecraftOrientation():
 		----------
 		orientation : cosiburstpy.megalib.spacecraft_orientation.SpacecraftOrientation
 			Original orientation
-		time_range : tuple of astropy.units.quantity.Quantity
-			Range of times to output
+		time_range : 2-tuple of astropy.units.quantity.Quantity
+			Range of times
 
 		Returns
 		-------
@@ -170,7 +145,7 @@ class SpacecraftOrientation():
 
 	def edit_times(self, file, time):
 		'''
-		Update timestamps in file to begin at specified time.
+		Update timestamps to begin at specified time, and write to file.
 
 		Parameters
 		----------

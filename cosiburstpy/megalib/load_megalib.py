@@ -3,56 +3,57 @@ from cosiburstpy.utility.utility import SuppressOutput
 
 class LoadMEGAlib():
 
-	def __init__(self, geometry_path):
+	def __init__(self, mass_model):
 		'''
 		Load MEGAlib.
 
 		Parameters
 		----------
-		geometry_path : pathlib.PosixPath
+		mass_model : pathlib.PosixPath
 			Path to mass model
 		'''
 
-		self.geometry_path = str(geometry_path)
+		self.mass_model = str(mass_model)
 
-		self.init_megalib()
-		self.load_geo()
+		self.initialize_megalib()
+		self.load_mass_model()
 
-	def init_megalib(self):
+	def initialize_megalib(self):
 		'''
 		Load and initialize MEGAlib.
 		'''
 
 		with SuppressOutput():
-			root.gSystem.Load("$(MEGALIB)/lib/libMEGAlib.so")
+
+			root.gSystem.Load('$(MEGALIB)/lib/libMEGAlib.so')
 			g = root.MGlobal()
 			g.Initialize()
 
-	def load_geo(self):
+	def load_mass_model(self):
 		'''
 		Load mass model.
 		'''
 
 		with SuppressOutput():
-			geometry = root.MDGeometryQuest()
 
-			if geometry.ScanSetupFile(root.MString(self.geometry_path)) == True:
-				print("Geometry " + self.geometry_path + " loaded!")
+			mass_model = root.MDGeometryQuest()
+
+			if mass_model.ScanSetupFile(root.MString(self.mass_model)) == True:
+				print(f"Mass model {self.mass_model} loaded.")
 			else:
-				raise RuntimeError('Unable to load geometry ' + self.geometry_path)
+				raise RuntimeError(f"Unable to load {self.mass_model}.")
 
-			with SuppressOutput():
-				self.reader = root.MFileEventsSim(geometry)
+			self.reader = root.MFileEventsSim(mass_model)
 
-	def open_file(self, file_path):
+	def open_file(self, file):
 		'''
 		Open MEGAlib file.
 
 		Parameters
 		----------
-		file_path : str
+		file : pathlib.PosixPath
 			Path to file
 		'''
 
-		if self.reader.Open(root.MString(file_path)) == False:
-			raise RuntimeError('Unable to open file ' + file_path)
+		if self.reader.Open(root.MString(str(file))) == False:
+			raise RuntimeError(f"Unable to open {file}.")
