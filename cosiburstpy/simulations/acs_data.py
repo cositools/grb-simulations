@@ -1,6 +1,8 @@
 import shutil
 import pandas as pd
 import astropy.units as u
+import numpy as np
+import matplotlib.pyplot as plt
 import logging
 from cosiburstpy.utility.utility import read_hdf5, write_hdf5, SuppressOutput
 
@@ -259,3 +261,67 @@ class ACSData():
 
 		write_hdf5(file, data, file_attributes={'columns': ['time (s)', 'energy (keV)']})
 
+	def plot(self, time_range, energy_range=(80.*u.keV, 2000*u.keV), bin_size=0.05*u.s, file=None, show=False, colors={'b1': 'red', 'b2': 'green', 'x1': 'blue', 'x1': 'orange', 'y1': 'purple', 'y1': 'pink'}, event_time_range=None, title=None):
+		'''
+		Plot ACS data file.
+
+		Parameters
+		----------
+		time_range : tuple of astropy.units.Quantity
+			Time range of data to plot
+		energy_range : tuple of astropy.units.Quantity, optional
+			Energy range of data to plot
+		bin_size : astropy.units.Quantity, optional
+			Time bin size
+		file : pathlib.PosixPath, optional
+			Path to file to save plot
+		show : bool, optional
+			Whether to show plot
+		colors : dict, optional
+			Color to plot for each panel where keys are ACS panel names and entries are colors
+		event_time_range : tuple of astropy.units.Quantity, optional
+			Time range to highlight on plot
+		title : str, optional
+			Title of plot
+		'''
+
+		nbins = int(np.ceil((time_range[1] - time_range[0]).to_value(u.s) / bin_size.to_value(u.s)))
+		duration = nbins * bin_size
+
+		time_range = (time_range[0], time_range[0] + duration)
+		bin_edges = np.linspace(time_range[0].to_value(u.s), time_range[1].to_value(u.s), nbins+1)
+
+		for panel in ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']:
+
+			hits = getattr(self, panel)
+			times, energies = zip(*hits)
+
+			times = np.array([t.to_value(u.s) for t in times])
+			energies = np.array([e.to_value(u.keV) for e in energies])
+
+			mask = (time_range[0].to_value(u.s) <= times) & (times <= time_range[1].to_value(u.s)) & (energy_range[0].to_value(u.keV) <= energies) & (energies <= energy_range[1].to_value(u.keV))
+
+			times = times[mask]
+			energies = energies[mask]
+
+			counts, bins = np.histogram(times, bins=bin_edges)
+			plt.stairs(counts, bins, color=colors[panel], alpha=0.4)
+
+		plt.legend()
+
+		plt.xlabel('Time (s)')
+		plt.ylabel(f'Counts per {bin_size} s bin')
+
+		if event_time_range:
+			plt.axvspan(event_time_range[0].to_value(u.s), event_time_range[1].to_value(u.s), facecolor='gray', alpha=0.5)
+
+		if title:
+			plt.title(title)
+
+		if file:
+			plt.savefig(file)
+
+		if show:
+			plt.show()
+
+		plt.close()
