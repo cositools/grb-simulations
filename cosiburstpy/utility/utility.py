@@ -69,6 +69,8 @@ def write_yaml(file, data):
 
 	logger.info(f"Writing file: {file}")
 
+	(file.parent).mkdir(parents=True, exist_ok=True)
+
 	with open(file, 'w') as f:
 		yaml.dump(data, f, sort_keys=False)
 
@@ -140,6 +142,8 @@ def write_hdf5(file, data, file_attributes=None, dataset_attributes=None):
 
 	logger.info(f"Writing file: {file}")
 
+	(file.parent).mkdir(parents=True, exist_ok=True)
+
 	with h5py.File(file, 'w') as f:
 
 		if file_attributes:
@@ -170,6 +174,8 @@ def write_readme(file, inputs_path=None, input_parameters=None):
 	'''
 
 	logger.info(f"Writing file: {file}")
+
+	(file.parent).mkdir(parents=True, exist_ok=True)
 
 	with open(file, 'w') as f:
 
@@ -247,6 +253,8 @@ def write_csv(file, data, delimiter='\t'):
 	'''
 
 	logger.info(f"Writing file: {file}")
+
+	(file.parent).mkdir(parents=True, exist_ok=True)
 
 	with open(file, 'w', newline='') as f:
 

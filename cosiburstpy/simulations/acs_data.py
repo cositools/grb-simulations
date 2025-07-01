@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class ACSData():
 
-	def __init__(self, data):
+	def __init__(self, data, sort=True):
 		'''
 		ACS data handling.
 
@@ -18,28 +18,38 @@ class ACSData():
 		----------
 		data : dict of list of 2-tuple of astropy.units.Quantity
 			ACS data where keys are ACS panel names and values are lists of tuples of time and energy
+		sort : bool, optional
+			Whether to sort by time
 		'''
 
-		self.b1 = data['b1']
-		self.b2 = data['b2']
+		for panel in data:
 
-		self.x1 = data['x1']
-		self.x2 = data['x2']
+			if panel in ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']:
 
-		self.y1 = data['y1']
-		self.y2 = data['y2']
+				if sort:
+					panel_data = sorted(data[panel], key=lambda x: x[0].to(u.s).value)
+				else:
+					panel_data = data[panel]
+
+				setattr(self, panel, panel_data)
+
+			else:
+
+				raise RuntimeError(f"{panel} is not a valid panel name.")
 
 	@classmethod
-	def from_file(cls, file, mass_model=None):
+	def from_file(cls, file, mass_model=None, sort=True):
 		'''
 		Read in ACS data file.
 
 		Parameters
 		----------
-		file : pathlib.PosixPath
-			Path to ACS data file
+		file : pathlib.PosixPath or list of pathlib.PosixPath
+			Path to ACS data file or files, if panels are saved separately
 		mass_model : pathlib.PosixPath, optional
 			Path to analysis mass model if reading .sim or .sim.gz file
+		sort : bool, optional
+			Whether to sort by time
 
 		Returns
 		-------
@@ -47,33 +57,37 @@ class ACSData():
 			ACS data
 		'''
 
-		if file.suffix == '.hdf5':
+		if type(file) == list:
 
-			acs_data = cls.from_hdf5_file(file)
-
-		elif file.suffix == '.sim' or ''.join(file.suffixes) == '.sim.gz':
-
-			acs_data = cls.from_sim_file(file, mass_model)
-
-		elif ''.join(file.suffixes) == '.csv.gz':
-
-			acs_data = cls.from_csv_file(file)
+			acs_data = cls.from_hdf5_files(file)
 
 		else:
 
-			raise RuntimeError(f"{file.suffix} files are not supported for ACS data.")
+			if file.suffix == '.hdf5':
+				acs_data = cls.from_hdf5_file(file)
+
+			elif file.suffix == '.sim' or ''.join(file.suffixes) == '.sim.gz':
+				acs_data = cls.from_sim_file(file, mass_model)
+
+			elif ''.join(file.suffixes) == '.csv.gz':
+				acs_data = cls.from_csv_file(file)
+
+			else:
+				raise RuntimeError(f"{file.suffix} files are not supported for ACS data.")
 
 		return acs_data
 
 	@classmethod
-	def from_hdf5_file(cls, file):
+	def from_hdf5_files(cls, files, sort=True):
 		'''
-		Extract ACS hits from .hdf5 file.
+		Extract ACS hits from .hdf5 files for each panel.
 
 		Parameters
 		----------
-		file : pathlib.PosixPath
-			Path to ACS data .hdf5 file
+		files : list of pathlib.PosixPath
+			Paths to ACS data .hdf5 files for each panel
+		sort : bool, optional
+			Whether to sort by time
 	
 		Returns
 		-------
@@ -81,10 +95,40 @@ class ACSData():
 			ACS data
 		'''
 
-		data, file_attributes, dataset_attributes = read_hdf5(file)
+		data = {}
+
+		for file in files:
+
+			panel_data = read_hdf5(file)[0]
+			panel_data = {key: [tuple(value * unit for value, unit in zip(hit, (u.s, u.keV))) for hit in hits] for key, hits in this_data.items()}
+			data = data | this_data
+
+		acs_data = cls(data, sort)
+
+		return acs_data
+
+	@classmethod
+	def from_hdf5_file(cls, file, sort=True):
+		'''
+		Extract ACS hits from .hdf5 file.
+
+		Parameters
+		----------
+		file : pathlib.PosixPath
+			Path to ACS data .hdf5 file
+		sort : bool, optional
+			Whether to sort by time
+	
+		Returns
+		-------
+		acs_data : cosiburstpy.acs_data.ACSData
+			ACS data
+		'''
+
+		data = read_hdf5(file)[0]
 		data = {key: [tuple(value * unit for value, unit in zip(hit, (u.s, u.keV))) for hit in hits] for key, hits in data.items()}
 
-		acs_data = cls(data)
+		acs_data = cls(data, sort)
 
 		return acs_data
 
@@ -172,16 +216,14 @@ class ACSData():
 		return acs_data
 
 	@classmethod
-	def combine(cls, files, mass_model=None):
+	def combine(cls, files):
 		'''
-		Combine ACS data files.
+		Combine ACS .hdf5 files.
 
 		Parameters
 		----------
 		files : list of pathlib.PosixPath
-			Paths to ACS data files
-		mass_model : pathlib.PosixPath, optional
-			Path to analysis mass model if reading .sim file
+			Paths to ACS .hdf5 files
 
 		Returns
 		-------
@@ -191,21 +233,27 @@ class ACSData():
 
 		logger.info("Combining ACS data files")
 
-		data = {'b1': [], 'b2': [], 'x1': [], 'x2': [], 'y1': [], 'y2': []}
-
 		for file in files:
+			if file.suffix != '.hdf5':
+				raise RuntimeError("Only .hdf5 files can be combined.")
 
-			component_data = cls.from_file(file, mass_model)
+		for i, file in enumerate(files):
 
-			data['b1'].extend(component_data.b1)
-			data['b2'].extend(component_data.b2)
-			data['x1'].extend(component_data.x1)
-			data['x2'].extend(component_data.x2)
-			data['y1'].extend(component_data.y1)
-			data['y2'].extend(component_data.y2)
+			component_data = read_hdf5(file)[0]
+			component_data = {key: [tuple(value * unit for value, unit in zip(hit, (u.s, u.keV))) for hit in hits] for key, hits in component_data.items()}
 
-		for panel in data:
-			data[panel].sort(key=lambda x: x[0].to(u.s).value)
+			if i == 0:
+
+				data = component_data
+
+			elif set(data.keys()) == set(component_data.keys()):
+
+				for panel in data.keys():
+					data[panel].extend(component_data[panel])
+
+			else:
+
+				raise RuntimeError("All components must contain data for the same panels.")
 
 		acs_data = cls(data)
 
@@ -240,9 +288,26 @@ class ACSData():
 
 		return data
 
+	def write_files(self, path):
+		'''
+		Write ACS data files for each panel.
+
+		Parameters
+		----------
+		path : pathlib.PosixPath
+			Path to directory to write ACS data .hdf5 files
+		'''
+
+		for panel in list(vars(self)):
+
+			if panel in ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']:
+
+				panel_data = {panel: [tuple(value.to(unit).value for value, unit in zip(hit, (u.s, u.keV))) for hit in getattr(self, panel)]}
+				write_hdf5(path/f'{panel}.hdf5', panel_data, file_attributes={'columns': ['time (s)', 'energy (keV)']})
+
 	def write_file(self, file):
 		'''
-		Write ACS data file.
+		Write ACS data file or files.
 
 		Parameters
 		----------
@@ -250,14 +315,18 @@ class ACSData():
 			Path to ACS data .hdf5 file
 		'''
 
-		acs_data = {'b1': sorted(self.b1, key=lambda x: x[0].to(u.s).value), 'b2': sorted(self.b2, key=lambda x: x[0].to(u.s).value), 'x1': sorted(self.x1, key=lambda x: x[0].to(u.s).value), 
-					'x2': sorted(self.x2, key=lambda x: x[0].to(u.s).value), 'y1': sorted(self.y1, key=lambda x: x[0].to(u.s).value), 'y2': sorted(self.y2, key=lambda x: x[0].to(u.s).value)}
+		acs_data = {}
 
-		data = {panel: [tuple(value.to(unit).value for value, unit in zip(hit, (u.s, u.keV))) for hit in hits] for panel, hits in acs_data.items()}
+		for panel in list(vars(self)):
 
-		write_hdf5(file, data, file_attributes={'columns': ['time (s)', 'energy (keV)']})
+			if panel in ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']:
 
-	def plot(self, time_range, energy_range=(80.*u.keV, 2000*u.keV), bin_size=0.05*u.s, file=None, show=False, colors={'b1': 'red', 'b2': 'green', 'x1': 'blue', 'x1': 'orange', 'y1': 'purple', 'y1': 'pink'}, event_time_range=None, title=None, dpi=350):
+				panel_data = {panel: [tuple(value.to(unit).value for value, unit in zip(hit, (u.s, u.keV))) for hit in getattr(self, panel)]}
+				acs_data = acs_data | panel_data
+
+		write_hdf5(file, acs_data, file_attributes={'columns': ['time (s)', 'energy (keV)']})
+
+	def plot(self, time_range, energy_range=(80.*u.keV, 2000*u.keV), bin_size=0.05*u.s, file=None, show=False, colors={'b1': 'red', 'b2': 'green', 'x1': 'blue', 'x2': 'orange', 'y1': 'purple', 'y2': 'pink'}, event_time_range=None, title=None, dpi=350):
 		'''
 		Plot ACS data file.
 
@@ -289,21 +358,23 @@ class ACSData():
 		time_range = (time_range[0], time_range[0] + duration)
 		bin_edges = np.linspace(time_range[0].to_value(u.s), time_range[1].to_value(u.s), nbins+1)
 
-		for panel in ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']:
+		for panel in list(vars(self)):
 
-			hits = getattr(self, panel)
-			times, energies = zip(*hits)
+			if panel in ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']:
 
-			times = np.array([t.to_value(u.s) for t in times])
-			energies = np.array([e.to_value(u.keV) for e in energies])
+				hits = getattr(self, panel)
+				times, energies = zip(*hits)
 
-			mask = (time_range[0].to_value(u.s) <= times) & (times <= time_range[1].to_value(u.s)) & (energy_range[0].to_value(u.keV) <= energies) & (energies <= energy_range[1].to_value(u.keV))
+				times = np.array([t.to_value(u.s) for t in times])
+				energies = np.array([e.to_value(u.keV) for e in energies])
 
-			times = times[mask]
-			energies = energies[mask]
+				mask = (time_range[0].to_value(u.s) <= times) & (times <= time_range[1].to_value(u.s)) & (energy_range[0].to_value(u.keV) <= energies) & (energies <= energy_range[1].to_value(u.keV))
 
-			counts, bins = np.histogram(times, bins=bin_edges)
-			plt.stairs(counts, bins, color=colors[panel], alpha=0.4)
+				times = times[mask]
+				energies = energies[mask]
+
+				counts, bins = np.histogram(times, bins=bin_edges)
+				plt.stairs(counts, bins, color=colors[panel], alpha=0.4)
 
 		plt.legend()
 
