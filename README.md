@@ -11,5 +11,8 @@ If you have questions or encounter any problems, please open an issue.
 `git clone https://github.com/cositools/grb-simulations.git`  
 2. Navigate into the project directory.  
 `cd grb-simulations`  
-3. Install the cosiburstpy package.  
+3. Create and activate a conda environment (this is optional, but highly recommended).  
+<pre> ```conda create -n cosi-grb-sims python=3.11
+conda activate cosi-grb-sims``` </pre>  
+4. Install the cosiburstpy package, ideally within a conda environment.  
 `pip install .`  

@@ -1,18 +1,15 @@
-# COSI GRB Group Simulations
+# Example Notebooks
 
-This repository contains code to run COSI simulations of GRBs and other short-duration transients in bulk. 
+This directory contains example Jupyter notebooks that download GBM data, generate source models from GBM data, produce input files for MEGAlib, simulate transients using MEGAlib, combine the simulations with background, and extract the ACS hits from the simulations.  
 
-Simulations for the GRB group run using this pipeline should be uploaded [here](https://drive.google.com/drive/u/0/folders/11_qUIzQx3oGTjrb6voim0GB_EgXny9co).  
+- `download_gbm_data`: Downloads data from GBM's Burst Catalog, as well as the TTE data
+- `generate_source_models`: Produces lightcurves binned using Bayesian blocks from GBM TTE data, and creates spectral models from the GBM best spectral fits
+- `create_megalib_inputs`: 
 
-If you have questions or encounter any problems, please open an issue.  
 
-## Installation Instructions     
-1. Clone the repository. From the command line, run:  
-`git clone https://github.com/cositools/grb-simulations.git`  
-2. Navigate into the project directory.  
-`cd grb-simulations`  
-3. Install the cosiburstpy package.  
-`pip install .`  
+
+
+
 
 ## Steps to Running Simulations      
 1. Create source input files, either using data observed by other telescopes (e.g. Fermi-GBM) or theoretical models. `download_gbm_data.py` is an example script that can be used to download lightcurves and spectra from Fermi-GBM.  `gbm_to_megalib.py` may be used to convert the downloaded lightcurves and spectra to the formats required to generate the MEGAlib .source files.         
