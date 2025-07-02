@@ -112,7 +112,7 @@ def read_sim_file(file, mass_model):
 
 					elif z > 7:
 
-						elif x > 15:
+						if x > 15:
 
 							if y < -2.6 and y > -14:
 								y1_1 += hit.GetEnergy()
@@ -132,7 +132,7 @@ def read_sim_file(file, mass_model):
 
 					elif z > -10:
 
-						elif y > 15:
+						if y > 15:
 
 							if x < -6:
 								x1_1 += hit.GetEnergy()
