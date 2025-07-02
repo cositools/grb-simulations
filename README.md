@@ -14,5 +14,5 @@ If you have questions or encounter any problems, please open an issue.
 3. Create and activate a conda environment (this is optional, but highly recommended).  
 `conda create -n cosi-grb-sims python=3.11`  
 `conda activate cosi-grb-sims`  
-4. Install the cosiburstpy package, ideally within a conda environment.  
+4. Install the cosiburstpy package.  
 `pip install .`  
