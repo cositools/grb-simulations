@@ -1,6 +1,6 @@
 [project]
 name = "cosiburstpy"
-version = "0.1.1"
+version = "0.2.0"
 description = "Facilitate producing large samples of COSI transient simulations."
 readme = "README.md"
 authors = [
