@@ -1,0 +1,26 @@
+[project]
+name = "cosiburstpy"
+version = "0.2.0"
+description = "Facilitate producing large samples of COSI transient simulations."
+readme = "README.md"
+authors = [
+    { name = "Eliza Neights", email = "eliza.neights@gmail.com" }
+]
+requires-python = ">=3.7"
+dependencies = [
+    "numpy",
+    "astropy",
+    "scoords",
+    "scipy",
+    "matplotlib",
+    "pandas",
+    "h5py",
+    "gbm"
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "cosiburstpy/_version.py"
