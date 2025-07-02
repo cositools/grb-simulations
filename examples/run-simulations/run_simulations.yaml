@@ -1,3 +1,3 @@
 paths:
-  input: '/Users/eneights/work/COSI/grb-simulations/data/examples/megalib_inputs'
-  output: '/Users/eneights/work/COSI/grb-simulations/data/examples/simulations'
+  input: '/path/to/inputs'                                        # Path to directory containing MEGAlib input files
+  output: '/path/to/simulations'                                  # Path to directory to save simulations

@@ -411,7 +411,7 @@ class BayesianBlocks():
 
 		return lightcurve
 
-	def bin_lightcurve(self, file, plot=False, plot_path=None):
+	def bin_lightcurve(self, file, plot_path=None):
 		'''
 		Bin lightcurve using Bayesian blocks and create .dat file.
 

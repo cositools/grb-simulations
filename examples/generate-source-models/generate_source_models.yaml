@@ -1,9 +1,9 @@
 paths:
-  input: '/path/to/gbm/data'    
-  output: '/path/to/models'
+  input: '/path/to/gbm/data'                                      # Path to directory containing GBM data
+  output: '/path/to/models'                                       # Path to directory to save source models
 time:
-  source_range: [-2.0, 4.0]
-  background_range: [-15.0, 17.0]
+  source_range: [-2.0, 4.0]                                       # Time interval (s) with respect to GBM trigger time to consider for source
+  background_range: [-15.0, 17.0]                                 # Time interval (s) with respect to GBM trigger time to fit background
 energy:
-  nai_range: [10., 10000.]   
-  bgo_range: [10., 10000.]
+  nai_range: [10., 10000.]                                        # Energy range (keV) to use for GBM's NaI detectors when generating lightcurve
+  bgo_range: [10., 10000.]                                        # Energy range (keV) to use for GBM's BGO detectors when generating lightcurve
