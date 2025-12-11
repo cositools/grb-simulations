@@ -1,5 +1,6 @@
 import ROOT as root
 import logging
+import astropy.units as u
 from cosiburstpy.utility.utility import SuppressOutput
 from cosiburstpy.simulations.acs_data import ACSData
 from .load_megalib import LoadMEGAlib
@@ -155,92 +156,92 @@ def read_sim_file(file, mass_model):
 						logger.warning(f"Coordinate ({x}, {y}, {z}) not found.")
 
 			if bottom_Zplus_1 >= 80.:
-				times['b1'].append(float(time)) * u.s
-				energies['b1'].append(float(bottom_Zplus_1)) * u.kev
+				times['b1'].append(float(time) * u.s)
+				energies['b1'].append(float(bottom_Zplus_1) * u.keV)
 
 			if bottom_Zplus_2 >= 80.:
-				times['b1'].append(float(time)) * u.s
-				energies['b1'].append(float(bottom_Zplus_2)) * u.kev
+				times['b1'].append(float(time) * u.s)
+				energies['b1'].append(float(bottom_Zplus_2) * u.keV)
 
 			if bottom_Zplus_3 >= 80.:
-				times['b1'].append(float(time)) * u.s
-				energies['b1'].append(float(bottom_Zplus_3)) * u.kev
+				times['b1'].append(float(time) * u.s)
+				energies['b1'].append(float(bottom_Zplus_3) * u.keV)
 
 			if bottom_Zplus_4 >= 80.:
-				times['b1'].append(float(time)) * u.s
-				energies['b1'].append(float(bottom_Zplus_4)) * u.kev
+				times['b1'].append(float(time) * u.s)
+				energies['b1'].append(float(bottom_Zplus_4) * u.keV)
 
 			if bottom_Zplus_5 >= 80.:
-				times['b1'].append(float(time)) * u.s
-				energies['b1'].append(float(bottom_Zplus_5)) * u.kev
+				times['b1'].append(float(time) * u.s)
+				energies['b1'].append(float(bottom_Zplus_5) * u.keV)
 
 			if bottom_Zminus_1 >= 80.:
-				times['b2'].append(float(time)) * u.s
-				energies['b2'].append(float(bottom_Zminus_1)) * u.kev
+				times['b2'].append(float(time) * u.s)
+				energies['b2'].append(float(bottom_Zminus_1) * u.keV)
 
 			if bottom_Zminus_2 >= 80.:
-				times['b2'].append(float(time)) * u.s
-				energies['b2'].append(float(bottom_Zminus_2)) * u.kev
+				times['b2'].append(float(time) * u.s)
+				energies['b2'].append(float(bottom_Zminus_2) * u.keV)
 
 			if bottom_Zminus_3 >= 80.:
-				times['b2'].append(float(time)) * u.s
-				energies['b2'].append(float(bottom_Zminus_3)) * u.kev
+				times['b2'].append(float(time) * u.s)
+				energies['b2'].append(float(bottom_Zminus_3) * u.keV)
 
 			if bottom_Zminus_4 >= 80.:
-				times['b2'].append(float(time)) * u.s
-				energies['b2'].append(float(bottom_Zminus_4)) * u.kev
+				times['b2'].append(float(time) * u.s)
+				energies['b2'].append(float(bottom_Zminus_4) * u.keV)
 
 			if bottom_Zminus_5 >= 80.:
-				times['b2'].append(float(time)) * u.s
-				energies['b2'].append(float(bottom_Zminus_5)) * u.kev
+				times['b2'].append(float(time) * u.s)
+				energies['b2'].append(float(bottom_Zminus_5) * u.keV)
 
 			if x1_1 >= 80.:
-				times['x1'].append(float(time)) * u.s
-				energies['x1'].append(float(x1_1)) * u.kev
+				times['x1'].append(float(time) * u.s)
+				energies['x1'].append(float(x1_1) * u.keV)
 
 			if x1_2 >= 80.:
-				times['x1'].append(float(time)) * u.s
-				energies['x1'].append(float(x1_2)) * u.kev
+				times['x1'].append(float(time) * u.s)
+				energies['x1'].append(float(x1_2) * u.keV)
 
 			if x1_3 >= 80.:
-				times['x1'].append(float(time)) * u.s
-				energies['x1'].append(float(x1_3)) * u.kev
+				times['x1'].append(float(time) * u.s)
+				energies['x1'].append(float(x1_3) * u.keV)
 
 			if x2_1 >= 80.:
-				times['x2'].append(float(time)) * u.s
-				energies['x2'].append(float(x2_1)) * u.kev
+				times['x2'].append(float(time) * u.s)
+				energies['x2'].append(float(x2_1) * u.keV)
 
 			if x2_2 >= 80.:
-				times['x2'].append(float(time)) * u.s
-				energies['x2'].append(float(x2_2)) * u.kev
+				times['x2'].append(float(time) * u.s)
+				energies['x2'].append(float(x2_2) * u.keV)
 
 			if x2_3 >= 80.:
-				times['x2'].append(float(time)) * u.s
-				energies['x2'].append(float(x2_3)) * u.kev
+				times['x2'].append(float(time) * u.s)
+				energies['x2'].append(float(x2_3) * u.keV)
 
 			if y1_1 >= 80.:
-				times['y1'].append(float(time)) * u.s
-				energies['y1'].append(float(y1_1)) * u.kev
+				times['y1'].append(float(time) * u.s)
+				energies['y1'].append(float(y1_1) * u.keV)
 
 			if y1_2 >= 80.:
-				times['y1'].append(float(time)) * u.s
-				energies['y1'].append(float(y1_2)) * u.kev
+				times['y1'].append(float(time) * u.s)
+				energies['y1'].append(float(y1_2) * u.keV)
 
 			if y1_3 >= 80.:
-				times['y1'].append(float(time)) * u.s
-				energies['y1'].append(float(y1_3)) * u.kev
+				times['y1'].append(float(time) * u.s)
+				energies['y1'].append(float(y1_3) * u.keV)
 
 			if y2_1 >= 80.:
-				times['y2'].append(float(time)) * u.s
-				energies['y2'].append(float(y2_1)) * u.kev
+				times['y2'].append(float(time) * u.s)
+				energies['y2'].append(float(y2_1) * u.keV)
 
 			if y2_2 >= 80.:
-				times['y2'].append(float(time)) * u.s
-				energies['y2'].append(float(y2_2)) * u.kev
+				times['y2'].append(float(time) * u.s)
+				energies['y2'].append(float(y2_2) * u.keV)
 
 			if y2_3 >= 80.:
-				times['y2'].append(float(time)) * u.s
-				energies['y2'].append(float(y2_3)) * u.kev
+				times['y2'].append(float(time) * u.s)
+				energies['y2'].append(float(y2_3) * u.keV)
 
 	acs_data = ACSData({key: list(zip(times[key], energies[key])) for key in times})
 
