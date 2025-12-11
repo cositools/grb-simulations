@@ -8,25 +8,45 @@ from cosiburstpy.utility.utility import read_hdf5, write_hdf5, SuppressOutput
 
 logger = logging.getLogger(__name__)
 
+# combine for binned (check if binning is same) or unbinned
+# add shift function
+
 class ACSData():
 
-	def __init__(self, data, sort=True):
+	def __init__(self, data, sort=True, binned=False, bins=None):
 		'''
 		ACS data handling.
 
 		Parameters
 		----------
 		data : dict of list of 2-tuple of astropy.units.Quantity
-			ACS data where keys are ACS panel names and values are lists of tuples of time and energy
+			ACS data where keys are ACS panel names and values are lists of tuples of time and energy if unbinned, and values are 2D np.ndarray if binned
 		sort : bool, optional
-			Whether to sort by time
+			Whether to sort by time (ignored if binned)
+		binned : bool, optional
+			Whether data are binned
+		bins : dict of list of astropy.units.Quantity, optional
+			Time and energy bin edges
 		'''
+
+		self.binned = binned
+
+		if self.binned:
+
+			if bins:
+
+				self.time_bin_edges = bins['time']
+				self.energy_bin_edges = bins['energy']
+
+			else:
+
+				raise RuntimeError("Bin edges must be provided for binned data.")
 
 		for panel in data:
 
 			if panel in ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']:
 
-				if sort:
+				if sort and not self.binned:
 					panel_data = sorted(data[panel], key=lambda x: x[0].to(u.s).value)
 				else:
 					panel_data = data[panel]
@@ -100,8 +120,8 @@ class ACSData():
 		for file in files:
 
 			panel_data = read_hdf5(file)[0]
-			panel_data = {key: [tuple(value * unit for value, unit in zip(hit, (u.s, u.keV))) for hit in hits] for key, hits in this_data.items()}
-			data = data | this_data
+			panel_data = {key: [tuple(value * unit for value, unit in zip(hit, (u.s, u.keV))) for hit in hits] for key, hits in panel_data.items()}
+			data = data | panel_data
 
 		acs_data = cls(data, sort)
 
@@ -125,10 +145,18 @@ class ACSData():
 			ACS data
 		'''
 
-		data = read_hdf5(file)[0]
-		data = {key: [tuple(value * unit for value, unit in zip(hit, (u.s, u.keV))) for hit in hits] for key, hits in data.items()}
+		data, attributes, dataset_attributes = read_hdf5(file)
 
-		acs_data = cls(data, sort)
+		if 'type' in attributes and attributes['type'] == 'binned':
+
+			bins = {'time': [value * u.s for value in dataset_attributes['time bins (s)']], 
+					'energy': [value * u.keV for value in dataset_attributes['energy bins (keV)']]}
+			acs_data = cls(data, binned=True, bins=bins)
+
+		else:
+
+			data = {key: [tuple(value * unit for value, unit in zip(hit, (u.s, u.keV))) for hit in hits] for key, hits in data.items()}
+			acs_data = cls(data, sort)
 
 		return acs_data
 
@@ -278,7 +306,7 @@ class ACSData():
 
 		data = cls.from_file(input_file, mass_model=mass_model)
 
-		if (input_file.suffix == '.sim' or ''.join(input_file.suffixes) == '.csv.gz') and not output_file.exists():
+		if (input_file.suffix == '.sim' or ''.join(input_file.suffixes) == '.csv.gz' or ''.join(input_file.suffixes) == '.sim.gz') and not output_file.exists():
 
 			data.write_file(output_file)
 
@@ -287,6 +315,39 @@ class ACSData():
 			shutil.copy(input_file, output_file)
 
 		return data
+
+	def bin(self, time_bins, energy_bins):
+		'''
+		Bin ACS data.
+
+		Parameters
+		----------
+		time_bins : list of astropy.units.quantity.Quantity
+			Time bin edges
+		energy_bins : list of astropy.units.quantity.Quantity
+			Energy bin edges
+
+		Returns
+		-------
+		binned_acs_data : cosiburstpy.acs_data.ACSData
+			Binned ACS data
+		'''
+
+		binned_data = {}
+
+		for panel in ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']:
+
+			unbinned_panel_data = getattr(self, panel)
+			unbinned_panel_data = [(t.to(u.s).value, e.to(u.keV).value) for t, e in unbinned_panel_data]
+
+			times, energies = np.array(unbinned_panel_data).T
+			binned_panel_data, time_edges, energy_edges = np.histogram2d(times, energies, bins=[time_bins.to(u.s).value, energy_bins.to(u.keV).value])
+
+			binned_data[panel] = binned_panel_data
+
+		binned_acs_data = self.__class__(binned_data, binned=True, bins={'time': time_bins, 'energy': energy_bins})
+
+		return binned_acs_data
 
 	def write_files(self, path):
 		'''
@@ -317,14 +378,28 @@ class ACSData():
 
 		acs_data = {}
 
-		for panel in list(vars(self)):
+		if self.binned:
 
-			if panel in ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']:
+			for panel in list(vars(self)):
 
-				panel_data = {panel: [tuple(value.to(unit).value for value, unit in zip(hit, (u.s, u.keV))) for hit in getattr(self, panel)]}
-				acs_data = acs_data | panel_data
+				if panel in ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']:
 
-		write_hdf5(file, acs_data, file_attributes={'columns': ['time (s)', 'energy (keV)']})
+					acs_data[panel] = getattr(self, panel)
+
+			write_hdf5(file, acs_data, file_attributes={'type': 'binned'}, 
+					   dataset_attributes={'time bins (s)': [value.to(u.s).value for value in self.time_bin_edges],
+										   'energy bins (keV)': [value.to(u.keV).value for value in self.energy_bin_edges]})
+
+		else:
+
+			for panel in list(vars(self)):
+
+				if panel in ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']:
+
+					panel_data = {panel: [tuple(value.to(unit).value for value, unit in zip(hit, (u.s, u.keV))) for hit in getattr(self, panel)]}
+					acs_data = acs_data | panel_data
+
+			write_hdf5(file, acs_data, file_attributes={'type': 'unbinned', 'columns': ['time (s)', 'energy (keV)']})
 
 	def plot(self, time_range, energy_range=(80.*u.keV, 2000*u.keV), bin_size=0.05*u.s, file=None, show=False, colors={'b1': 'red', 'b2': 'green', 'x1': 'blue', 'x2': 'orange', 'y1': 'purple', 'y2': 'pink'}, event_time_range=None, title=None, dpi=350):
 		'''
