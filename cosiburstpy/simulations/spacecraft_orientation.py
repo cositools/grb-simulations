@@ -109,7 +109,7 @@ class SpacecraftOrientation():
 			Spacecraft orientation at the given time in the form (time, pointing, altitude, earth_zenith, exclude)
 		'''
 
-		if not time in range(np.min(self.times), np.max(self.times)):
+		if not np.min(self.times) <= time <= np.max(self.times):
 			raise RuntimeError(f'Provided time ({time}) is outside the bounds of the times in the orientation file ({np.min(self.times)}, {np.max(self.times)}).')
 
 		index = np.abs(self.times - time).argmin()
@@ -122,7 +122,7 @@ class SpacecraftOrientation():
 
 		this_orientation = (time, pointing, altitude, earth_zenith, exclude)
 
-		return this_orientatio
+		return this_orientation
 
 	@classmethod
 	def slice(cls, orientation, time_range):
