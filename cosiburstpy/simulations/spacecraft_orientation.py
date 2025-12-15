@@ -109,10 +109,10 @@ class SpacecraftOrientation():
 			Spacecraft orientation at the given time in the form (time, pointing, altitude, earth_zenith, exclude)
 		'''
 
-		if not time in range(np.min(self.orientation[:, 0]), np.max(self.orientation[:, 0])):
-			raise RuntimeError(f'Provided time ({time}) is outside the bounds of the times in the orientation file ({np.min(self.orientation[:, 0])}, {np.max(self.orientation[:, 0])}).')
+		if not time in range(np.min(self.times), np.max(self.times)):
+			raise RuntimeError(f'Provided time ({time}) is outside the bounds of the times in the orientation file ({np.min(self.times)}, {np.max(self.times)}).')
 
-		index = np.abs(self.orientation[:, 0] - time).argmin()
+		index = np.abs(self.times - time).argmin()
 
 		time = self.times[index]
 		pointing = self.pointings[index]
