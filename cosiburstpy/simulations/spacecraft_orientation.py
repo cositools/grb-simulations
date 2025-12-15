@@ -94,6 +94,36 @@ class SpacecraftOrientation():
 			if time_range[0] <= t <= time_range[1]:
 				self.exclude[i] = True
 
+	def get_orientation_at_time(self, time):
+		'''
+		Get the spacecraft orientation at a given time.
+
+		Parameters
+		----------
+		time : astropy.units.quantity.Quantity
+			Time
+
+		Returns
+		-------
+		this_orientation : tuple
+			Spacecraft orientation at the given time in the form (time, pointing, altitude, earth_zenith, exclude)
+		'''
+
+		if not time in range(np.min(self.orientation[:, 0]), np.max(self.orientation[:, 0])):
+			raise RuntimeError(f'Provided time ({time}) is outside the bounds of the times in the orientation file ({np.min(self.orientation[:, 0])}, {np.max(self.orientation[:, 0])}).')
+
+		index = np.abs(self.orientation[:, 0] - time).argmin()
+
+		time = self.times[index]
+		pointing = self.pointings[index]
+		altitude = self.altitudes[index]
+		earth_zenith = self.earth_zeniths[index]
+		exclude = self.exclude[index]
+
+		this_orientation = (time, pointing, altitude, earth_zenith, exclude)
+
+		return this_orientatio
+
 	@classmethod
 	def slice(cls, orientation, time_range):
 		'''
