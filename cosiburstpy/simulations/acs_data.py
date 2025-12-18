@@ -232,8 +232,6 @@ class ACSData():
 
 		for i, file in enumerate(files):
 
-			logger.info(f"Adding {file}")
-
 			if i == 0:
 
 				data = cls.from_file(file)
@@ -256,7 +254,14 @@ class ACSData():
 
 				for panel, value in vars(data).items():
 					if panel in ['x1', 'x2', 'y1', 'y2', 'b1', 'b2']:
-						setattr(data, panel, np.add(getattr(data, panel), getattr(component_data, panel)))
+						setattr(data, panel, np.add(value, getattr(component_data, panel)))
+
+			counts = 0
+			for panel, value in vars(data).items():
+				if panel in ['x1', 'x2', 'y1', 'y2', 'b1', 'b2']:
+					counts += np.sum(value)
+
+			logger.info(f"Added {file}. Total counts: {int(counts)}")
 
 		return data
 
