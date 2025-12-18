@@ -8,9 +8,6 @@ from cosiburstpy.utility.utility import read_hdf5, write_hdf5, SuppressOutput
 
 logger = logging.getLogger(__name__)
 
-# combine for binned (check if binning is same) or unbinned
-# add shift function
-
 class ACSData():
 
 	def __init__(self, data, sort=True, binned=False, bins=None):
@@ -64,8 +61,8 @@ class ACSData():
 
 		Parameters
 		----------
-		file : pathlib.PosixPath or list of pathlib.PosixPath
-			Path to ACS data file or files, if panels are saved separately
+		file : pathlib.PosixPath
+			Path to ACS data file
 		mass_model : pathlib.PosixPath, optional
 			Path to analysis mass model if reading .sim or .sim.gz file
 		sort : bool, optional
@@ -77,53 +74,17 @@ class ACSData():
 			ACS data
 		'''
 
-		if type(file) == list:
+		if file.suffix == '.hdf5':
+			acs_data = cls.from_hdf5_file(file)
 
-			acs_data = cls.from_hdf5_files(file)
+		elif file.suffix == '.sim' or ''.join(file.suffixes) == '.sim.gz':
+			acs_data = cls.from_sim_file(file, mass_model)
+
+		elif ''.join(file.suffixes) == '.csv.gz':
+			acs_data = cls.from_csv_file(file)
 
 		else:
-
-			if file.suffix == '.hdf5':
-				acs_data = cls.from_hdf5_file(file)
-
-			elif file.suffix == '.sim' or ''.join(file.suffixes) == '.sim.gz':
-				acs_data = cls.from_sim_file(file, mass_model)
-
-			elif ''.join(file.suffixes) == '.csv.gz':
-				acs_data = cls.from_csv_file(file)
-
-			else:
-				raise RuntimeError(f"{file.suffix} files are not supported for ACS data.")
-
-		return acs_data
-
-	@classmethod
-	def from_hdf5_files(cls, files, sort=True):
-		'''
-		Extract ACS hits from .hdf5 files for each panel.
-
-		Parameters
-		----------
-		files : list of pathlib.PosixPath
-			Paths to ACS data .hdf5 files for each panel
-		sort : bool, optional
-			Whether to sort by time
-	
-		Returns
-		-------
-		acs_data : cosiburstpy.acs_data.ACSData
-			ACS data
-		'''
-
-		data = {}
-
-		for file in files:
-
-			panel_data = read_hdf5(file)[0]
-			panel_data = {key: [tuple(value * unit for value, unit in zip(hit, (u.s, u.keV))) for hit in hits] for key, hits in panel_data.items()}
-			data = data | panel_data
-
-		acs_data = cls(data, sort)
+			raise RuntimeError(f"{file.suffix} files are not supported for ACS data.")
 
 		return acs_data
 
@@ -149,8 +110,12 @@ class ACSData():
 
 		if 'type' in attributes and attributes['type'] == 'binned':
 
-			bins = {'time': [value * u.s for value in dataset_attributes['time bins (s)']], 
-					'energy': [value * u.keV for value in dataset_attributes['energy bins (keV)']]}
+			panels = ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']
+
+			bins = {'time': [value * u.s for value in data['time bins (s)']], 
+					'energy': [value * u.keV for value in data['energy bins (keV)']]}
+			data = {panel: data[panel] for panel in panels}
+
 			acs_data = cls(data, binned=True, bins=bins)
 
 		else:
@@ -251,7 +216,7 @@ class ACSData():
 		Parameters
 		----------
 		files : list of pathlib.PosixPath
-			Paths to ACS .hdf5 files
+			Paths to binned ACS .hdf5 files
 
 		Returns
 		-------
@@ -267,25 +232,33 @@ class ACSData():
 
 		for i, file in enumerate(files):
 
-			component_data = read_hdf5(file)[0]
-			component_data = {key: [tuple(value * unit for value, unit in zip(hit, (u.s, u.keV))) for hit in hits] for key, hits in component_data.items()}
+			logger.info(f"Adding {file}")
 
 			if i == 0:
 
-				data = component_data
+				data = cls.from_file(file)
 
-			elif set(data.keys()) == set(component_data.keys()):
-
-				for panel in data.keys():
-					data[panel].extend(component_data[panel])
+				if not data.binned:
+					raise RuntimeError("Only binned files can be combined.")
 
 			else:
 
-				raise RuntimeError("All components must contain data for the same panels.")
+				component_data = cls.from_file(file)
 
-		acs_data = cls(data)
+				if not component_data.binned:
+					raise RuntimeError("Only binned files can be combined.")
 
-		return acs_data
+				if data.time_bin_edges != component_data.time_bin_edges:
+					raise RuntimeError("Files must be binned with same time bins.")
+
+				if data.energy_bin_edges != component_data.energy_bin_edges:
+					raise RuntimeError("Files must be binned with same energy bins.")
+
+				for panel, value in vars(data).items():
+					if panel in ['x1', 'x2', 'y1', 'y2', 'b1', 'b2']:
+						setattr(data, panel, np.add(getattr(data, panel), getattr(component_data, panel)))
+
+		return data
 
 	@classmethod
 	def convert(cls, input_file, output_file, mass_model=None):
@@ -316,7 +289,7 @@ class ACSData():
 
 		return data
 
-	def bin(self, time_bins, energy_bins):
+	def bin(self, time_bins, energy_bins, shift=None):
 		'''
 		Bin ACS data.
 
@@ -326,6 +299,8 @@ class ACSData():
 			Time bin edges
 		energy_bins : list of astropy.units.quantity.Quantity
 			Energy bin edges
+		shift : astropy.units.quantity.Quantity, optional
+			Time shift to add before binning
 
 		Returns
 		-------
@@ -340,7 +315,20 @@ class ACSData():
 			unbinned_panel_data = getattr(self, panel)
 			unbinned_panel_data = [(t.to(u.s).value, e.to(u.keV).value) for t, e in unbinned_panel_data]
 
-			times, energies = np.array(unbinned_panel_data).T
+			if len(unbinned_panel_data) == 0:
+
+				times = [0.]
+				energies = [0.]
+
+			else:
+
+				times, energies = np.array(unbinned_panel_data).T
+
+			if not shift == None:
+
+				for t in range(len(times)):
+					times[t] += shift.to(u.s).value
+
 			binned_panel_data, time_edges, energy_edges = np.histogram2d(times, energies, bins=[time_bins.to(u.s).value, energy_bins.to(u.keV).value])
 
 			binned_data[panel] = binned_panel_data
@@ -348,23 +336,6 @@ class ACSData():
 		binned_acs_data = self.__class__(binned_data, binned=True, bins={'time': time_bins, 'energy': energy_bins})
 
 		return binned_acs_data
-
-	def write_files(self, path):
-		'''
-		Write ACS data files for each panel.
-
-		Parameters
-		----------
-		path : pathlib.PosixPath
-			Path to directory to write ACS data .hdf5 files
-		'''
-
-		for panel in list(vars(self)):
-
-			if panel in ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']:
-
-				panel_data = {panel: [tuple(value.to(unit).value for value, unit in zip(hit, (u.s, u.keV))) for hit in getattr(self, panel)]}
-				write_hdf5(path/f'{panel}.hdf5', panel_data, file_attributes={'columns': ['time (s)', 'energy (keV)']})
 
 	def write_file(self, file):
 		'''
@@ -380,15 +351,18 @@ class ACSData():
 
 		if self.binned:
 
+			dataset_attributes = {}
+
 			for panel in list(vars(self)):
 
 				if panel in ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']:
 
 					acs_data[panel] = getattr(self, panel)
 
-			write_hdf5(file, acs_data, file_attributes={'type': 'binned'}, 
-					   dataset_attributes={'time bins (s)': [value.to(u.s).value for value in self.time_bin_edges],
-										   'energy bins (keV)': [value.to(u.keV).value for value in self.energy_bin_edges]})
+			acs_data['time bins (s)'] = [float(value.to(u.s).value) for value in self.time_bin_edges]
+			acs_data['energy bins (keV)'] = [float(value.to(u.keV).value) for value in self.energy_bin_edges]
+
+			write_hdf5(file, acs_data, file_attributes={'type': 'binned'})
 
 		else:
 
