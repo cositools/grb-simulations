@@ -191,21 +191,24 @@ class SpacecraftOrientation():
 			Shifted orientation
 		'''
 
-		start_time = np.min(orientation.times)
+		shifted_orientation = cls(orientation.times, orientation.pointings, orientation.altitudes, 
+								  orientation.earth_zeniths, orientation.saa_livetime, orientation.exclude)
+
+		start_time = np.min(shifted_orientation.times)
 		time_add = time - start_time
 
-		for i in range(len(orientation.times)):
-			orientation.times[i] += time_add
+		for i in range(len(shifted_orientation.times)):
+			shifted_orientation.times[i] += time_add
 
-		pointings = [p for t, p in zip(orientation.times, orientation.pointings) if t.value >= 0.]
-		altitudes = [a.value for t, a in zip(orientation.times, orientation.altitudes) if t.value >= 0.] * orientation.altitudes.unit
-		earth_zeniths = [z for t, z in zip(orientation.times, orientation.earth_zeniths) if t.value >= 0.]
-		if hasattr(orientation, 'saa_livetime'):
-			saa_livetime = [s.value for t, s in zip(orientation.times, orientation.saa_livetime) if t.value >= 0.] * orientation.saa_livetime.unit
+		pointings = [p for t, p in zip(shifted_orientation.times, shifted_orientation.pointings) if t.value >= 0.]
+		altitudes = [a.value for t, a in zip(shifted_orientation.times, shifted_orientation.altitudes) if t.value >= 0.] * shifted_orientation.altitudes.unit
+		earth_zeniths = [z for t, z in zip(shifted_orientation.times, shifted_orientation.earth_zeniths) if t.value >= 0.]
+		if hasattr(shifted_orientation, 'saa_livetime'):
+			saa_livetime = [s.value for t, s in zip(shifted_orientation.times, shifted_orientation.saa_livetime) if t.value >= 0.] * shifted_orientation.saa_livetime.unit
 		else:
 			saa_livetime = None
-		exclude = [e for t, e in zip(orientation.times, orientation.exclude) if t.value >= 0.]
-		times = [t.value for t in orientation.times if t.value >= 0.] * orientation.times.unit
+		exclude = [e for t, e in zip(shifted_orientation.times, shifted_orientation.exclude) if t.value >= 0.]
+		times = [t.value for t in shifted_orientation.times if t.value >= 0.] * shifted_orientation.times.unit
 
 		shifted_orientation = cls(times, pointings, altitudes, earth_zeniths, saa_livetime, exclude)
 
