@@ -342,6 +342,23 @@ class ACSData():
 
 		return binned_acs_data
 
+	def shift_bins(self, file, time):
+		'''
+		Update time bins to begin at specified time, and write to file.
+
+		Parameters
+		----------
+		file : pathlib.PosixPath
+			Path to .hdf5 file
+		time : astropy.units.quantity.Quantity
+			New start time of data
+		'''
+
+		time_add = time - self.time_bin_edges[0]
+		self.time_bin_edges = [t + time_add for t in self.time_bin_edges]
+
+		self.write_file(file)
+
 	def write_file(self, file):
 		'''
 		Write ACS data file or files.
