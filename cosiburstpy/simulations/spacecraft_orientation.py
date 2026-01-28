@@ -209,8 +209,6 @@ class SpacecraftOrientation():
 		shifted_orientation.earth_zeniths = [z for t, z in zip(shifted_orientation.times, shifted_orientation.earth_zeniths) if t.value >= 0.]
 		if hasattr(shifted_orientation, 'saa_livetime'):
 			shifted_orientation.saa_livetime = [s.value for t, s in zip(shifted_orientation.times, shifted_orientation.saa_livetime) if t.value >= 0.] * shifted_orientation.saa_livetime.unit
-		else:
-			shifted_orientation.saa_livetime = None
 		shifted_orientation.exclude = [e for t, e in zip(shifted_orientation.times, shifted_orientation.exclude) if t.value >= 0.]
 		shifted_orientation.times = [t.value for t in shifted_orientation.times if t.value >= 0.] * shifted_orientation.times.unit
 
