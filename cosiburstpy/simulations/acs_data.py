@@ -436,8 +436,8 @@ class ACSData():
 				hits = getattr(self, panel)
 				times, energies = zip(*hits)
 
-				times = np.array([t.to_value(u.s) for t in times])
-				energies = np.array([e.to_value(u.keV) for e in energies])
+				times = np.array([t for t in times])
+				energies = np.array([e for e in energies])
 
 				mask = (time_range[0].to_value(u.s) <= times) & (times <= time_range[1].to_value(u.s)) & (energy_range[0].to_value(u.keV) <= energies) & (energies <= energy_range[1].to_value(u.keV))
 
