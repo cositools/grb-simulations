@@ -434,18 +434,34 @@ class ACSData():
 			if panel in ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']:
 
 				hits = getattr(self, panel)
-				times, energies = zip(*hits)
 
-				times = np.array([t for t in times])
-				energies = np.array([e for e in energies])
+				if self.binned:
 
-				mask = (time_range[0].to_value(u.s) <= times) & (times <= time_range[1].to_value(u.s)) & (energy_range[0].to_value(u.keV) <= energies) & (energies <= energy_range[1].to_value(u.keV))
+					time_start = np.searchsorted([t.to_value(u.s) for t in self.time_bin_edges], time_range[0].to_value(u.s), side='right') - 1
+					time_end = np.searchsorted([t.to_value(u.s) for t in self.time_bin_edges], time_range[1].to_value(u.s), side='right')
 
-				times = times[mask]
-				energies = energies[mask]
+					energy_start = np.searchsorted([e.to_value(u.keV) for e in self.energy_bin_edges], energy_range[0].to_value(u.keV), side='right') - 1
+					energy_end = np.searchsorted([e.to_value(u.keV) for e in self.energy_bin_edges], energy_range[1].to_value(u.keV) - 0.01, side='right')
 
-				counts, bins = np.histogram(times, bins=bin_edges)
-				plt.stairs(counts, bins, color=colors[panel], alpha=0.4)
+					hits = np.array(hits)[time_start:time_end, energy_start:energy_end]
+					counts = np.sum(hits, axis=1)
+
+					plt.stairs(counts, [t.to_value(u.s) for t in self.time_bin_edges][time_start:time_end+1], color=colors[panel], alpha=0.4, label=panel)
+
+				else:
+
+					times, energies = zip(*hits)
+
+					times = np.array([t for t in times])
+					energies = np.array([e for e in energies])
+
+					mask = (time_range[0].to_value(u.s) <= times) & (times <= time_range[1].to_value(u.s)) & (energy_range[0].to_value(u.keV) <= energies) & (energies <= energy_range[1].to_value(u.keV))
+
+					times = times[mask]
+					energies = energies[mask]
+
+					counts, bins = np.histogram(times, bins=bin_edges)
+					plt.stairs(counts, bins, color=colors[panel], alpha=0.4, label=panel)
 
 		plt.legend()
 
