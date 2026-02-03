@@ -461,6 +461,9 @@ class ACSData():
 				counts, bins = np.histogram(times, bins=bin_edges)
 				plt.stairs(counts, bins, color=colors[panel], alpha=0.4, label=panel)
 
+		if self.binned:
+			bin_size = round((self.time_bin_edges[1] - self.time_bin_edges[0]).to_value(u.s), 2)
+
 		plt.legend()
 
 		plt.xlabel("Time (s)")
