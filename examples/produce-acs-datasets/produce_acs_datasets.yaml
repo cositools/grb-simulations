@@ -1,0 +1,11 @@
+paths:
+  input: '/path/to/simulations'                                   # Path to directory containing MEGAlib simulations
+  background: 'path/to/background'                                # Path to directory containing background simulations
+  mass_model: 'path/to/mass/model'                                # Path to directory containing mass model
+  unbinned_output: '/path/to/unbinned/data'                       # Path to directory to save unbinned .hdf5 files
+  binned_output: '/path/to/binned/data'                           # Path to directory to save binned .hdf5 files
+  combined_output: 'path/to/combined/data'                        # Path to directory to save combined source and background .hdf5 files
+binning:
+  time_bin_size: 0.05                                             # Time bin size (s)
+  time_range: [1835487300., 1835573700.]                          # Time range (s)
+  energy_bins: [80., 2000., .inf]                                 # Energy bin edges (keV)
