@@ -313,6 +313,9 @@ class ACSData():
 			Binned ACS data
 		'''
 
+		time_bins = [t.to(u.s).value for t in time_bins]
+		energy_bins = [e.to(u.keV).value for e in energy_bins]
+
 		binned_data = {}
 
 		for panel in ['b1', 'b2', 'x1', 'x2', 'y1', 'y2']:
@@ -334,7 +337,7 @@ class ACSData():
 				for t in range(len(times)):
 					times[t] += shift.to(u.s).value
 
-			binned_panel_data, time_edges, energy_edges = np.histogram2d(times, energies, bins=[time_bins.to(u.s).value, energy_bins.to(u.keV).value])
+			binned_panel_data, time_edges, energy_edges = np.histogram2d(times, energies, bins=[time_bins, energy_bins])
 
 			binned_data[panel] = binned_panel_data
 
