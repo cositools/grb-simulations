@@ -341,7 +341,7 @@ class ACSData():
 
 			binned_data[panel] = binned_panel_data
 
-		binned_acs_data = self.__class__(binned_data, binned=True, bins={'time': time_bins, 'energy': energy_bins})
+		binned_acs_data = self.__class__(binned_data, binned=True, bins={'time': time_bins * u.s, 'energy': energy_bins * u.keV})
 
 		return binned_acs_data
 
