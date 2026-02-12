@@ -94,6 +94,36 @@ class SpacecraftOrientation():
 			if time_range[0] <= t <= time_range[1]:
 				self.exclude[i] = True
 
+	def get_orientation_at_time(self, time):
+		'''
+		Get the spacecraft orientation at a given time.
+
+		Parameters
+		----------
+		time : astropy.units.quantity.Quantity
+			Time
+
+		Returns
+		-------
+		this_orientation : tuple
+			Spacecraft orientation at the given time in the form (time, pointing, altitude, earth_zenith, exclude)
+		'''
+
+		if not np.min(self.times) <= time <= np.max(self.times):
+			raise RuntimeError(f'Provided time ({time}) is outside the bounds of the times in the orientation file ({np.min(self.times)}, {np.max(self.times)}).')
+
+		index = np.abs(self.times - time).argmin()
+
+		time = self.times[index]
+		pointing = self.pointings[index]
+		altitude = self.altitudes[index]
+		earth_zenith = self.earth_zeniths[index]
+		exclude = self.exclude[index]
+
+		this_orientation = (time, pointing, altitude, earth_zenith, exclude)
+
+		return this_orientation
+
 	@classmethod
 	def slice(cls, orientation, time_range):
 		'''
@@ -139,13 +169,14 @@ class SpacecraftOrientation():
 			earth_zeniths.append(orientation.earth_zeniths[index])
 			exclude.append(orientation.exclude[index])
 
-		sliced_orientation = cls(times, pointings, altitudes, earth_zeniths, exclude)
+		sliced_orientation = cls(times, pointings, altitudes, earth_zeniths, None, exclude)
 
 		return sliced_orientation
 
-	def edit_times(self, file, time):
+	@classmethod
+	def shift(cls, orientation, file, time):
 		'''
-		Update timestamps to begin at specified time, and write to file.
+		Shift timestamps to begin at specified time, and write to file.
 
 		Parameters
 		----------
@@ -153,15 +184,37 @@ class SpacecraftOrientation():
 			Path to .ori file
 		time : astropy.units.quantity.Quantity
 			New start time of orientation file
+
+		Returns
+		-------
+		shifted_orientation : cosiburstpy.megalib.spacecraft_orientation.SpacecraftOrientation
+			Shifted orientation
 		'''
 
-		start_time = np.min(self.times)
+		if hasattr(orientation, 'saa_livetime'):
+			shifted_orientation = cls(orientation.times, orientation.pointings, orientation.altitudes, 
+								  orientation.earth_zeniths, orientation.saa_livetime, orientation.exclude)
+		else:
+			shifted_orientation = cls(orientation.times, orientation.pointings, orientation.altitudes, 
+								  orientation.earth_zeniths, None, orientation.exclude)
+
+		start_time = np.min(shifted_orientation.times)
 		time_add = time - start_time
 
-		for i in range(len(self.times)):
-			self.times[i] += time_add
+		for i in range(len(shifted_orientation.times)):
+			shifted_orientation.times[i] += time_add
 
-		self.write_file(file)
+		shifted_orientation.pointings = [p for t, p in zip(shifted_orientation.times, shifted_orientation.pointings) if t.value >= 0.]
+		shifted_orientation.altitudes = [a.value for t, a in zip(shifted_orientation.times, shifted_orientation.altitudes) if t.value >= 0.] * shifted_orientation.altitudes.unit
+		shifted_orientation.earth_zeniths = [z for t, z in zip(shifted_orientation.times, shifted_orientation.earth_zeniths) if t.value >= 0.]
+		if hasattr(shifted_orientation, 'saa_livetime'):
+			shifted_orientation.saa_livetime = [s.value for t, s in zip(shifted_orientation.times, shifted_orientation.saa_livetime) if t.value >= 0.] * shifted_orientation.saa_livetime.unit
+		shifted_orientation.exclude = [e for t, e in zip(shifted_orientation.times, shifted_orientation.exclude) if t.value >= 0.]
+		shifted_orientation.times = [t.value for t in shifted_orientation.times if t.value >= 0.] * shifted_orientation.times.unit
+
+		shifted_orientation.write_file(file)
+
+		return shifted_orientation
 
 	def write_file(self, file):
 		'''

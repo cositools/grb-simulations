@@ -96,7 +96,7 @@ class Event():
 		Energy range.
 		'''
 
-		if not hasattr(self, _energy_range):
+		if not hasattr(self, '_energy_range'):
 			raise RuntimeError("No energy range defined. Must set using set_average_flux() or set_peak_flux().")
 
 		return self._energy_range
