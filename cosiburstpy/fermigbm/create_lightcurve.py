@@ -110,7 +110,7 @@ class BayesianBlocks():
 
 		Parameters
 		----------
-		tte : list of gdt.core.tte.PhotonList
+		tte : list of gdt.missions.fermi.gbm.tte.GbmTte
 			TTE data from each detector
 		p0 : float, optional
 			False alarm probability to compute prior
@@ -129,7 +129,7 @@ class BayesianBlocks():
 			Number of bins for MEGAlib lightcurve
 		'''
 
-		times = tte.data.time
+		times = tte.data.times
 
 		nbins = int((times[-1] - times[0]) / self.bin_sizes[0].to(u.s).value)
 		counts, bin_edges = np.histogram(times, bins=nbins)
@@ -159,19 +159,23 @@ class BayesianBlocks():
 			bin_sizes.append(bins_bayesian[i+1] - bins_bayesian[i])
 
 		if min(bin_sizes) > 1.25 * self.duration.to(u.s).value or len(bin_sizes) == 1:
+
+			logger.warning(f"{self.name} not found using Bayesian blocks.")
 			raise RuntimeError(f"{self.name} not found using Bayesian blocks.")
 
-		count_rates = []
+		else:
 
-		for i in range(len(counts_bayesian)):
-			count_rates.append(counts_bayesian[i] / bin_sizes[i])
+			count_rates = []
 
-		count_rates = np.array(count_rates)
+			for i in range(len(counts_bayesian)):
+				count_rates.append(counts_bayesian[i] / bin_sizes[i])
 
-		phaii = tte.to_phaii(bin_by_time, self.bin_sizes[1].to(u.s).value, time_ref=0.0)
-		lightcurve_plot = phaii.to_lightcurve()
+			count_rates = np.array(count_rates)
 
-		return count_rates, bins_bayesian, lightcurve_plot, nbins
+			phaii = tte.to_phaii(bin_by_time, self.bin_sizes[1].to(u.s).value, time_ref=0.0)
+			lightcurve_plot = phaii.to_lightcurve()
+
+			return count_rates, bins_bayesian, lightcurve_plot, nbins
 
 	def fit_background(self, background_tte_nai, background_tte_bgo, order=2):
 		'''
@@ -179,9 +183,9 @@ class BayesianBlocks():
 
 		Parameters
 		----------
-		background_tte_nai : gdt.core.tte.PhotonList
+		background_tte_nai : gdt.missions.fermi.gbm.tte.GbmTte
 			TTE data for NaI detectors during background interval
-		background_tte_bgo : gdt.core.tte.PhotonList
+		background_tte_bgo : gdt.missions.fermi.gbm.tte.GbmTte
 			TTE data for BGO detectors during background interval
 		order : int, optional
 			Order of polynomial to fit to background
@@ -435,8 +439,8 @@ class BayesianBlocks():
 			background_rates = self.fit_background(background_tte_nai, background_tte_bgo)
 			source_rates = self.subtract_background(count_rates, bins_bayesian, background_rates)
 
-			if plot_path:
-				self.plot_lightcurve(lightcurve_plot, background_rates, bins_bayesian, count_rates, source_rates, plot_path)
+			#if plot_path:
+				#self.plot_lightcurve(lightcurve_plot, background_rates, bins_bayesian, count_rates, source_rates, plot_path)
 
 			lightcurve = self.rebin_lightcurve(bins_bayesian, source_rates, nbins)
 			lightcurve.write_file(file)
