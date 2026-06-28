@@ -1,7 +1,7 @@
 [project]
 name = "cosiburstpy"
-version = "0.3.0"
-description = "Facilitate producing large samples of COSI transient simulations."
+dynamic = ["version"]
+description = "Produce population-level COSI transient simulations."
 readme = "README.md"
 authors = [{name = "Eliza Neights", email = "eliza.neights@gmail.com"}]
 requires-python = ">=3.8"
