@@ -83,7 +83,7 @@ def run_revan(file, output_dir, mass_model, config_file, overwrite=False):
 		Whether to overwrite existing .tra.gz file if it exists
 	'''
 
-	name = file.stem
+	name = file.name.removesuffix(''.join(file.suffixes))
 	sim_file = file.name
 
 	cwd = os.getcwd()
@@ -133,7 +133,7 @@ def run_mimrec(file, output_dir, mass_model, config_file, overwrite=False):
 		Whether to overwrite existing .tra file if it exists
 	'''
 
-	name = file.stem
+	name = file.name.removesuffix(''.join(file.suffixes))
 	tra_file = file.name
 
 	cwd = os.getcwd()
@@ -207,7 +207,7 @@ def reconstruct(sim_dir, output_dir, mass_model, config_file, overwrite=False):
 
 	for sim_file in sim_dir.iterdir():
 
-		if sim_file.suffix == '.sim' or sim_file.suffix == '.sim.gz':
+		if '.sim' in sim_file.suffixes:
 
 			run_revan(sim_file, output_dir, mass_model, config_file, overwrite)
 
@@ -231,6 +231,6 @@ def extract(tra_dir, output_dir, mass_model, config_file, overwrite=False):
 
 	for tra_file in tra_dir.iterdir():
 
-		if tra_file.suffix == '.tra.gz':
+		if '.tra' in tra_file.suffixes:
 
 			run_mimrec(tra_file, output_dir, mass_model, config_file, overwrite)

@@ -177,7 +177,7 @@ def sbpl(e, ebreak, index_lo, index_hi, bscale, piv=100.*u.keV):
 	a = m * bscale * np.log((np.exp(q) + np.exp(-q)) / 2)
 	a_piv = m * bscale * np.log((np.exp(q_piv) + np.exp(-q_piv)) / 2)
 
-	amplitude = (e / piv)**b * 10**(a - a_piv)
+	amplitude = (e / piv)**b * 10**(a - a_piv) / e.unit
 	amplitude = amplitude.decompose()
 
 	return amplitude

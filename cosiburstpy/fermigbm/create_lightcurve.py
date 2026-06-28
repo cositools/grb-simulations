@@ -3,11 +3,12 @@ import glob
 import astropy.units as u
 from astropy.stats import bayesian_blocks
 import matplotlib.pyplot as plt
-from gbm.data import TTE
-from gbm.binning.unbinned import bin_by_time
-from gbm.background import BackgroundFitter, BackgroundRates
-from gbm.background.binned import Polynomial
-import gbm.plot
+from gdt.missions.fermi.gbm.tte import GbmTte
+from gdt.core.binning.unbinned import bin_by_time
+from gdt.core.background.fitter import BackgroundFitter
+from gdt.core.background.primitives import BackgroundRates
+from gdt.core.background.binned import Polynomial
+import gdt.core.plot
 import logging
 from cosiburstpy.event.lightcurve import Lightcurve
 from cosiburstpy.utility.utility import read_yaml
@@ -63,11 +64,11 @@ class BayesianBlocks():
 
 		Returns
 		-------
-		source_tte : gbm.data.phaii.TTE
+		source_tte : gdt.core.tte.PhotonList
 			TTE data during source interval
-		background_tte_nai : gbm.data.phaii.TTE
+		background_tte_nai : gdt.core.tte.PhotonList
 			TTE data for NaI detectors during background interval
-		background_tte_bgo : gbm.data.phaii.TTE
+		background_tte_bgo : gdt.core.tte.PhotonList
 			TTE data for BGO detectors during background interval
 		'''
 
@@ -77,7 +78,7 @@ class BayesianBlocks():
 
 		for nai_file in self.nai_paths:
 
-			tte = TTE.open(nai_file)
+			tte = GbmTte.open(nai_file)
 
 			source_tte_detector = tte.slice_time([self.source_time_range[0].to(u.s).value, self.source_time_range[1].to(u.s).value])
 			source_tte_detector = source_tte_detector.slice_energy([self.nai_energy_range[0].to(u.keV).value, self.nai_energy_range[1].to(u.keV).value])
@@ -88,7 +89,7 @@ class BayesianBlocks():
 
 		for bgo_file in self.bgo_paths:
 
-			tte = TTE.open(bgo_file)
+			tte = GbmTte.open(bgo_file)
 
 			source_tte_detector = tte.slice_time([self.source_time_range[0].to(u.s).value, self.source_time_range[1].to(u.s).value])
 			source_tte_detector = source_tte_detector.slice_energy([self.bgo_energy_range[0].to(u.keV).value, self.bgo_energy_range[1].to(u.keV).value])
@@ -97,9 +98,9 @@ class BayesianBlocks():
 			background_tte_detector = tte.slice_time([self.background_time_range[0].to(u.s).value, self.background_time_range[1].to(u.s).value])
 			background_tte_bgo.append(background_tte_detector)
 
-		source_tte = TTE.merge(source_tte, force_unique=True)
-		background_tte_nai = TTE.merge(background_tte_nai, force_unique=True)
-		background_tte_bgo = TTE.merge(background_tte_bgo, force_unique=True)
+		source_tte = GbmTte.merge(source_tte, force_unique=True)
+		background_tte_nai = GbmTte.merge(background_tte_nai, force_unique=True)
+		background_tte_bgo = GbmTte.merge(background_tte_bgo, force_unique=True)
 
 		return source_tte, background_tte_nai, background_tte_bgo
 
@@ -109,7 +110,7 @@ class BayesianBlocks():
 
 		Parameters
 		----------
-		tte : list of gbm.data.phaii.TTE
+		tte : list of gdt.missions.fermi.gbm.tte.GbmTte
 			TTE data from each detector
 		p0 : float, optional
 			False alarm probability to compute prior
@@ -122,13 +123,13 @@ class BayesianBlocks():
 			Count rate in each Bayesian block bin (counts/s)
 		bins_bayesian : np.ndarray
 			Bayesian block bin edges (s)
-		lightcurve_plot : gbm.data.primitives.TimeBins
+		lightcurve_plot : gdt.core.data_primitives.TimeBins
 			Lightcurve for plotting
 		nbins : int
 			Number of bins for MEGAlib lightcurve
 		'''
 
-		times = tte.data.time
+		times = tte.data.times
 
 		nbins = int((times[-1] - times[0]) / self.bin_sizes[0].to(u.s).value)
 		counts, bin_edges = np.histogram(times, bins=nbins)
@@ -158,19 +159,23 @@ class BayesianBlocks():
 			bin_sizes.append(bins_bayesian[i+1] - bins_bayesian[i])
 
 		if min(bin_sizes) > 1.25 * self.duration.to(u.s).value or len(bin_sizes) == 1:
+
+			logger.warning(f"{self.name} not found using Bayesian blocks.")
 			raise RuntimeError(f"{self.name} not found using Bayesian blocks.")
 
-		count_rates = []
+		else:
 
-		for i in range(len(counts_bayesian)):
-			count_rates.append(counts_bayesian[i] / bin_sizes[i])
+			count_rates = []
 
-		count_rates = np.array(count_rates)
+			for i in range(len(counts_bayesian)):
+				count_rates.append(counts_bayesian[i] / bin_sizes[i])
 
-		phaii = tte.to_phaii(bin_by_time, self.bin_sizes[1].to(u.s).value, time_ref=0.0)
-		lightcurve_plot = phaii.to_lightcurve()
+			count_rates = np.array(count_rates)
 
-		return count_rates, bins_bayesian, lightcurve_plot, nbins
+			phaii = tte.to_phaii(bin_by_time, self.bin_sizes[1].to(u.s).value, time_ref=0.0)
+			lightcurve_plot = phaii.to_lightcurve()
+
+			return count_rates, bins_bayesian, lightcurve_plot, nbins
 
 	def fit_background(self, background_tte_nai, background_tte_bgo, order=2):
 		'''
@@ -178,16 +183,16 @@ class BayesianBlocks():
 
 		Parameters
 		----------
-		background_tte_nai : gbm.data.phaii.TTE
+		background_tte_nai : gdt.missions.fermi.gbm.tte.GbmTte
 			TTE data for NaI detectors during background interval
-		background_tte_bgo : gbm.data.phaii.TTE
+		background_tte_bgo : gdt.missions.fermi.gbm.tte.GbmTte
 			TTE data for BGO detectors during background interval
 		order : int, optional
 			Order of polynomial to fit to background
 
 		Returns
 		-------
-		background_rates : gbm.background.background.BackgroundRates
+		background_rates : gdt.core.background.primitives.BackgroundRates
 			Background rates in NaI and BGO detectors
 		'''
 
@@ -224,7 +229,7 @@ class BayesianBlocks():
 			Count rate in each Bayesian block bin (counts/s)
 		bins_bayesian : np.ndarray, shape(N,)
 			Bayesian block bin edges (s)
-		background_rates : gbm.background.background.BackgroundRates
+		background_rates : gdt.core.background.primitives.BackgroundRates
 			Background rates in NaI and BGO detectors
 
 		Returns
@@ -278,9 +283,9 @@ class BayesianBlocks():
 
 		Parameters
 		----------
-		lightcurve_plot : gbm.data.primitives.TimeBins
+		lightcurve_plot : gdt.core.background.primitives.TimeBins
 			Lightcurve for plotting
-		background_rates : gbm.background.background.BackgroundRates
+		background_rates : gdt.core.background.primitives.BackgroundRates
 			Background rates in NaI and BGO detectors
 		bins_bayesian : np.ndarray, shape(N,)
 			Bayesian block bin edges (s)
@@ -296,7 +301,7 @@ class BayesianBlocks():
 
 		plot_path.mkdir(parents=True, exist_ok=True)
 
-		lcplot = gbm.plot.Lightcurve(data=lightcurve_plot, background=background_rates)
+		lcplot = gdt.core.plot.Lightcurve(data=lightcurve_plot, background=background_rates)
 		lcplot.lightcurve.color='grey'
 		lcplot.lightcurve.alpha=0.5
 		lcplot.background.color='purple'
@@ -434,8 +439,8 @@ class BayesianBlocks():
 			background_rates = self.fit_background(background_tte_nai, background_tte_bgo)
 			source_rates = self.subtract_background(count_rates, bins_bayesian, background_rates)
 
-			if plot_path:
-				self.plot_lightcurve(lightcurve_plot, background_rates, bins_bayesian, count_rates, source_rates, plot_path)
+			#if plot_path:
+				#self.plot_lightcurve(lightcurve_plot, background_rates, bins_bayesian, count_rates, source_rates, plot_path)
 
 			lightcurve = self.rebin_lightcurve(bins_bayesian, source_rates, nbins)
 			lightcurve.write_file(file)

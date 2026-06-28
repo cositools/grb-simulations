@@ -83,73 +83,55 @@ def read_sim_file(file, mass_model):
 					y = hit.GetPosition().Y()
 					z = hit.GetPosition().Z()
 
-					if z < 7:
+					if x < -11.2 and y < 3 and z < 7:
+						z0_0 += hit.GetEnergy()
+					elif -11.2 < x < -2.5 and y < 3 and z < 7:
+						z0_1 += hit.GetEnergy()
+					elif -2.5 < x < 4.6 and y < 3 and z < 7:
+						z0_2 += hit.GetEnergy()
+					elif 4.6 < x < 11.2 and y < 3 and z < 7:
+ 						z0_3 += hit.GetEnergy()
+					elif x > 11.2 and y < 3 and z < 7:
+						z0_4 += hit.GetEnergy()
 
-						if y < 3:
+					elif x < -11.2 and y > 3 and z < 7:
+						z1_0 += hit.GetEnergy()
+					elif -11.2 < x < -2.5 and y > 3 and z < 7:
+						z1_1 += hit.GetEnergy()
+					elif -2.5 < x < 4.6 and y > 3 and z < 7:
+						z1_2 += hit.GetEnergy()
+					elif 4.6 < x < 11.2 and y > 3 and z < 7:
+						z1_3 += hit.GetEnergy()
+					elif x > 11.2 and y > 3 and z < 7:
+						z1_4 += hit.GetEnergy()
 
-							if x < -11.2:
-								z0_0 += hit.GetEnergy()
-							elif -11.2 < x < -2.5:
-								z0_1 += hit.GetEnergy()
-							elif -2.5 < x < 4.6:
-								z0_2 += hit.GetEnergy()
-							elif 4.6 < x < 11.2:
- 								z0_3 += hit.GetEnergy()
-							elif x > 11.2:
-								z0_4 += hit.GetEnergy()
+					elif z > 7 and -14 < y < -2.6 and x > 15:
+						y0_0 += hit.GetEnergy()
+					elif z > 7 and -2.6 < y < 9 and x > 15:
+						y0_1 + hit.GetEnergy()
+					elif z > 7 and 9 < y < 20.6 and x > 15:
+						y0_2 += hit.GetEnergy()
 
-						elif y > 3:
+					elif z > 7 and -14 < y < -2.6 and x < -10:
+						y1_0 += hit.GetEnergy()
+					elif z > 7 and -2.6 < y < 9 and x < -10:
+						y1_1 += hit.GetEnergy()
+					elif z > 7 and 9 < y < 20.6 and x < -10:
+						y1_2 += hit.GetEnergy()
 
-							if x < -11.2:
-								z1_0 += hit.GetEnergy()
-							elif -11.2 < x < -2.5:
-								z1_1 += hit.GetEnergy()
-							elif -2.5 < x < 4.6:
-								z1_2 += hit.GetEnergy()
-							elif 4.6 < x < 11.2:
-								z1_3 += hit.GetEnergy()
-							elif x > 11.2:
-								z1_4 += hit.GetEnergy()
+					elif z > -10 and x < -6 and y < -10:
+						x0_0 += hit.GetEnergy()
+					elif z > -10 and -6 < x < 6 and y < -10:
+						x0_1 += hit.GetEnergy()
+					elif z > -10 and x > 6 and y < -10:
+						x0_2 += hit.GetEnergy()
 
-					elif z > 7:
-
-						if x > 15:
-
-							if -14 < y < -2.6:
-								y0_0 += hit.GetEnergy()
-							elif -2.6 < y < 9:
-								y0_1 + hit.GetEnergy()
-							elif 9 < y < 20.6:
-								y0_2 += hit.GetEnergy()
-
-						elif x < -10:
-
-							if -14 < y < -2.6:
-								y1_0 += hit.GetEnergy()
-							elif -2.6 < y < 9:
-								y1_1 += hit.GetEnergy()
-							elif 9 < y < 20.6:
-								y1_2 += hit.GetEnergy()
-
-					elif z > -10:
-
-						if y < -10:
-
-							if x < -6:
-								x0_0 += hit.GetEnergy()
-							elif -6 < x < 6:
-								x0_1 += hit.GetEnergy()
-							elif x > 6:
-								x0_2 += hit.GetEnergy()
-
-						elif y > 15:
-
-							if x < -6:
-								x1_0 += hit.GetEnergy()
-							elif -6 < x < 6:
-								x1_1 += hit.GetEnergy()
-							elif x > 6:
-								x1_2 += hit.GetEnergy()
+					elif z > -10 and x < -6 and y > 15:
+						x1_0 += hit.GetEnergy()
+					elif z > -10 and -6 < x < 6 and y > 15:
+						x1_1 += hit.GetEnergy()
+					elif z > -10 and x > 6 and y > 15:
+						x1_2 += hit.GetEnergy()
 
 					else:
 
@@ -172,8 +154,8 @@ def read_sim_file(file, mass_model):
 				energies['z0'].append(float(z0_3) * u.keV)
 
 			if z0_4 >= 80.:
-				times['z0'].append(float(time) * u.s)
-				energies['z0'].append(float(z0_4) * u.keV)
+				times['y0'].append(float(time) * u.s)
+				energies['y0'].append(float(z0_4) * u.keV)
 
 			if z1_0 >= 80.:
 				times['y1'].append(float(time) * u.s)

@@ -117,7 +117,7 @@ class ACSData():
 
 			bins = {'time': [value * u.s for value in data['time bins (s)']], 
 					'energy': [value * u.keV for value in data['energy bins (keV)']]}
-			data = {panel: data[panel] for panel in self.panels}
+			data = {panel: data[panel] for panel in ['z0', 'z1', 'x0', 'x1', 'y0', 'y1']}
 
 			acs_data = cls(data, binned=True, bins=bins)
 
@@ -186,42 +186,38 @@ class ACSData():
 			chunks = []
 
 			for chunk in pd.read_csv(file, compression='gzip', chunksize=chunk_size):
-
-				chunks.append(chunk)
-
-				if (chunk['timestamp[s]'] == stop_time.to_value(u.s)).any():
-					break
+				chunks.append(chunk[chunk['timestamp[s]'] <= stop_time.to_value(u.s)])
 
 			data = pd.concat(chunks, ignore_index=True)
 		
 		for i in range(len(data['timestamp[s]'])):
 
-			if data['SCB2-A1[keV]'][i] != 0.0:
+			if data['SCB2-A1[keV]'][i] != 0.:
 
 				times['z1'].append(float(data['timestamp[s]'][i]) * u.s)
 				energies['z1'].append(float(data['SCB2-A1[keV]'][i]) * u.keV)
 
-			elif data['SCB2-A0[keV]'][i] != 0.0:
+			elif data['SCB2-A0[keV]'][i] != 0.:
 
 				times['z0'].append(float(data['timestamp[s]'][i]) * u.s)
 				energies['z0'].append(float(data['SCB2-A0[keV]'][i]) * u.keV)
 
-			elif data['SCB0-A1[keV]'][i] != 0.0:
+			elif data['SCB0-A1[keV]'][i] != 0.:
 
 				times['x1'].append(float(data['timestamp[s]'][i]) * u.s)
 				energies['x1'].append(float(data['SCB0-A1[keV]'][i]) * u.keV)
 
-			elif data['SCB0-A0[keV]'][i] != 0.0:
+			elif data['SCB0-A0[keV]'][i] != 0.:
 
 				times['x0'].append(float(data['timestamp[s]'][i]) * u.s)
 				energies['x0'].append(float(data['SCB0-A0[keV]'][i]) * u.keV)
 
-			elif data['SCB1-A0[keV]'][i] != 0.0:
+			elif data['SCB1-A0[keV]'][i] != 0.:
 
 				times['y0'].append(float(data['timestamp[s]'][i]) * u.s)
 				energies['y0'].append(float(data['SCB1-A0[keV]'][i]) * u.keV)
 
-			elif data['SCB1-A1[keV]'][i] != 0.0:
+			elif data['SCB1-A1[keV]'][i] != 0.:
 
 				times['y1'].append(float(data['timestamp[s]'][i]) * u.s)
 				energies['y1'].append(float(data['SCB1-A1[keV]'][i]) * u.keV)
@@ -275,12 +271,12 @@ class ACSData():
 					raise RuntimeError("Files must be binned with same energy bins.")
 
 				for panel, value in vars(data).items():
-					if panel in self.panels:
+					if panel in ['z0', 'z1', 'x0', 'x1', 'y0', 'y1']:
 						setattr(data, panel, np.add(value, getattr(component_data, panel)))
 
 			counts = 0
 			for panel, value in vars(data).items():
-				if panel in self.panels:
+				if panel in ['z0', 'z1', 'x0', 'x1', 'y0', 'y1']:
 					counts += np.sum(value)
 
 			logger.info(f"Added {file}. Total counts: {int(counts)}")
@@ -467,7 +463,7 @@ class ACSData():
 		if file is not None:
 			self.write_file(file)
 
-	def plot(self, time_range, energy_range=(80.*u.keV, 2000*u.keV), bin_size=0.05*u.s, file=None, show=False, colors={'b1': 'red', 'b2': 'green', 'x1': 'blue', 'x2': 'orange', 'y1': 'purple', 'y2': 'pink'}, event_time_range=None, title=None, dpi=350):
+	def plot(self, time_range, energy_range=(80.*u.keV, 2000*u.keV), bin_size=0.05*u.s, file=None, show=False, colors={'z0': 'red', 'z1': 'green', 'x0': 'blue', 'x1': 'orange', 'y0': 'purple', 'y1': 'pink'}, event_time_range=None, title=None, dpi=350):
 		'''
 		Plot ACS data file.
 

@@ -1,3 +1,4 @@
+from .define_spectrum import DefineSpectrum
 from .event import Event
 from .lightcurve import Lightcurve
 from .source_file import SourceFile

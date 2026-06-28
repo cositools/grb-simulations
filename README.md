@@ -11,8 +11,12 @@ If you have questions or encounter any problems, please open an issue.
 `git clone https://github.com/cositools/grb-simulations.git`  
 2. Navigate into the project directory.  
 `cd grb-simulations`  
-3. Create and activate a conda environment (this is optional, but highly recommended).  
-`conda create -n cosi-grb-sims python=3.11`  
+3. Optional but highly recommended: Create and activate a conda environment.  
+`conda create -n cosi-grb-sims python=3.12`  
 `conda activate cosi-grb-sims`  
 4. Install the cosiburstpy package.  
-`pip install .`  
+   a. If you do not need to work with Fermi-GBM data, run:  
+      `pip install .`  
+   b. If you are using Fermi-GBM data, run:  
+       `pip install -e ".[fermi-gbm]"`  
+       `cosiburstpy setup"`
