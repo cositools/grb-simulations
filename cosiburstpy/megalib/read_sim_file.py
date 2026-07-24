@@ -9,14 +9,14 @@ logger = logging.getLogger(__name__)
 
 def read_sim_file(file, mass_model):
 	'''
-	Extract ACS hits from .sim or .sim.gz file. Modified from Savitri's code to create ACS data .csv files with the Data Challenge 3 mass model.
+	Extract ACS hits from .sim or .sim.gz file. Modified from Nicolò's code in cosipy.nonimaging.
 
 	Parameters
 	----------
 	file : pathlib.PosixPath
 		Path to ACS data .sim or .sim.gz file
 	mass_model : pathlib.PosixPath
-		Path to Data Challenge 3 analysis mass model
+		Path to mass model with labeled ACS crystals
 
 	Returns
 	-------
@@ -31,6 +31,7 @@ def read_sim_file(file, mass_model):
 
 	megalib = LoadMEGAlib(mass_model)
 	megalib.open_file(file)
+	geometry = megalib.geometry
 
 	with SuppressOutput():
 
@@ -79,63 +80,65 @@ def read_sim_file(file, mass_model):
 
 				if hit.GetDetectorType() == 8:
 
-					x = hit.GetPosition().X()
-					y = hit.GetPosition().Y()
-					z = hit.GetPosition().Z()
+					position = hit.GetPosition()
 
-					if x < -11.2 and y < 3 and z < 7:
+					detector_object = geometry.GetDetector(position)
+
+					if not detector_object:
+						raise RuntimeError(f"Coordinate ({position.X()}, {position.Y()}, {position.Z()}) not found.")
+					else:	
+						detector = detector_object.GetName()
+
+					if detector.GetString() == 'ACS_Z0_0':
 						z0_0 += hit.GetEnergy()
-					elif -11.2 < x < -2.5 and y < 3 and z < 7:
+					elif detector.GetString() == 'ACS_Z0_1':
 						z0_1 += hit.GetEnergy()
-					elif -2.5 < x < 4.6 and y < 3 and z < 7:
+					elif detector.GetString() == 'ACS_Z0_2':
 						z0_2 += hit.GetEnergy()
-					elif 4.6 < x < 11.2 and y < 3 and z < 7:
- 						z0_3 += hit.GetEnergy()
-					elif x > 11.2 and y < 3 and z < 7:
+					elif detector.GetString() == 'ACS_Z0_3':
+						z0_3 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Z0_4':
 						z0_4 += hit.GetEnergy()
-
-					elif x < -11.2 and y > 3 and z < 7:
+					elif detector.GetString() == 'ACS_Z1_0':
 						z1_0 += hit.GetEnergy()
-					elif -11.2 < x < -2.5 and y > 3 and z < 7:
+					elif detector.GetString() == 'ACS_Z1_1':
 						z1_1 += hit.GetEnergy()
-					elif -2.5 < x < 4.6 and y > 3 and z < 7:
+					elif detector.GetString() == 'ACS_Z1_2':
 						z1_2 += hit.GetEnergy()
-					elif 4.6 < x < 11.2 and y > 3 and z < 7:
+					elif detector.GetString() == 'ACS_Z1_3':
 						z1_3 += hit.GetEnergy()
-					elif x > 11.2 and y > 3 and z < 7:
+					elif detector.GetString() == 'ACS_Z1_4':
 						z1_4 += hit.GetEnergy()
 
-					elif z > 7 and -14 < y < -2.6 and x > 15:
+					elif detector.GetString() == 'ACS_Y0_0':
 						y0_0 += hit.GetEnergy()
-					elif z > 7 and -2.6 < y < 9 and x > 15:
+					elif detector.GetString() == 'ACS_Y0_1':
 						y0_1 += hit.GetEnergy()
-					elif z > 7 and 9 < y < 20.6 and x > 15:
+					elif detector.GetString() == 'ACS_Y0_2':
 						y0_2 += hit.GetEnergy()
-
-					elif z > 7 and -14 < y < -2.6 and x < -10:
+					elif detector.GetString() == 'ACS_Y1_0':
 						y1_0 += hit.GetEnergy()
-					elif z > 7 and -2.6 < y < 9 and x < -10:
+					elif detector.GetString() == 'ACS_Y1_1':
 						y1_1 += hit.GetEnergy()
-					elif z > 7 and 9 < y < 20.6 and x < -10:
+					elif detector.GetString() == 'ACS_Y1_2':
 						y1_2 += hit.GetEnergy()
 
-					elif z > -10 and x < -6 and y < -10:
+					elif detector.GetString() == 'ACS_X0_0':
 						x0_0 += hit.GetEnergy()
-					elif z > -10 and -6 < x < 6 and y < -10:
+					elif detector.GetString() == 'ACS_X0_1':
 						x0_1 += hit.GetEnergy()
-					elif z > -10 and x > 6 and y < -10:
+					elif detector.GetString() == 'ACS_X0_2':
 						x0_2 += hit.GetEnergy()
-
-					elif z > -10 and x < -6 and y > 15:
+					elif detector.GetString() == 'ACS_X1_0':
 						x1_0 += hit.GetEnergy()
-					elif z > -10 and -6 < x < 6 and y > 15:
+					elif detector.GetString() == 'ACS_X1_1':
 						x1_1 += hit.GetEnergy()
-					elif z > -10 and x > 6 and y > 15:
+					elif detector.GetString() == 'ACS_X1_2':
 						x1_2 += hit.GetEnergy()
 
 					else:
 
-						logger.warning(f"Coordinate ({x}, {y}, {z}) not found.")
+						logger.warning(f"Coordinate ({position.X()}, {position.Y()}, {position.Z()}) not found.")
 
 			if z0_0 >= 80.:
 				times['z0'].append(float(time) * u.s)
