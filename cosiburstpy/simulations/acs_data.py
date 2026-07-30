@@ -192,35 +192,35 @@ class ACSData():
 		
 		for i in range(len(data['timestamp[s]'])):
 
-			if data['SCB2-A1[keV]'][i] != 0.:
+			if data['ACS_z1'][i] != 0.:
 
 				times['z1'].append(float(data['timestamp[s]'][i]) * u.s)
-				energies['z1'].append(float(data['SCB2-A1[keV]'][i]) * u.keV)
+				energies['z1'].append(float(data['ACS_z1'][i]) * u.keV)
 
-			elif data['SCB2-A0[keV]'][i] != 0.:
+			elif data['ACS_z0'][i] != 0.:
 
 				times['z0'].append(float(data['timestamp[s]'][i]) * u.s)
-				energies['z0'].append(float(data['SCB2-A0[keV]'][i]) * u.keV)
+				energies['z0'].append(float(data['ACS_z0'][i]) * u.keV)
 
-			elif data['SCB0-A1[keV]'][i] != 0.:
+			elif data['ACS_x1'][i] != 0.:
 
 				times['x1'].append(float(data['timestamp[s]'][i]) * u.s)
-				energies['x1'].append(float(data['SCB0-A1[keV]'][i]) * u.keV)
+				energies['x1'].append(float(data['ACS_x1'][i]) * u.keV)
 
-			elif data['SCB0-A0[keV]'][i] != 0.:
+			elif data['ACS_x0'][i] != 0.:
 
 				times['x0'].append(float(data['timestamp[s]'][i]) * u.s)
-				energies['x0'].append(float(data['SCB0-A0[keV]'][i]) * u.keV)
+				energies['x0'].append(float(data['ACS_x0'][i]) * u.keV)
 
-			elif data['SCB1-A0[keV]'][i] != 0.:
+			elif data['ACS_y0'][i] != 0.:
 
 				times['y0'].append(float(data['timestamp[s]'][i]) * u.s)
-				energies['y0'].append(float(data['SCB1-A0[keV]'][i]) * u.keV)
+				energies['y0'].append(float(data['ACS_y0'][i]) * u.keV)
 
-			elif data['SCB1-A1[keV]'][i] != 0.:
+			elif data['ACS_y1'][i] != 0.:
 
 				times['y1'].append(float(data['timestamp[s]'][i]) * u.s)
-				energies['y1'].append(float(data['SCB1-A1[keV]'][i]) * u.keV)
+				energies['y1'].append(float(data['ACS_y1'][i]) * u.keV)
 
 		acs_data = cls({key: list(zip(times[key], energies[key])) for key in times})
 
