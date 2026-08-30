@@ -16,7 +16,7 @@ class ACSData():
 
 		Parameters
 		----------
-		data : dict of list of 2-tuple of astropy.units.Quantity
+		data : dict
 			ACS data where keys are ACS panel names and values are lists of tuples of time and energy if unbinned, and values are 2D np.ndarray if binned
 		sort : bool, optional
 			Whether to sort by time (ignored if binned)
@@ -424,7 +424,7 @@ class ACSData():
 
 	def slice(self, start_time, end_time, file=None):
 		'''
-		and write to file.
+		Slice ACS data and write to file.
 
 		Parameters
 		----------
@@ -459,6 +459,27 @@ class ACSData():
 				energies_sliced = energies[mask]
 
 				setattr(self, panel, list(zip(times_sliced, energies_sliced)))
+
+		if file is not None:
+			self.write_file(file)
+
+	def scale(self, factor, file=None):
+		'''
+		Scale ACS data and write to file.
+
+		Parameters
+		----------
+		factor : float
+			Scaling factor
+		file : pathlib.PosixPath, optional
+			Path to ACS data .hdf5 file
+		'''
+
+		if not self.binned:
+			raise RuntimeError("Only binned data can be scaled.")
+
+		for panel in self.panels:
+			setattr(self, panel, [[energy_bin * factor for energy_bin in time_bin] for time_bin in getattr(self, panel)])
 
 		if file is not None:
 			self.write_file(file)
