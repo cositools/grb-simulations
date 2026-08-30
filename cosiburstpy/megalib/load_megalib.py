@@ -16,7 +16,7 @@ class LoadMEGAlib():
 		self.mass_model = str(mass_model)
 
 		self.initialize_megalib()
-		self.load_mass_model()
+		self.geometry = self.load_mass_model()
 
 	def initialize_megalib(self):
 		'''
@@ -44,6 +44,8 @@ class LoadMEGAlib():
 				raise RuntimeError(f"Unable to load {self.mass_model}.")
 
 			self.reader = root.MFileEventsSim(mass_model)
+
+		return mass_model
 
 	def open_file(self, file):
 		'''
