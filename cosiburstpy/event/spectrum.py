@@ -5,7 +5,7 @@ from .spectral_models import mono, band, comp, pl, bpl, sbpl
 
 class Spectrum():
 
-	def __init__(self, model, parameters):
+	def __init__(self, model, parameters=None):
 		'''
 		Define spectral model.
 
@@ -13,7 +13,7 @@ class Spectrum():
 		----------
 		model : str
 			Name of model (either 'Mono', 'Band', 'Comptonized', 'PowerLaw', 'BrokenPowerLaw', or 'SmoothlyBrokenPowerLaw')
-		parameters : dict of astropy.units.quantity.Quantity
+		parameters : dict of astropy.units.quantity.Quantity, optional
 			Values of model parameters where keys are parameter names and values are parameter values
 		'''
 

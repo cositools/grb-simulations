@@ -157,7 +157,7 @@ def write_hdf5(file, data, file_attributes=None, dataset_attributes=None):
 
 			if dataset_attributes and key in dataset_attributes:
 				for att_key in dataset_attributes[key]:
-					dataset.attrs[key][att_key] = dataset_attributes[key][att_key]
+					dataset.attrs[att_key] = dataset_attributes[key][att_key]
 
 def write_readme(file, inputs_path=None, input_parameters=None):
 	'''

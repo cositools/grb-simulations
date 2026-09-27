@@ -1,22 +1,20 @@
 [project]
 name = "cosiburstpy"
-version = "0.2.0"
-description = "Facilitate producing large samples of COSI transient simulations."
+dynamic = ["version"]
+description = "Produce population-level COSI transient simulations."
 readme = "README.md"
-authors = [
-    { name = "Eliza Neights", email = "eliza.neights@gmail.com" }
-]
-requires-python = ">=3.7"
-dependencies = [
-    "numpy",
-    "astropy",
-    "scoords",
-    "scipy",
-    "matplotlib",
-    "pandas",
-    "h5py",
-    "gbm"
-]
+authors = [{name = "Eliza Neights", email = "eliza.neights@gmail.com"}]
+requires-python = ">=3.8"
+dependencies = ["numpy",
+                "astropy",
+                "scoords",
+                "scipy",
+                "matplotlib",
+                "pandas",
+                "h5py"]
+[project.optional-dependencies]
+fermi-gbm = ["gdt",
+             "astro-gdt-fermi"]
 
 [build-system]
 requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2"]
@@ -24,3 +22,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
 write_to = "cosiburstpy/_version.py"
+
+[project.scripts]
+cosiburstpy = "cosiburstpy.cli:main"

@@ -1,5 +1,6 @@
 import ROOT as root
 import logging
+import astropy.units as u
 from cosiburstpy.utility.utility import SuppressOutput
 from cosiburstpy.simulations.acs_data import ACSData
 from .load_megalib import LoadMEGAlib
@@ -8,14 +9,14 @@ logger = logging.getLogger(__name__)
 
 def read_sim_file(file, mass_model):
 	'''
-	Extract ACS hits from .sim or .sim.gz file. Modified from Savitri's code to create ACS data .csv files with the Data Challenge 3 mass model.
+	Extract ACS hits from .sim or .sim.gz file. Modified from Nicolò's code in cosipy.nonimaging.
 
 	Parameters
 	----------
 	file : pathlib.PosixPath
 		Path to ACS data .sim or .sim.gz file
 	mass_model : pathlib.PosixPath
-		Path to Data Challenge 3 analysis mass model
+		Path to mass model with labeled ACS crystals
 
 	Returns
 	-------
@@ -25,11 +26,12 @@ def read_sim_file(file, mass_model):
 
 	logger.info(f"Reading file: {file}")
 
-	times = {'b1': [], 'b2': [], 'x1': [], 'x2': [], 'y1': [], 'y2': []}
-	energies = {'b1': [], 'b2': [], 'x1': [], 'x2': [], 'y1': [], 'y2': []}
+	times = {'z0': [], 'z1': [], 'x0': [], 'x1': [], 'y0': [], 'y1': []}
+	energies = {'z0': [], 'z1': [], 'x0': [], 'x1': [], 'y0': [], 'y1': []}
 
 	megalib = LoadMEGAlib(mass_model)
 	megalib.open_file(file)
+	geometry = megalib.geometry
 
 	with SuppressOutput():
 
@@ -44,33 +46,33 @@ def read_sim_file(file, mass_model):
 
 			time = float(event.GetTime().GetAsSeconds()) 
 
-			bottom_Zplus_1 = 0.
-			bottom_Zplus_2 = 0.
-			bottom_Zplus_3 = 0.
-			bottom_Zplus_4 = 0.
-			bottom_Zplus_5 = 0.
+			z1_0 = 0.
+			z1_1 = 0.
+			z1_2 = 0.
+			z1_3 = 0.
+			z1_4 = 0.
 
-			bottom_Zminus_1 = 0.
-			bottom_Zminus_2 = 0.
-			bottom_Zminus_3 = 0.
-			bottom_Zminus_4 = 0.
-			bottom_Zminus_5 = 0.
+			z0_0 = 0.
+			z0_1 = 0.
+			z0_2 = 0.
+			z0_3 = 0.
+			z0_4 = 0.
 
+			x1_0 = 0.
 			x1_1 = 0.
 			x1_2 = 0.
-			x1_3 = 0.
 
-			x2_1 = 0.
-			x2_2 = 0.
-			x2_3 = 0.
+			x0_0 = 0.
+			x0_1 = 0.
+			x0_2 = 0.
 
+			y0_0 = 0.
+			y0_1 = 0.
+			y0_2 = 0.
+
+			y1_0 = 0.
 			y1_1 = 0.
 			y1_2 = 0.
-			y1_3 = 0.
-
-			y2_1 = 0.
-			y2_2 = 0.
-			y2_3 = 0.
 
 			for i in range(event.GetNHTs()):
 
@@ -78,169 +80,153 @@ def read_sim_file(file, mass_model):
 
 				if hit.GetDetectorType() == 8:
 
-					x = hit.GetPosition().X()
-					y = hit.GetPosition().Y()
-					z = hit.GetPosition().Z()
+					position = hit.GetPosition()
 
-					if z < 7:
+					detector_object = geometry.GetDetector(position)
 
-						if y > 3:
+					if not detector_object:
+						raise RuntimeError(f"Coordinate ({position.X()}, {position.Y()}, {position.Z()}) not found.")
+					else:	
+						detector = detector_object.GetName()
 
-							if x < -11.2:
-								bottom_Zplus_1 += hit.GetEnergy()
-							elif x > -11.2 and x < -2.5:
-								bottom_Zplus_2 += hit.GetEnergy()
-							elif x > -2.5 and x < 4.6:
-								bottom_Zplus_3 += hit.GetEnergy()
-							elif x > 4.6 and x < 11.2:
-								bottom_Zplus_4 += hit.GetEnergy()
-							elif x > 4.6:
-								bottom_Zplus_5 += hit.GetEnergy()
+					if detector.GetString() == 'ACS_Z0_0':
+						z0_0 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Z0_1':
+						z0_1 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Z0_2':
+						z0_2 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Z0_3':
+						z0_3 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Z0_4':
+						z0_4 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Z1_0':
+						z1_0 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Z1_1':
+						z1_1 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Z1_2':
+						z1_2 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Z1_3':
+						z1_3 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Z1_4':
+						z1_4 += hit.GetEnergy()
 
-						elif y < 3:
-               
-							if x < -11.2:
-								bottom_Zminus_1 += hit.GetEnergy()
-							elif x > -11.2 and x < -2.5:
-								bottom_Zminus_2 += hit.GetEnergy()
-							elif x > -2.5 and x < 4.6:
-								bottom_Zminus_3 += hit.GetEnergy()
-							elif x > 4.6 and x < 11.2:
- 								bottom_Zminus_4 += hit.GetEnergy()
-							elif x > 4.6:
-								bottom_Zminus_5 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Y0_0':
+						y0_0 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Y0_1':
+						y0_1 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Y0_2':
+						y0_2 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Y1_0':
+						y1_0 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Y1_1':
+						y1_1 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_Y1_2':
+						y1_2 += hit.GetEnergy()
 
-					elif z > 7:
-
-						elif x > 15:
-
-							if y < -2.6 and y > -14:
-								y1_1 += hit.GetEnergy()
-							elif y > -2.6 and y < 9:
-								y1_2 + hit.GetEnergy()
-							elif y > 9 and y < 20.6:
-								y1_3 += hit.GetEnergy()
-
-						elif x < -10:
-
-							if y < -2.6 and y > -14:
-								y2_1 += hit.GetEnergy()
-							elif y > -2.6 and y < 9:
-								y2_2 += hit.GetEnergy()
-							elif y > 9 and y < 20.6:
-								y2_3 += hit.GetEnergy()
-
-					elif z > -10:
-
-						elif y > 15:
-
-							if x < -6:
-								x1_1 += hit.GetEnergy()
-							elif x > -6 and x < 6:
-								x1_2 += hit.GetEnergy()
-							elif x > 6:
-								x1_3 += hit.GetEnergy()
-
-						elif y < -10:
-
-							if x < -6:
-								x2_1 += hit.GetEnergy()
-							elif x > -6 and x < 6:
-								x2_2 += hit.GetEnergy()
-							elif x > 6:
-								x2_3 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_X0_0':
+						x0_0 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_X0_1':
+						x0_1 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_X0_2':
+						x0_2 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_X1_0':
+						x1_0 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_X1_1':
+						x1_1 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_X1_2':
+						x1_2 += hit.GetEnergy()
 
 					else:
 
-						logger.warning(f"Coordinate ({x}, {y}, {z}) not found.")
+						logger.warning(f"Coordinate ({position.X()}, {position.Y()}, {position.Z()}) not found.")
 
-			if bottom_Zplus_1 >= 80.:
-				times['b1'].append(float(time)) * u.s
-				energies['b1'].append(float(bottom_Zplus_1)) * u.kev
+			if z0_0 >= 80.:
+				times['z0'].append(float(time) * u.s)
+				energies['z0'].append(float(z0_0) * u.keV)
 
-			if bottom_Zplus_2 >= 80.:
-				times['b1'].append(float(time)) * u.s
-				energies['b1'].append(float(bottom_Zplus_2)) * u.kev
+			if z0_1 >= 80.:
+				times['z0'].append(float(time) * u.s)
+				energies['z0'].append(float(z0_1) * u.keV)
 
-			if bottom_Zplus_3 >= 80.:
-				times['b1'].append(float(time)) * u.s
-				energies['b1'].append(float(bottom_Zplus_3)) * u.kev
+			if z0_2 >= 80.:
+				times['z0'].append(float(time) * u.s)
+				energies['z0'].append(float(z0_2) * u.keV)
 
-			if bottom_Zplus_4 >= 80.:
-				times['b1'].append(float(time)) * u.s
-				energies['b1'].append(float(bottom_Zplus_4)) * u.kev
+			if z0_3 >= 80.:
+				times['z0'].append(float(time) * u.s)
+				energies['z0'].append(float(z0_3) * u.keV)
 
-			if bottom_Zplus_5 >= 80.:
-				times['b1'].append(float(time)) * u.s
-				energies['b1'].append(float(bottom_Zplus_5)) * u.kev
+			if z0_4 >= 80.:
+				times['y0'].append(float(time) * u.s)
+				energies['y0'].append(float(z0_4) * u.keV)
 
-			if bottom_Zminus_1 >= 80.:
-				times['b2'].append(float(time)) * u.s
-				energies['b2'].append(float(bottom_Zminus_1)) * u.kev
+			if z1_0 >= 80.:
+				times['y1'].append(float(time) * u.s)
+				energies['y1'].append(float(z1_0) * u.keV)
 
-			if bottom_Zminus_2 >= 80.:
-				times['b2'].append(float(time)) * u.s
-				energies['b2'].append(float(bottom_Zminus_2)) * u.kev
+			if z1_1 >= 80.:
+				times['z1'].append(float(time) * u.s)
+				energies['z1'].append(float(z1_1) * u.keV)
 
-			if bottom_Zminus_3 >= 80.:
-				times['b2'].append(float(time)) * u.s
-				energies['b2'].append(float(bottom_Zminus_3)) * u.kev
+			if z1_2 >= 80.:
+				times['z1'].append(float(time) * u.s)
+				energies['z1'].append(float(z1_2) * u.keV)
 
-			if bottom_Zminus_4 >= 80.:
-				times['b2'].append(float(time)) * u.s
-				energies['b2'].append(float(bottom_Zminus_4)) * u.kev
+			if z1_3 >= 80.:
+				times['z1'].append(float(time) * u.s)
+				energies['z1'].append(float(z1_3) * u.keV)
 
-			if bottom_Zminus_5 >= 80.:
-				times['b2'].append(float(time)) * u.s
-				energies['b2'].append(float(bottom_Zminus_5)) * u.kev
+			if z1_4 >= 80.:
+				times['z1'].append(float(time) * u.s)
+				energies['z1'].append(float(z1_4) * u.keV)
+
+			if x0_0 >= 80.:
+				times['x0'].append(float(time) * u.s)
+				energies['x0'].append(float(x0_0) * u.keV)
+
+			if x0_1 >= 80.:
+				times['x0'].append(float(time) * u.s)
+				energies['x0'].append(float(x0_1) * u.keV)
+
+			if x0_2 >= 80.:
+				times['x0'].append(float(time) * u.s)
+				energies['x0'].append(float(x0_2) * u.keV)
+
+			if x1_0 >= 80.:
+				times['x1'].append(float(time) * u.s)
+				energies['x1'].append(float(x1_0) * u.keV)
 
 			if x1_1 >= 80.:
-				times['x1'].append(float(time)) * u.s
-				energies['x1'].append(float(x1_1)) * u.kev
+				times['x1'].append(float(time) * u.s)
+				energies['x1'].append(float(x1_1) * u.keV)
 
 			if x1_2 >= 80.:
-				times['x1'].append(float(time)) * u.s
-				energies['x1'].append(float(x1_2)) * u.kev
+				times['x1'].append(float(time) * u.s)
+				energies['x1'].append(float(x1_2) * u.keV)
 
-			if x1_3 >= 80.:
-				times['x1'].append(float(time)) * u.s
-				energies['x1'].append(float(x1_3)) * u.kev
+			if y0_0 >= 80.:
+				times['y0'].append(float(time) * u.s)
+				energies['y0'].append(float(y0_0) * u.keV)
 
-			if x2_1 >= 80.:
-				times['x2'].append(float(time)) * u.s
-				energies['x2'].append(float(x2_1)) * u.kev
+			if y0_1 >= 80.:
+				times['y0'].append(float(time) * u.s)
+				energies['y0'].append(float(y0_1) * u.keV)
 
-			if x2_2 >= 80.:
-				times['x2'].append(float(time)) * u.s
-				energies['x2'].append(float(x2_2)) * u.kev
+			if y0_2 >= 80.:
+				times['y0'].append(float(time) * u.s)
+				energies['y0'].append(float(y0_2) * u.keV)
 
-			if x2_3 >= 80.:
-				times['x2'].append(float(time)) * u.s
-				energies['x2'].append(float(x2_3)) * u.kev
+			if y1_0 >= 80.:
+				times['y1'].append(float(time) * u.s)
+				energies['y1'].append(float(y1_0) * u.keV)
 
 			if y1_1 >= 80.:
-				times['y1'].append(float(time)) * u.s
-				energies['y1'].append(float(y1_1)) * u.kev
+				times['y1'].append(float(time) * u.s)
+				energies['y1'].append(float(y1_1) * u.keV)
 
 			if y1_2 >= 80.:
-				times['y1'].append(float(time)) * u.s
-				energies['y1'].append(float(y1_2)) * u.kev
-
-			if y1_3 >= 80.:
-				times['y1'].append(float(time)) * u.s
-				energies['y1'].append(float(y1_3)) * u.kev
-
-			if y2_1 >= 80.:
-				times['y2'].append(float(time)) * u.s
-				energies['y2'].append(float(y2_1)) * u.kev
-
-			if y2_2 >= 80.:
-				times['y2'].append(float(time)) * u.s
-				energies['y2'].append(float(y2_2)) * u.kev
-
-			if y2_3 >= 80.:
-				times['y2'].append(float(time)) * u.s
-				energies['y2'].append(float(y2_3)) * u.kev
+				times['y1'].append(float(time) * u.s)
+				energies['y1'].append(float(y1_2) * u.keV)
 
 	acs_data = ACSData({key: list(zip(times[key], energies[key])) for key in times})
 
