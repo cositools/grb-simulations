@@ -27,7 +27,7 @@ class ACSData():
 		'''
 
 		self.binned = binned
-		self.panels = ['z0', 'z1', 'x0', 'x1', 'y0', 'y1']
+		self.panels = ['ACS-A-Z0', 'ACS-A-Z1', 'ACS-C-X0', 'ACS-C-X1', 'ACS-B-Y0', 'ACS-B-Y1']
 
 		if self.binned:
 
@@ -56,7 +56,7 @@ class ACSData():
 				raise RuntimeError(f"{panel} is not a valid panel name.")
 
 	@classmethod
-	def from_file(cls, file, mass_model=None, sort=True, stop_time=None, chunk_size=None):
+	def from_file(cls, file, mass_model=None, sort=True, stop_time=None, chunk_size=None, mode='all'):
 		'''
 		Read in ACS data file.
 
@@ -72,6 +72,8 @@ class ACSData():
 			Time to stop reading .csv file
 		chunk_size : int, optional
 			Size of chunks to read in
+		mode : str, optional
+			Energy selection per crystal if reading .sim or .sim.gz file: 'all' (>= 80 keV), 'gamma' (80-2000 keV), or 'proton' (> 2000 keV)
 
 		Returns
 		-------
@@ -83,7 +85,7 @@ class ACSData():
 			acs_data = cls.from_hdf5_file(file)
 
 		elif file.suffix == '.sim' or ''.join(file.suffixes) == '.sim.gz':
-			acs_data = cls.from_sim_file(file, mass_model)
+			acs_data = cls.from_sim_file(file, mass_model, mode)
 
 		elif ''.join(file.suffixes) == '.csv.gz':
 			acs_data = cls.from_csv_file(file, stop_time=stop_time, chunk_size=chunk_size)
@@ -117,7 +119,7 @@ class ACSData():
 
 			bins = {'time': [value * u.s for value in data['time bins (s)']], 
 					'energy': [value * u.keV for value in data['energy bins (keV)']]}
-			data = {panel: data[panel] for panel in ['z0', 'z1', 'x0', 'x1', 'y0', 'y1']}
+			data = {panel: data[panel] for panel in ['ACS-A-Z0', 'ACS-A-Z1', 'ACS-C-X0', 'ACS-C-X1', 'ACS-B-Y0', 'ACS-B-Y1']}
 
 			acs_data = cls(data, binned=True, bins=bins)
 
@@ -129,7 +131,7 @@ class ACSData():
 		return acs_data
 
 	@classmethod
-	def from_sim_file(cls, file, mass_model):
+	def from_sim_file(cls, file, mass_model, mode='all'):
 		'''
 		Extract ACS hits from .sim or .sim.gz file.
 
@@ -139,6 +141,8 @@ class ACSData():
 			Path to ACS data .sim or .sim.gz file
 		mass_model : pathlib.PosixPath
 			Path to Data Challenge 3 analysis mass model
+		mode : str, optional
+			Energy selection per crystal: 'all' (>= 80 keV), 'gamma' (80-2000 keV), or 'proton' (> 2000 keV)
 	
 		Returns
 		-------
@@ -148,7 +152,7 @@ class ACSData():
 
 		from cosiburstpy.megalib.read_sim_file import read_sim_file
 
-		acs_data = read_sim_file(file, mass_model)
+		acs_data = read_sim_file(file, mass_model, mode)
 
 		return acs_data
 
@@ -174,8 +178,8 @@ class ACSData():
 
 		logger.info(f"Reading file: {file}")
 
-		times = {'z0': [], 'z1': [], 'x0': [], 'x1': [], 'y0': [], 'y1': []}
-		energies = {'z0': [], 'z1': [], 'x0': [], 'x1': [], 'y0': [], 'y1': []}
+		times = {'ACS-A-Z0': [], 'ACS-A-Z1': [], 'ACS-C-X0': [], 'ACS-C-X1': [], 'ACS-B-Y0': [], 'ACS-B-Y1': []}
+		energies = {'ACS-A-Z0': [], 'ACS-A-Z1': [], 'ACS-C-X0': [], 'ACS-C-X1': [], 'ACS-B-Y0': [], 'ACS-B-Y1': []}
 
 		if chunk_size is None:
 
@@ -194,33 +198,33 @@ class ACSData():
 
 			if data['ACS_z1'][i] != 0.:
 
-				times['z1'].append(float(data['timestamp[s]'][i]) * u.s)
-				energies['z1'].append(float(data['ACS_z1'][i]) * u.keV)
+				times['ACS-A-Z1'].append(float(data['timestamp[s]'][i]) * u.s)
+				energies['ACS-A-Z1'].append(float(data['ACS_z1'][i]) * u.keV)
 
 			elif data['ACS_z0'][i] != 0.:
 
-				times['z0'].append(float(data['timestamp[s]'][i]) * u.s)
-				energies['z0'].append(float(data['ACS_z0'][i]) * u.keV)
+				times['ACS-A-Z0'].append(float(data['timestamp[s]'][i]) * u.s)
+				energies['ACS-A-Z0'].append(float(data['ACS_z0'][i]) * u.keV)
 
 			elif data['ACS_x1'][i] != 0.:
 
-				times['x1'].append(float(data['timestamp[s]'][i]) * u.s)
-				energies['x1'].append(float(data['ACS_x1'][i]) * u.keV)
+				times['ACS-C-X1'].append(float(data['timestamp[s]'][i]) * u.s)
+				energies['ACS-C-X1'].append(float(data['ACS_x1'][i]) * u.keV)
 
 			elif data['ACS_x0'][i] != 0.:
 
-				times['x0'].append(float(data['timestamp[s]'][i]) * u.s)
-				energies['x0'].append(float(data['ACS_x0'][i]) * u.keV)
+				times['ACS-C-X0'].append(float(data['timestamp[s]'][i]) * u.s)
+				energies['ACS-C-X0'].append(float(data['ACS_x0'][i]) * u.keV)
 
 			elif data['ACS_y0'][i] != 0.:
 
-				times['y0'].append(float(data['timestamp[s]'][i]) * u.s)
-				energies['y0'].append(float(data['ACS_y0'][i]) * u.keV)
+				times['ACS-B-Y0'].append(float(data['timestamp[s]'][i]) * u.s)
+				energies['ACS-B-Y0'].append(float(data['ACS_y0'][i]) * u.keV)
 
 			elif data['ACS_y1'][i] != 0.:
 
-				times['y1'].append(float(data['timestamp[s]'][i]) * u.s)
-				energies['y1'].append(float(data['ACS_y1'][i]) * u.keV)
+				times['ACS-B-Y1'].append(float(data['timestamp[s]'][i]) * u.s)
+				energies['ACS-B-Y1'].append(float(data['ACS_y1'][i]) * u.keV)
 
 		acs_data = cls({key: list(zip(times[key], energies[key])) for key in times})
 
@@ -271,12 +275,12 @@ class ACSData():
 					raise RuntimeError("Files must be binned with same energy bins.")
 
 				for panel, value in vars(data).items():
-					if panel in ['z0', 'z1', 'x0', 'x1', 'y0', 'y1']:
+					if panel in ['ACS-A-Z0', 'ACS-A-Z1', 'ACS-C-X0', 'ACS-C-X1', 'ACS-B-Y0', 'ACS-B-Y1']:
 						setattr(data, panel, np.add(value, getattr(component_data, panel)))
 
 			counts = 0
 			for panel, value in vars(data).items():
-				if panel in ['z0', 'z1', 'x0', 'x1', 'y0', 'y1']:
+				if panel in ['ACS-A-Z0', 'ACS-A-Z1', 'ACS-C-X0', 'ACS-C-X1', 'ACS-B-Y0', 'ACS-B-Y1']:
 					counts += np.sum(value)
 
 			logger.info(f"Added {file}. Total counts: {int(counts)}")
@@ -284,7 +288,7 @@ class ACSData():
 		return data
 
 	@classmethod
-	def convert(cls, input_file, output_file, mass_model=None, stop_time=None, chunk_size=None):
+	def convert(cls, input_file, output_file, mass_model=None, stop_time=None, chunk_size=None, mode='all'):
 		'''
 		Convert ACS data file to .hdf5.
 
@@ -300,11 +304,13 @@ class ACSData():
 			Time to stop reading .csv file
 		chunk_size : int, optional
 			Size of chunks to read in
+		mode : str, optional
+			Energy selection per crystal if reading .sim or .sim.gz file: 'all' (>= 80 keV), 'gamma' (80-2000 keV), or 'proton' (> 2000 keV)
 		'''
 
 		logger.info(f"Converting {input_file} to .hdf5")
 
-		data = cls.from_file(input_file, mass_model=mass_model, stop_time=stop_time, chunk_size=chunk_size)
+		data = cls.from_file(input_file, mass_model=mass_model, stop_time=stop_time, chunk_size=chunk_size, mode=mode)
 
 		if (input_file.suffix == '.sim' or ''.join(input_file.suffixes) == '.csv.gz' or ''.join(input_file.suffixes) == '.sim.gz') and not output_file.exists():
 
@@ -484,7 +490,7 @@ class ACSData():
 		if file is not None:
 			self.write_file(file)
 
-	def plot(self, time_range, energy_range=(80.*u.keV, 2000*u.keV), bin_size=0.05*u.s, file=None, show=False, colors={'z0': 'red', 'z1': 'green', 'x0': 'blue', 'x1': 'orange', 'y0': 'purple', 'y1': 'pink'}, event_time_range=None, title=None, dpi=350):
+	def plot(self, time_range, energy_range=(80.*u.keV, 2000*u.keV), bin_size=0.05*u.s, file=None, show=False, colors={'ACS-A-Z0': 'red', 'ACS-A-Z1': 'green', 'ACS-C-X0': 'blue', 'ACS-C-X1': 'orange', 'ACS-B-Y0': 'purple', 'ACS-B-Y1': 'pink'}, event_time_range=None, title=None, dpi=350):
 		'''
 		Plot ACS data file.
 

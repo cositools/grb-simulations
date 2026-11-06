@@ -5,6 +5,7 @@ paths:
   unbinned_output: '/path/to/unbinned/data'                       # Path to directory to save unbinned .hdf5 files
   binned_output: '/path/to/binned/data'                           # Path to directory to save binned .hdf5 files
   combined_output: 'path/to/combined/data'                        # Path to directory to save combined source and background .hdf5 files
+mode: 'all'                                                       # Energy selection per ACS crystal: 'all' (>= 80 keV), 'gamma' (80-2000 keV), or 'proton' (> 2000 keV)
 binning:
   time_bin_size: 0.05                                             # Time bin size (s)
   time_range: [1835487300., 1835573700.]                          # Time range (s)

@@ -7,7 +7,7 @@ from .load_megalib import LoadMEGAlib
 
 logger = logging.getLogger(__name__)
 
-def read_sim_file(file, mass_model):
+def read_sim_file(file, mass_model, mode='all'):
 	'''
 	Extract ACS hits from .sim or .sim.gz file. Modified from Nicolò's code in cosipy.nonimaging.
 
@@ -17,6 +17,8 @@ def read_sim_file(file, mass_model):
 		Path to ACS data .sim or .sim.gz file
 	mass_model : pathlib.PosixPath
 		Path to mass model with labeled ACS crystals
+	mode : str, optional
+		Energy selection per crystal: 'all' (>= 80 keV), 'gamma' (80-2000 keV), or 'proton' (> 2000 keV)
 
 	Returns
 	-------
@@ -24,10 +26,19 @@ def read_sim_file(file, mass_model):
 		ACS data
 	'''
 
+	if mode == 'all':
+		selected = lambda energy: energy >= 80.
+	elif mode == 'gamma':
+		selected = lambda energy: 80. <= energy <= 2000.
+	elif mode == 'proton':
+		selected = lambda energy: energy > 2000.
+	else:
+		raise RuntimeError(f"{mode} is an invalid mode. Must be 'all', 'gamma', or 'proton'.")
+
 	logger.info(f"Reading file: {file}")
 
-	times = {'z0': [], 'z1': [], 'x0': [], 'x1': [], 'y0': [], 'y1': []}
-	energies = {'z0': [], 'z1': [], 'x0': [], 'x1': [], 'y0': [], 'y1': []}
+	times = {'ACS-A-Z0': [], 'ACS-A-Z1': [], 'ACS-C-X0': [], 'ACS-C-X1': [], 'ACS-B-Y0': [], 'ACS-B-Y1': []}
+	energies = {'ACS-A-Z0': [], 'ACS-A-Z1': [], 'ACS-C-X0': [], 'ACS-C-X1': [], 'ACS-B-Y0': [], 'ACS-B-Y1': []}
 
 	megalib = LoadMEGAlib(mass_model)
 	megalib.open_file(file)
@@ -73,6 +84,9 @@ def read_sim_file(file, mass_model):
 			y1_0 = 0.
 			y1_1 = 0.
 			y1_2 = 0.
+
+			d0_0 = 0.
+			d1_0 = 0.
 
 			for i in range(event.GetNHTs()):
 
@@ -136,97 +150,110 @@ def read_sim_file(file, mass_model):
 					elif detector.GetString() == 'ACS_X1_2':
 						x1_2 += hit.GetEnergy()
 
+					elif detector.GetString() == 'ACS_D0_0':
+						d0_0 += hit.GetEnergy()
+					elif detector.GetString() == 'ACS_D1_0':
+						d1_0 += hit.GetEnergy()
+
 					else:
 
 						logger.warning(f"Coordinate ({position.X()}, {position.Y()}, {position.Z()}) not found.")
 
-			if z0_0 >= 80.:
-				times['z0'].append(float(time) * u.s)
-				energies['z0'].append(float(z0_0) * u.keV)
+			if selected(z0_0):
+				times['ACS-A-Z0'].append(float(time) * u.s)
+				energies['ACS-A-Z0'].append(float(z0_0) * u.keV)
 
-			if z0_1 >= 80.:
-				times['z0'].append(float(time) * u.s)
-				energies['z0'].append(float(z0_1) * u.keV)
+			if selected(z0_1):
+				times['ACS-A-Z0'].append(float(time) * u.s)
+				energies['ACS-A-Z0'].append(float(z0_1) * u.keV)
 
-			if z0_2 >= 80.:
-				times['z0'].append(float(time) * u.s)
-				energies['z0'].append(float(z0_2) * u.keV)
+			if selected(z0_2):
+				times['ACS-A-Z0'].append(float(time) * u.s)
+				energies['ACS-A-Z0'].append(float(z0_2) * u.keV)
 
-			if z0_3 >= 80.:
-				times['z0'].append(float(time) * u.s)
-				energies['z0'].append(float(z0_3) * u.keV)
+			if selected(z0_3):
+				times['ACS-A-Z0'].append(float(time) * u.s)
+				energies['ACS-A-Z0'].append(float(z0_3) * u.keV)
 
-			if z0_4 >= 80.:
-				times['y0'].append(float(time) * u.s)
-				energies['y0'].append(float(z0_4) * u.keV)
+			if selected(z0_4):
+				times['ACS-B-Y0'].append(float(time) * u.s)
+				energies['ACS-B-Y0'].append(float(z0_4) * u.keV)
 
-			if z1_0 >= 80.:
-				times['y1'].append(float(time) * u.s)
-				energies['y1'].append(float(z1_0) * u.keV)
+			if selected(z1_0):
+				times['ACS-B-Y1'].append(float(time) * u.s)
+				energies['ACS-B-Y1'].append(float(z1_0) * u.keV)
 
-			if z1_1 >= 80.:
-				times['z1'].append(float(time) * u.s)
-				energies['z1'].append(float(z1_1) * u.keV)
+			if selected(z1_1):
+				times['ACS-A-Z1'].append(float(time) * u.s)
+				energies['ACS-A-Z1'].append(float(z1_1) * u.keV)
 
-			if z1_2 >= 80.:
-				times['z1'].append(float(time) * u.s)
-				energies['z1'].append(float(z1_2) * u.keV)
+			if selected(z1_2):
+				times['ACS-A-Z1'].append(float(time) * u.s)
+				energies['ACS-A-Z1'].append(float(z1_2) * u.keV)
 
-			if z1_3 >= 80.:
-				times['z1'].append(float(time) * u.s)
-				energies['z1'].append(float(z1_3) * u.keV)
+			if selected(z1_3):
+				times['ACS-A-Z1'].append(float(time) * u.s)
+				energies['ACS-A-Z1'].append(float(z1_3) * u.keV)
 
-			if z1_4 >= 80.:
-				times['z1'].append(float(time) * u.s)
-				energies['z1'].append(float(z1_4) * u.keV)
+			if selected(z1_4):
+				times['ACS-A-Z1'].append(float(time) * u.s)
+				energies['ACS-A-Z1'].append(float(z1_4) * u.keV)
 
-			if x0_0 >= 80.:
-				times['x0'].append(float(time) * u.s)
-				energies['x0'].append(float(x0_0) * u.keV)
+			if selected(x0_0):
+				times['ACS-C-X0'].append(float(time) * u.s)
+				energies['ACS-C-X0'].append(float(x0_0) * u.keV)
 
-			if x0_1 >= 80.:
-				times['x0'].append(float(time) * u.s)
-				energies['x0'].append(float(x0_1) * u.keV)
+			if selected(x0_1):
+				times['ACS-C-X0'].append(float(time) * u.s)
+				energies['ACS-C-X0'].append(float(x0_1) * u.keV)
 
-			if x0_2 >= 80.:
-				times['x0'].append(float(time) * u.s)
-				energies['x0'].append(float(x0_2) * u.keV)
+			if selected(x0_2):
+				times['ACS-C-X0'].append(float(time) * u.s)
+				energies['ACS-C-X0'].append(float(x0_2) * u.keV)
 
-			if x1_0 >= 80.:
-				times['x1'].append(float(time) * u.s)
-				energies['x1'].append(float(x1_0) * u.keV)
+			if selected(x1_0):
+				times['ACS-C-X1'].append(float(time) * u.s)
+				energies['ACS-C-X1'].append(float(x1_0) * u.keV)
 
-			if x1_1 >= 80.:
-				times['x1'].append(float(time) * u.s)
-				energies['x1'].append(float(x1_1) * u.keV)
+			if selected(x1_1):
+				times['ACS-C-X1'].append(float(time) * u.s)
+				energies['ACS-C-X1'].append(float(x1_1) * u.keV)
 
-			if x1_2 >= 80.:
-				times['x1'].append(float(time) * u.s)
-				energies['x1'].append(float(x1_2) * u.keV)
+			if selected(x1_2):
+				times['ACS-C-X1'].append(float(time) * u.s)
+				energies['ACS-C-X1'].append(float(x1_2) * u.keV)
 
-			if y0_0 >= 80.:
-				times['y0'].append(float(time) * u.s)
-				energies['y0'].append(float(y0_0) * u.keV)
+			if selected(d0_0):
+				times['ACS-C-X0'].append(float(time) * u.s)
+				energies['ACS-C-X0'].append(float(d0_0) * u.keV)
 
-			if y0_1 >= 80.:
-				times['y0'].append(float(time) * u.s)
-				energies['y0'].append(float(y0_1) * u.keV)
+			if selected(d1_0):
+				times['ACS-C-X1'].append(float(time) * u.s)
+				energies['ACS-C-X1'].append(float(d1_0) * u.keV)
 
-			if y0_2 >= 80.:
-				times['y0'].append(float(time) * u.s)
-				energies['y0'].append(float(y0_2) * u.keV)
+			if selected(y0_0):
+				times['ACS-B-Y0'].append(float(time) * u.s)
+				energies['ACS-B-Y0'].append(float(y0_0) * u.keV)
 
-			if y1_0 >= 80.:
-				times['y1'].append(float(time) * u.s)
-				energies['y1'].append(float(y1_0) * u.keV)
+			if selected(y0_1):
+				times['ACS-B-Y0'].append(float(time) * u.s)
+				energies['ACS-B-Y0'].append(float(y0_1) * u.keV)
 
-			if y1_1 >= 80.:
-				times['y1'].append(float(time) * u.s)
-				energies['y1'].append(float(y1_1) * u.keV)
+			if selected(y0_2):
+				times['ACS-B-Y0'].append(float(time) * u.s)
+				energies['ACS-B-Y0'].append(float(y0_2) * u.keV)
 
-			if y1_2 >= 80.:
-				times['y1'].append(float(time) * u.s)
-				energies['y1'].append(float(y1_2) * u.keV)
+			if selected(y1_0):
+				times['ACS-B-Y1'].append(float(time) * u.s)
+				energies['ACS-B-Y1'].append(float(y1_0) * u.keV)
+
+			if selected(y1_1):
+				times['ACS-B-Y1'].append(float(time) * u.s)
+				energies['ACS-B-Y1'].append(float(y1_1) * u.keV)
+
+			if selected(y1_2):
+				times['ACS-B-Y1'].append(float(time) * u.s)
+				energies['ACS-B-Y1'].append(float(y1_2) * u.keV)
 
 	acs_data = ACSData({key: list(zip(times[key], energies[key])) for key in times})
 
