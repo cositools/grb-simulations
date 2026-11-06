@@ -56,7 +56,7 @@ class ACSData():
 				raise RuntimeError(f"{panel} is not a valid panel name.")
 
 	@classmethod
-	def from_file(cls, file, mass_model=None, sort=True, stop_time=None, chunk_size=None, mode='all'):
+	def from_file(cls, file, mass_model=None, sort=True, stop_time=None, chunk_size=None):
 		'''
 		Read in ACS data file.
 
@@ -72,8 +72,6 @@ class ACSData():
 			Time to stop reading .csv file
 		chunk_size : int, optional
 			Size of chunks to read in
-		mode : str, optional
-			Energy selection per crystal if reading .sim or .sim.gz file: 'all' (>= 80 keV), 'gamma' (80-2000 keV), or 'proton' (> 2000 keV)
 
 		Returns
 		-------
@@ -85,7 +83,7 @@ class ACSData():
 			acs_data = cls.from_hdf5_file(file)
 
 		elif file.suffix == '.sim' or ''.join(file.suffixes) == '.sim.gz':
-			acs_data = cls.from_sim_file(file, mass_model, mode)
+			acs_data = cls.from_sim_file(file, mass_model)
 
 		elif ''.join(file.suffixes) == '.csv.gz':
 			acs_data = cls.from_csv_file(file, stop_time=stop_time, chunk_size=chunk_size)
@@ -131,7 +129,7 @@ class ACSData():
 		return acs_data
 
 	@classmethod
-	def from_sim_file(cls, file, mass_model, mode='all'):
+	def from_sim_file(cls, file, mass_model):
 		'''
 		Extract ACS hits from .sim or .sim.gz file.
 
@@ -141,8 +139,6 @@ class ACSData():
 			Path to ACS data .sim or .sim.gz file
 		mass_model : pathlib.PosixPath
 			Path to Data Challenge 3 analysis mass model
-		mode : str, optional
-			Energy selection per crystal: 'all' (>= 80 keV), 'gamma' (80-2000 keV), or 'proton' (> 2000 keV)
 	
 		Returns
 		-------
@@ -152,7 +148,7 @@ class ACSData():
 
 		from cosiburstpy.megalib.read_sim_file import read_sim_file
 
-		acs_data = read_sim_file(file, mass_model, mode)
+		acs_data = read_sim_file(file, mass_model)
 
 		return acs_data
 
@@ -288,7 +284,7 @@ class ACSData():
 		return data
 
 	@classmethod
-	def convert(cls, input_file, output_file, mass_model=None, stop_time=None, chunk_size=None, mode='all'):
+	def convert(cls, input_file, output_file, mass_model=None, stop_time=None, chunk_size=None):
 		'''
 		Convert ACS data file to .hdf5.
 
@@ -304,13 +300,11 @@ class ACSData():
 			Time to stop reading .csv file
 		chunk_size : int, optional
 			Size of chunks to read in
-		mode : str, optional
-			Energy selection per crystal if reading .sim or .sim.gz file: 'all' (>= 80 keV), 'gamma' (80-2000 keV), or 'proton' (> 2000 keV)
 		'''
 
 		logger.info(f"Converting {input_file} to .hdf5")
 
-		data = cls.from_file(input_file, mass_model=mass_model, stop_time=stop_time, chunk_size=chunk_size, mode=mode)
+		data = cls.from_file(input_file, mass_model=mass_model, stop_time=stop_time, chunk_size=chunk_size)
 
 		if (input_file.suffix == '.sim' or ''.join(input_file.suffixes) == '.csv.gz' or ''.join(input_file.suffixes) == '.sim.gz') and not output_file.exists():
 
