@@ -28,20 +28,24 @@ class SpacecraftOrientation():
 		self.times = u.Quantity(times)
 		self.pointings = pointings
 
-		self.attitudes = []
-		for pointing in pointings:
-			self.attitudes.append(Attitude.from_axes(x=pointing[0], z=pointing[1], frame='galactic'))
-
 		self.altitudes = u.Quantity(altitudes)
 		self.earth_zeniths = earth_zeniths
 
-		if saa_livetime:
+		if saa_livetime is not None:
 			self.saa_livetime = u.Quantity(saa_livetime)
 
-		if exclude:
-			self.exclude = exclude
+		if exclude is not None:
+			self.exclude = np.array(exclude, dtype=bool)
 		else:
-			self.exclude = list(np.zeros(len(times), dtype=bool))
+			self.exclude = np.zeros(len(self.times), dtype=bool)
+
+	@property
+	def attitudes(self):
+		'''
+		Spacecraft attitudes, computed on demand since building one per row is expensive for long orientation files.
+		'''
+
+		return [Attitude.from_axes(x=pointing[0], z=pointing[1], frame='galactic') for pointing in self.pointings]
 
 	@classmethod
 	def from_file(cls, file):
@@ -64,19 +68,14 @@ class SpacecraftOrientation():
 		times = data[:, 0] * u.s 
 		altitudes = data[:, 5] * u.km
 
-		pointings = []
-		earth_zeniths = []
+		x_pointings = SkyCoord(data[:, 2]*u.deg, data[:, 1]*u.deg, frame='galactic')
+		z_pointings = SkyCoord(data[:, 4]*u.deg, data[:, 3]*u.deg, frame='galactic')
+		earth_zeniths = SkyCoord(data[:, 7]*u.deg, data[:, 6]*u.deg, frame='galactic')
 
-		for i in range(len(data)):
+		pointings = list(zip(x_pointings, z_pointings))
+		earth_zeniths = list(earth_zeniths)
 
-			x_pointing = SkyCoord(data[:, 2][i]*u.deg, data[:, 1][i]*u.deg, frame='galactic')
-			z_pointing = SkyCoord(data[:, 4][i]*u.deg, data[:, 3][i]*u.deg, frame='galactic')
-			pointings.append((x_pointing, z_pointing))
-
-			earth_zenith = SkyCoord(data[:, 7][i]*u.deg, data[:, 6][i]*u.deg, frame='galactic')
-			earth_zeniths.append(earth_zenith)
-
-		orientation = cls(list(times), pointings, list(altitudes), earth_zeniths)
+		orientation = cls(times, pointings, altitudes, earth_zeniths)
 
 		return orientation
 
@@ -90,9 +89,7 @@ class SpacecraftOrientation():
 			Range of times to exclude
 		'''
 
-		for i, t in enumerate(self.times):
-			if time_range[0] <= t <= time_range[1]:
-				self.exclude[i] = True
+		self.exclude |= (self.times >= time_range[0]) & (self.times <= time_range[1])
 
 	def get_orientation_at_time(self, time):
 		'''
@@ -142,34 +139,17 @@ class SpacecraftOrientation():
 			Sliced orientation
 		'''
 
-		times = []
-		pointings = []
-		altitudes = []
-		earth_zeniths = []
-		exclude = []
+		indices = np.nonzero((orientation.times >= time_range[0]) & (orientation.times <= time_range[1]))[0]
 
-		for i, t in enumerate(orientation.times):
+		if len(indices) == 0 and (time_range[1] - time_range[0]) <= 1. * u.s:
+			indices = np.array([np.abs(orientation.times - time_range[0]).argmin()])
 
-			if t >= time_range[0] and t <= time_range[1]:
-
-				times.append(t)
-				pointings.append(orientation.pointings[i])
-				altitudes.append(orientation.altitudes[i])
-				earth_zeniths.append(orientation.earth_zeniths[i])
-				exclude.append(orientation.exclude[i])
-
-		if len(times) == 0 and (time_range[1] - time_range[0]) <= 1. * u.s:
-
-			closest_time = min(orientation.times, key=lambda x: abs(x - time_range[0]))
-			index = np.where(orientation.times == closest_time)[0][0]
-
-			times.append(closest_time)
-			pointings.append(orientation.pointings[index])
-			altitudes.append(orientation.altitudes[index])
-			earth_zeniths.append(orientation.earth_zeniths[index])
-			exclude.append(orientation.exclude[index])
-
-		sliced_orientation = cls(times, pointings, altitudes, earth_zeniths, None, exclude)
+		sliced_orientation = cls(orientation.times[indices], 
+								 [orientation.pointings[i] for i in indices], 
+								 orientation.altitudes[indices], 
+								 [orientation.earth_zeniths[i] for i in indices], 
+								 None, 
+								 np.asarray(orientation.exclude)[indices])
 
 		return sliced_orientation
 
@@ -191,26 +171,17 @@ class SpacecraftOrientation():
 			Shifted orientation
 		'''
 
-		if hasattr(orientation, 'saa_livetime'):
-			shifted_orientation = cls(orientation.times, orientation.pointings, orientation.altitudes, 
-								  orientation.earth_zeniths, orientation.saa_livetime, orientation.exclude)
-		else:
-			shifted_orientation = cls(orientation.times, orientation.pointings, orientation.altitudes, 
-								  orientation.earth_zeniths, None, orientation.exclude)
+		times = orientation.times - np.min(orientation.times) + time
+		keep = times.value >= 0.
 
-		start_time = np.min(shifted_orientation.times)
-		time_add = time - start_time
+		saa_livetime = orientation.saa_livetime[keep] if hasattr(orientation, 'saa_livetime') else None
 
-		for i in range(len(shifted_orientation.times)):
-			shifted_orientation.times[i] += time_add
-
-		shifted_orientation.pointings = [p for t, p in zip(shifted_orientation.times, shifted_orientation.pointings) if t.value >= 0.]
-		shifted_orientation.altitudes = [a.value for t, a in zip(shifted_orientation.times, shifted_orientation.altitudes) if t.value >= 0.] * shifted_orientation.altitudes.unit
-		shifted_orientation.earth_zeniths = [z for t, z in zip(shifted_orientation.times, shifted_orientation.earth_zeniths) if t.value >= 0.]
-		if hasattr(shifted_orientation, 'saa_livetime'):
-			shifted_orientation.saa_livetime = [s.value for t, s in zip(shifted_orientation.times, shifted_orientation.saa_livetime) if t.value >= 0.] * shifted_orientation.saa_livetime.unit
-		shifted_orientation.exclude = [e for t, e in zip(shifted_orientation.times, shifted_orientation.exclude) if t.value >= 0.]
-		shifted_orientation.times = [t.value for t in shifted_orientation.times if t.value >= 0.] * shifted_orientation.times.unit
+		shifted_orientation = cls(times[keep], 
+								  [p for p, k in zip(orientation.pointings, keep) if k], 
+								  orientation.altitudes[keep], 
+								  [z for z, k in zip(orientation.earth_zeniths, keep) if k], 
+								  saa_livetime, 
+								  np.asarray(orientation.exclude)[keep])
 
 		shifted_orientation.write_file(file)
 
